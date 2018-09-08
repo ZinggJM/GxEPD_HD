@@ -47,4 +47,5 @@ E-Paper display library for Arduino for HD parallel IF displays from Dalian Good
 
 ### Version 0.0.1
 - preliminary
+- for panel GDE60BA (may work with GDE043A2)
 - initial test successful
