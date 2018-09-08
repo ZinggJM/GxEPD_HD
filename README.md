@@ -17,8 +17,8 @@ E-Paper display library for Arduino for HD parallel IF displays from Dalian Good
 #### - Paged drawing is implemented as picture loop, like in U8G2 (Oliver Kraus)
 #### - see https://github.com/olikraus/u8glib/wiki/tpictureloop
 #### - Paged drawing is also available using drawPaged() and drawCallback(), like in GxEPD
-´´´ // GxEPD style paged drawing; drawCallback() is called as many times as needed ´´´
-´´´ void drawPaged(void (*drawCallback)(const void*), const void* pv) ´´´
+- ` // GxEPD style paged drawing; drawCallback() is called as many times as needed `
+- ` void drawPaged(void (*drawCallback)(const void*), const void* pv) `
 #### - paged drawing is done using Adafruit_GFX methods inside picture loop or drawCallback
 
 ### Full Screen Buffer Support
