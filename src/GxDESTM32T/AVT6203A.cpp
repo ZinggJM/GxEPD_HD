@@ -769,9 +769,9 @@ void AVT6203A::AVT_CONFIG_check(void)
 
 //avt init
 
-void AVT6203A::avt_init(bool enable_diagnostic_output)
+void AVT6203A::avt_init(Stream* pDiagnosticOutput)
 {
-  _diag_enabled = enable_diagnostic_output;
+  _pDiagnosticOutput = pDiagnosticOutput;
   avt_reset();
   delay(100);
   Reg0x0204Save = avt_rd_reg(0x0204);
@@ -933,7 +933,7 @@ void AVT6203A::SpiFlash_ReadData(uint32_t addr, uint8_t *data)
 
 void AVT6203A::Debug_str(const char *s)
 {
-  if (_diag_enabled) Serial1.print(s);
+  if (_pDiagnosticOutput) _pDiagnosticOutput->print(s);
 }
 
 void AVT6203A::Debug_hex(unsigned int dat)
@@ -941,7 +941,7 @@ void AVT6203A::Debug_hex(unsigned int dat)
   char buf[8];
   unsigned char i;
 
-  if (!_diag_enabled) return;
+  if (!_pDiagnosticOutput) return;
 
   buf[0] = '0';
   buf[1] = 'x';
@@ -979,7 +979,7 @@ void AVT6203A::Debug_dec(unsigned int dat)
 {
   char buf[7];
 
-  if (!_diag_enabled) return;
+  if (!_pDiagnosticOutput) return;
 
   buf[0] = '0' + dat / 10000;
   buf[1] = '0' + (dat % 10000) / 1000;

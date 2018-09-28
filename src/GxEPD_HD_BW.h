@@ -21,6 +21,8 @@ template<typename GxEPD_HD_Type, const uint16_t page_height>
 class GxEPD_HD_BW : public GxEPD_HD_GFX
 {
   public:
+    static const uint16_t DEPTH = 1; // 1 bit per pixel, black / white
+    static const uint16_t GREYLEVELS = 2;
     GxEPD_HD_Type epd_hd;
     GxEPD_HD_BW(GxEPD_HD_Type epd_hd_instance) : epd_hd(epd_hd_instance), GxEPD_HD_GFX(epd_hd, GxEPD_HD_Type::WIDTH, GxEPD_HD_Type::HEIGHT)
     {
@@ -83,9 +85,9 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
         _buffer[i] = (_buffer[i] & (0xFF ^ (1 << (7 - x % 8))));
     }
 
-    void init(uint32_t serial_diag_bitrate = 0) // = 0 : disabled
+    void init(Stream* pDiagnosticOutput = 0) // (pDiagnosticOutput = 0) : disabled
     {
-      epd_hd.init(serial_diag_bitrate);
+      epd_hd.init(pDiagnosticOutput);
       _using_partial_mode = false;
       _current_page = 0;
       setFullWindow();

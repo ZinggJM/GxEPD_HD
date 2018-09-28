@@ -1,5 +1,5 @@
 # GxEPD_HD
-E-Paper display library for Arduino for HD parallel IF displays from Dalian Good Display.
+E-Paper display library for Arduino for HD parallel interface displays from Dalian Good Display.
 
 ## for HD e-paper displays from Dalian Good Display on DESTM32-T evaluation kit
 - http://www.good-display.com/products_detail/productId=370.html
@@ -12,24 +12,24 @@ E-Paper display library for Arduino for HD parallel IF displays from Dalian Good
 - single pixel update to the controller buffer seems possible, to be investigated, may be slow.
 
 ### Paged Drawing, Picture Loop
-#### - This library uses paged drawing to limit RAM use of graphics buffer for Adafruit_GFX
-#### - buffer size can be selected in the application by template parameter page_height, see GxEPD2_Example
-#### - Paged drawing is implemented as picture loop, like in U8G2 (Oliver Kraus)
-#### - see https://github.com/olikraus/u8glib/wiki/tpictureloop
-#### - Paged drawing is also available using drawPaged() and drawCallback(), like in GxEPD
+- This library uses paged drawing to limit RAM use of graphics buffer for Adafruit_GFX
+- buffer size can be selected in the application by template parameter page_height, see GxEPD_HD_Example
+- Paged drawing is implemented as picture loop, like in U8G2 (Oliver Kraus)
+- see https://github.com/olikraus/u8glib/wiki/tpictureloop
+- Paged drawing is also available using drawPaged() and drawCallback(), like in GxEPD
 ´´´ // GxEPD style paged drawing; drawCallback() is called as many times as needed ´´´
 ´´´ void drawPaged(void (*drawCallback)(const void*), const void* pv) ´´´
-#### - paged drawing is done using Adafruit_GFX methods inside picture loop or drawCallback
+- paged drawing is done using Adafruit_GFX methods inside picture loop or drawCallback
 
 ### Full Screen Buffer Support
-#### - full screen buffer is selected by setting template parameter page_height to display height
-#### - drawing to full screen buffer is done using Adafruit_GFX methods without picture loop or drawCallback
-#### - and then calling method display()
+- full screen buffer is selected by setting template parameter page_height to display height
+- drawing to full screen buffer is done using Adafruit_GFX methods without picture loop or drawCallback
+- and then calling method display()
 
 ### Low Level Bitmap Drawing Support
-#### - bitmap drawing support to the controller memory and screen is available:
-#### - either through the template class instance methods that forward calls to the base display class
-#### - or directy using an instance of a base display class and calling its methods directly
+- bitmap drawing support to the controller memory and screen is available:
+- either through the template class instance methods that forward calls to the base display class
+- or directy using an instance of a base display class and calling its methods directly
 
 ### Supporting Arduino Forum Topic:
 
@@ -45,6 +45,9 @@ E-Paper display library for Arduino for HD parallel IF displays from Dalian Good
 - CPU Speed(MHz): "72MHz (Normal)"
 - Upload method: "STLink"
 
+### Version 0.0.2
+- flexible selection of Serialx for diagnostic output
+- preliminary
 ### Version 0.0.1
 - preliminary
 - initial test successful

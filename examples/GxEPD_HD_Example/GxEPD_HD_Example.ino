@@ -1,4 +1,4 @@
-// GxEPD_HD_TestExample : test example for HD e-Paper displays from Dalian Good Display Inc. (parallel interface).
+// GxEPD_HD_Example : example for HD e-Paper displays from Dalian Good Display Inc. (parallel interface).
 //
 // To be used with "STM32F103VE" of "Generic STM32F103V series" of package "STM32 Boards (STM32Duino.com)" for Arduino.
 // install package with Boards Manager after adding to preferences in additional Boards Manager URLs:
@@ -29,15 +29,43 @@ GxEPD_HD_BW<GxGDE06BA, GxGDE06BA::HEIGHT> display(base_display); // full height,
 #include <Fonts/FreeMonoBold18pt7b.h>
 #include <Fonts/FreeMonoBold24pt7b.h>
 
-#define Serial Serial1
+// select diagnostic output stream, only one
+//HardwareSerial& DiagnosticStream = Serial1; // pins PA9, PA10
+HardwareSerial& DiagnosticStream = Serial2; // pins PA2, PA3 for USB jumpers
+//HardwareSerial& DiagnosticStream = Serial3; // pins PB10, PB11
+//USBSerial& DiagnosticStream = Serial; // pins PA11, PA12 USB direct?
 
 void setup()
 {
-  Serial.begin(115200);
-  Serial.println();
-  Serial.println("setup");
+  //  Serial.begin(115200);
+  //  delay(200);
+  //  Serial.println();
+  //  Serial.println("setup");
+  //  Serial.println("hello Serial");
+  //  delay(200);
 
-  display.init();
+  //  Serial1.begin(115200);
+  //  delay(200);
+  //  Serial1.println();
+  //  Serial1.println("setup");
+  //  Serial1.println("hello Serial1");
+  //  delay(200);
+
+  //  Serial2.begin(115200);
+  //  delay(200);
+  //  Serial2.println();
+  //  Serial2.println("setup");
+  //  Serial2.println("hello Serial2");
+  //  delay(200);
+
+  DiagnosticStream.begin(115200);
+  delay(200);
+  DiagnosticStream.println();
+  DiagnosticStream.println("setup");
+  DiagnosticStream.println("hello DiagnosticStream");
+
+  delay(200);
+  display.init(&DiagnosticStream);
 #ifndef _GxBitmapExamples_H_
   io.demo();
 #endif
@@ -55,7 +83,7 @@ void setup()
   showFont("FreeMonoBold24pt7b", &FreeMonoBold24pt7b);
   showPartialUpdate();
   //showPartialUpdatePaged();
-  Serial.println("setup done");
+  DiagnosticStream.println("setup done");
 }
 
 void loop()
@@ -70,7 +98,7 @@ void loop()
 
 void helloWorld()
 {
-  //Serial.println("helloWorld");
+  //DiagnosticStream.println("helloWorld");
   display.setRotation(1);
   display.setFont(&FreeMonoBold9pt7b);
   display.setTextColor(GxEPD_BLACK);
@@ -85,12 +113,12 @@ void helloWorld()
     display.println("Hello World!");
   }
   while (display.nextPage());
-  //Serial.println("helloWorld done");
+  //DiagnosticStream.println("helloWorld done");
 }
 
 void helloFullScreenPartialMode()
 {
-  //Serial.println("helloFullScreenPartialMode");
+  //DiagnosticStream.println("helloFullScreenPartialMode");
   display.setPartialWindow(0, 0, display.width(), display.height());
   display.setRotation(1);
   display.setFont(&FreeMonoBold9pt7b);
@@ -123,12 +151,12 @@ void helloFullScreenPartialMode()
     }
   }
   while (display.nextPage());
-  //Serial.println("helloFullScreenPartialMode done");
+  //DiagnosticStream.println("helloFullScreenPartialMode done");
 }
 
 void helloArduino()
 {
-  //Serial.println("helloArduino");
+  //DiagnosticStream.println("helloArduino");
   display.setRotation(1);
   display.setFont(&FreeMonoBold9pt7b);
   display.setTextColor(display.epd2.hasColor ? GxEPD_RED : GxEPD_BLACK);
@@ -144,12 +172,12 @@ void helloArduino()
   }
   while (display.nextPage());
   delay(1000);
-  //Serial.println("helloArduino done");
+  //DiagnosticStream.println("helloArduino done");
 }
 
 void helloEpaper()
 {
-  //Serial.println("helloEpaper");
+  //DiagnosticStream.println("helloEpaper");
   display.setRotation(1);
   display.setFont(&FreeMonoBold9pt7b);
   display.setTextColor(display.epd2.hasColor ? GxEPD_RED : GxEPD_BLACK);
@@ -164,12 +192,12 @@ void helloEpaper()
     display.println("Hello E-Paper!");
   }
   while (display.nextPage());
-  //Serial.println("helloEpaper done");
+  //DiagnosticStream.println("helloEpaper done");
 }
 
 void showBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool partial)
 {
-  //Serial.println("showBox");
+  //DiagnosticStream.println("showBox");
   display.setRotation(1);
   if (partial)
   {
@@ -186,7 +214,7 @@ void showBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool partial)
     display.fillRect(x, y, w, h, GxEPD_BLACK);
   }
   while (display.nextPage());
-  //Serial.println("showBox done");
+  //DiagnosticStream.println("showBox done");
 }
 
 void drawCornerTest()

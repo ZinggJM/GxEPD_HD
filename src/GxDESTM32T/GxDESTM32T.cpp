@@ -45,15 +45,14 @@ const uint16_t GxDESTM32T::bw2grey16[] =
   0xFF00, 0xFF03, 0xFF0C, 0xFF0F, 0xFF30, 0xFF33, 0xFF3C, 0xFF3F, 0xFFC0, 0xFFC3, 0xFFCC, 0xFFCF, 0xFFF0, 0xFFF3, 0xFFFC, 0xFFFF
 };
 
-GxDESTM32T::GxDESTM32T() : avt(tps)
+GxDESTM32T::GxDESTM32T() : avt(tps), _pDiagnosticOutput(0)
 {
-  _diag_enabled = false;
 }
 
-void GxDESTM32T::init(bool enable_diagnostic_output)
+void GxDESTM32T::init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput)
 {
-  _diag_enabled = enable_diagnostic_output;
-  //Serial1.println("GxDESTM32T::init()");
+  _pDiagnosticOutput = pDiagnosticOutput;
+  //if(pDiagnosticOutput) pDiagnosticOutput->println("GxDESTM32T::init()");
   avt.wf_mode = EPD_MODE_INIT;
   //#define PORT_A_OUT_PP        FLASH_CS_PIN
   pinMode(FLASH_CS_PP, OUTPUT);
@@ -105,20 +104,20 @@ void GxDESTM32T::init(bool enable_diagnostic_output)
   SPI.setClockDivider(SPI_CLOCK_DIV4); // 18MHz
   SYS_WAKEUP_H;
   delay(1000);
-  tps.tps_init(enable_diagnostic_output);
+  tps.tps_init(pDiagnosticOutput);
   tps.tps_sleep_to_standby();
   avt.AVT_CONFIG_check();      //���AVT�����������Ƿ���ȷ
-  //Serial1.println("AVT_CONFIG_check() done");
+  //if(pDiagnosticOutput) pDiagnosticOutput->println("AVT_CONFIG_check() done");
   delay(500);
   avt.avt_waveform_update();//���ز��α�
-  avt.avt_init(enable_diagnostic_output);//˫��
+  avt.avt_init(pDiagnosticOutput);//˫��
   avt.wf_mode = EPD_MODE_INIT;
   epd_draw_gray(0xff);
   avt.wf_mode = EPD_MODE_GC16;
   avt.avt_slp();
   epd_draw_gray(0xff);//ȫ��ɫ
   delay(2000);
-  //Serial1.println("GxDESTM32T::init() done");
+  //if(pDiagnosticOutput) pDiagnosticOutput->println("GxDESTM32T::init() done");
 }
 
 void GxDESTM32T::clearScreen(uint8_t value)
@@ -185,6 +184,7 @@ void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth,
       break;
     case 4:
       avt.avt_run_sys();
+      avt.avt_wr_reg(0x0020, 0x2);  //big endian
       avt.avt_ld_img_area(EPD_DATA_4BPP, x, y, w, h);
       avt.avt_wr_reg_addr(0x0154);
       n = uint32_t(w) * uint32_t(h) / 4;
@@ -192,12 +192,13 @@ void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth,
       {
         uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
         uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
-        dw = sb1 | (sb2 << 8);
+        dw = sb2 | (sb1 << 8);
         avt.avt_i80_write_dat(dw);
       }
       break;
     case 8:
       avt.avt_run_sys();
+      avt.avt_wr_reg(0x0020, 0x2);  //big endian
       avt.avt_ld_img_area(EPD_DATA_8BPP, x, y, w, h);
       avt.avt_wr_reg_addr(0x0154);
       n = uint32_t(w) * uint32_t(h) / 2;
@@ -205,7 +206,7 @@ void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth,
       {
         uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
         uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
-        dw = sb1 | (sb2 << 8);
+        dw = sb2 | (sb1 << 8);
         avt.avt_i80_write_dat(dw);
       }
       break;
@@ -213,7 +214,7 @@ void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth,
       return;
   }
   avt.avt_ld_img_end();
-  Debug_str("drawImage end...\r\n");
+  Debug_str("writeImage end...\r\n");
 }
 
 void GxDESTM32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
@@ -257,6 +258,7 @@ void GxDESTM32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t de
       break;
     case 4:
       avt.avt_run_sys();
+      avt.avt_wr_reg(0x0020, 0x2);  //big endian
       avt.avt_ld_img_area(EPD_DATA_4BPP, x, y, w, h);
       avt.avt_wr_reg_addr(0x0154);
       for (uint32_t y1 = y; y1 < y + h; y1++)
@@ -273,6 +275,7 @@ void GxDESTM32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t de
       break;
     case 8:
       avt.avt_run_sys();
+      avt.avt_wr_reg(0x0020, 0x2);  //big endian
       avt.avt_ld_img_area(EPD_DATA_8BPP, x, y, w, h);
       avt.avt_wr_reg_addr(0x0154);
       for (uint32_t y1 = y; y1 < y + h; y1++)
@@ -359,6 +362,81 @@ void GxDESTM32T::updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t wid
   tps.tps_vcom_disable();
   avt.avt_slp();
   Debug_str("updateWindow end...\r\n");
+}
+
+void GxDESTM32T::writeRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value)
+{
+  //Debug_str("writeRect start...\r\n");
+  if ((x >= tcon_init_hsize) || (y >= tcon_init_vsize)) return;
+  if (x + w > tcon_init_hsize) w = tcon_init_hsize - x;
+  if (y + h > tcon_init_vsize) h = tcon_init_vsize - y;
+  uint32_t idx = 0;
+  uint32_t n;
+  uint16_t dw = value | (value << 8);
+  switch (depth)
+  {
+    case 1:
+      avt.avt_run_sys();
+      avt.avt_wr_reg(0x0020, 0x2);  //big endian
+      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
+      avt.avt_wr_reg_addr(0x0154);
+      n = uint32_t(w) * uint32_t(h) / 8;
+      if (n < 1) n = 1;
+      for (uint32_t i = 0; i < n; i++)
+      {
+        dw = bw2grey16[value];
+        avt.avt_i80_write_dat(dw);
+      }
+      break;
+    case 2:
+      avt.avt_run_sys();
+      avt.avt_wr_reg(0x0020, 0x2);  //big endian
+      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
+      avt.avt_wr_reg_addr(0x0154);
+      n = uint32_t(w) * uint32_t(h) / 8;
+      if (n < 1) n = 1;
+      for (uint32_t i = 0; i < n; i++)
+      {
+        avt.avt_i80_write_dat(dw);
+      }
+      break;
+    case 4:
+      avt.avt_run_sys();
+      avt.avt_wr_reg(0x0020, 0x2);  //big endian
+      avt.avt_ld_img_area(EPD_DATA_4BPP, x, y, w, h);
+      avt.avt_wr_reg_addr(0x0154);
+      n = uint32_t(w) * uint32_t(h) / 4;
+      if (n < 1) n = 1;
+      for (uint32_t i = 0; i < n; i++)
+      {
+        avt.avt_i80_write_dat(dw);
+      }
+      break;
+    case 8:
+      avt.avt_run_sys();
+      avt.avt_wr_reg(0x0020, 0x2);  //big endian
+      avt.avt_ld_img_area(EPD_DATA_8BPP, x, y, w, h);
+      avt.avt_wr_reg_addr(0x0154);
+      n = uint32_t(w) * uint32_t(h) / 2;
+      if (n < 1) n = 1;
+      for (uint32_t i = 0; i < n; i++)
+      {
+        avt.avt_i80_write_dat(dw);
+      }
+      break;
+    default:
+      return;
+  }
+  avt.avt_ld_img_end();
+  //Debug_str("writeRect end...\r\n");
+}
+
+void GxDESTM32T::drawRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value)
+{
+  //Debug_str("drawRect start...\r\n");
+  writeRect(x, y, w, h, depth, value);
+  refresh(x, y, w, h, (depth == 1));
+  //Debug_str("drawRect end...\r\n");
 }
 
 void GxDESTM32T::demo()
@@ -887,6 +965,6 @@ void GxDESTM32T::avt_lut_demo(uint8_t gray)
 
 void GxDESTM32T::Debug_str(const char *s)
 {
-  if (_diag_enabled) Serial1.print(s);
+  if (_pDiagnosticOutput) _pDiagnosticOutput->print(s);
 }
 

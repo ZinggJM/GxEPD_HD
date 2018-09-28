@@ -29,7 +29,7 @@ class GxGDE06BA : public GxEPD_HD_EPD
     // constructor
     GxGDE06BA(GxDESTM32T& io);
     // methods (virtual)
-    void init(uint32_t serial_diag_bitrate = 0); // = 0 : disabled
+    void init(Stream* pDiagnosticOutput = 0); // (pDiagnosticOutput = 0) : disabled
     //  Support for Bitmaps (Sprites) to Controller Buffer and to Screen
     void clearScreen(uint8_t value = 0xFF); // init controller memory and screen (default white)
     // write to controller memory, without screen refresh; x and w should be multiple of 8

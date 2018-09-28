@@ -14,6 +14,7 @@
 #define _GxDESTM32T_H_
 
 #include <Arduino.h>
+#include <Stream.h>
 #include "../GxEPD_HD_EPD.h"
 #include "TPS65185.h"
 #include "AVT6203A.h"
@@ -22,7 +23,7 @@ class GxDESTM32T : public GxEPD_HD_IOCTRL
 {
   public:
     GxDESTM32T();
-    void init(bool enable_diagnostic_output);
+    void init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput); // (pDiagnosticOutput = 0) : disabled
     //  Support for Bitmaps (Sprites) to Controller Buffer and to Screen
     void clearScreen(uint8_t value = 0xFF); // init controller memory and screen (default white)
     // write to controller memory, without screen refresh; x and w should be multiple of 8
@@ -40,6 +41,8 @@ class GxDESTM32T : public GxEPD_HD_IOCTRL
     void powerOff();
     void demo();
     void updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t width, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+    void writeRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value);
+    void drawRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value);
   private:
     void epd_draw_pic_start(void);
     void epd_draw_pic_buff(uint8_t* buff, uint16_t len);
@@ -57,7 +60,7 @@ class GxDESTM32T : public GxEPD_HD_IOCTRL
   private:
     TPS65185 tps;
     AVT6203A avt;
-    bool _diag_enabled;
+    Stream* _pDiagnosticOutput;
     static const uint8_t bw2grey8[];
     static const uint16_t bw2grey16[];
 };

@@ -21,7 +21,7 @@ class GxEPD_HD_GFX : public Adafruit_GFX
     virtual uint16_t pages() = 0;
     virtual uint16_t pageHeight() = 0;
     virtual bool mirror(bool m) = 0;
-    virtual void init(uint32_t serial_diag_bitrate = 0) = 0; // serial_diag_bitrate = 0 : disabled
+    virtual void init(Stream* pDiagnosticOutput = 0) = 0; // (pDiagnosticOutput = 0) : disabled
     virtual void fillScreen(uint16_t color) = 0; // 0x0 black, >0x0 white, to buffer
     virtual void display() = 0;
     virtual void displayWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool using_rotation = true) = 0;

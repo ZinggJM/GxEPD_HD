@@ -373,9 +373,9 @@ void TPS65185::tps_vcom_disable(void)
 
 
 //��ʼ��
-void TPS65185::tps_init(bool enable_diagnostic_output)
+void TPS65185::tps_init(Stream* pDiagnosticOutput)
 {
-  _diag_enabled = enable_diagnostic_output;
+  _pDiagnosticOutput = pDiagnosticOutput;
   TPS_WAKEUP_L;
   TPS_SDA_H;
   TPS_SCL_H;
@@ -439,7 +439,7 @@ uint16_t tps_vcom_measure(void)
 
 void TPS65185::Debug_str(const char *s)
 {
-  if (_diag_enabled) Serial1.print(s);
+  if (_pDiagnosticOutput) _pDiagnosticOutput->print(s);
 }
 
 void TPS65185::Debug_hex(unsigned int dat)
@@ -447,7 +447,7 @@ void TPS65185::Debug_hex(unsigned int dat)
   char buf[8];
   unsigned char i;
 
-  if (!_diag_enabled) return;
+  if (!_pDiagnosticOutput) return;
 
   buf[0] = '0';
   buf[1] = 'x';
@@ -485,7 +485,7 @@ void TPS65185::Debug_dec(unsigned int dat)
 {
   char buf[7];
 
-  if (!_diag_enabled) return;
+  if (!_pDiagnosticOutput) return;
 
   buf[0] = '0' + dat / 10000;
   buf[1] = '0' + (dat % 10000) / 1000;

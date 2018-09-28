@@ -40,9 +40,9 @@ class GxEPD_HD
 class GxEPD_HD_IOCTRL
 {
   public:
-    virtual void init(bool enable_diagnostic_output) = 0;
+    virtual void init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput) = 0;
     //  Support for Bitmaps (Sprites) to Controller Buffer and to Screen
-    void clearScreen(uint8_t value = 0xFF); // init controller memory and screen (default white)
+    virtual void clearScreen(uint8_t value = 0xFF) = 0; // init controller memory and screen (default white)
     // write to controller memory, without screen refresh; x and w should be multiple of 8
     virtual void writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h) = 0;
     virtual void writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
@@ -72,9 +72,9 @@ class GxEPD_HD_EPD
     GxEPD_HD_EPD(uint16_t w, uint16_t h, GxEPD_HD::Panel p, bool c, bool pu, bool fpu) :
       WIDTH(w), HEIGHT(h), panel(p), hasColor(c), hasPartialUpdate(pu), hasFastPartialUpdate(fpu) {};
     // methods (virtual)
-    virtual void init(uint32_t serial_diag_bitrate = 0) = 0; // = 0 : disabled
+    virtual void init(Stream* pDiagnosticOutput = 0) = 0; // (pDiagnosticOutput = 0) : disabled
     //  Support for Bitmaps (Sprites) to Controller Buffer and to Screen
-    void clearScreen(uint8_t value = 0xFF); // init controller memory and screen (default white)
+    virtual void clearScreen(uint8_t value = 0xFF) = 0; // init controller memory and screen (default white)
     // write to controller memory, without screen refresh; x and w should be multiple of 8
     virtual void writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h) = 0;
     virtual void writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,

@@ -18,7 +18,7 @@
 class TPS65185
 {
   public:
-    TPS65185() : _diag_enabled(false) {};
+    TPS65185() : _pDiagnosticOutput(0) {};
     void tps_sleep_to_standby(void);
     void tps_standby_to_sleep(void);
     void tps_source_gate_enable(void);
@@ -27,7 +27,7 @@ class TPS65185
     void tps_vcom_disable(void);
     unsigned char ti_read_int_status(void);
     void tps_read_all_reg(void);
-    void tps_init(bool enable_diagnostic_output);
+    void tps_init(Stream* pDiagnosticOutput);
   private:
     void i2c_delay_x(uint32_t nCount);
     void i2c_delayus(void);
@@ -50,7 +50,7 @@ class TPS65185
     void Debug_hex(unsigned int dat);
     void Debug_dec(unsigned int dat);
   private:
-    bool _diag_enabled;
+    Stream* _pDiagnosticOutput;
 };
 
 #endif

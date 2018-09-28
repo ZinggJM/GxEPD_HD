@@ -16,7 +16,8 @@
 #include <Arduino.h>
 #include "TPS65185.h"
 
-#define GDE043A2
+#define GDE043A2 // GDE060BA or GDE043A2 800*600
+//#define GDE060F3 // GDE060F3 6.0" 1024*758     
 
 #define EPD_WF_ADDR				(0x3000)		//����ֽģ�����������ļ���SPI_FLASH����ʼ��ַ
 #define EPD_IMG_ADDR			(0x200000)		//����ͼƬ������RAM����ʼ��ַ
@@ -41,9 +42,9 @@
 #define  tcon_init_lelen        13
 #define  tcon_init_pixclkdiv    3
 #define  tcon_init_sdrv_cfg     (100 | (1 << 8) | (1 << 9))
-#ifdef  GDE043A2
+#ifdef  GDE043A2 // GDE060BA or GDE043A2 800*600
 #define  tcon_init_gdrv_cfg     0x00
-#else
+#else            // GDE060BA
 #define  tcon_init_gdrv_cfg     0x02
 #endif
 #define  tcon_init_lutidxfmt    (4 | (1 << 7))
@@ -65,7 +66,11 @@
 #endif
 #if 0	//1024x576 85Hz
 #define  tcon_init_hsize        1024
-#define  tcon_init_vsize        576
+#ifdef GDE060F3  //6" 1024*758
+#define  tcon_init_vsize        758 
+#else           //8" 1024*768
+#define  tcon_init_vsize        768 
+#endif
 #define  tcon_init_fslen        13
 #define  tcon_init_fblen        4
 #define  tcon_init_felen        10
@@ -84,7 +89,7 @@ class AVT6203A
   public:
     uint8_t wf_mode;
   public:
-    AVT6203A(TPS65185& _tps) : tps(_tps), _diag_enabled(false) {};
+    AVT6203A(TPS65185& _tps) : tps(_tps), _pDiagnosticOutput(0) {};
     void avt_delay(void);
     void avt_reset();
     void avt_busy_wait(void);
@@ -148,7 +153,7 @@ class AVT6203A
     void avt_spi_flash_write_waveform_end(void);
     void avt_waveform_update(void);
     void AVT_CONFIG_check(void);
-    void avt_init(bool enable_diagnostic_output);
+    void avt_init(Stream* pDiagnosticOutput);
     uint8_t SpiFlash_ReadWriteByte(uint8_t TxData);
     void SpiFlash_EraseBlock32K(uint32_t addr);
     void SpiFlash_PageProgram(uint32_t addr, uint8_t *data);
@@ -160,7 +165,7 @@ class AVT6203A
     void Debug_dec(unsigned int dat);
   private:
     TPS65185& tps;
-    bool _diag_enabled;
+    Stream* _pDiagnosticOutput;
     uint16_t Reg0x0204Save;
 };
 

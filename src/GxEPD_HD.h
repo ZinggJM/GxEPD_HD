@@ -48,7 +48,7 @@ class GxEPD_HDG : public GxFont_GFX
     //GxEPD_HDG(int16_t w, int16_t h) : Adafruit_GFX(w, h) {};
     GxEPD_HDG(int16_t w, int16_t h) : GxFont_GFX(w, h) {};
     virtual void drawPixel(int16_t x, int16_t y, uint16_t color) = 0;
-    virtual void init(uint32_t serial_diag_bitrate = 0) = 0; // = 0 : disabled
+    virtual void init(Stream& diagnostic_stream, bool enable_diagnostic_output) = 0;
     virtual void fillScreen(uint16_t color) = 0; // to buffer
     virtual void update(void) = 0;
     // to buffer, may be cropped, drawPixel() used, update needed, subclass may support some modes

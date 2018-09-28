@@ -17,10 +17,9 @@ GxGDE06BA::GxGDE06BA(GxDESTM32T& io) :
 {
 }
 
-void GxGDE06BA::init(uint32_t serial_diag_bitrate)
+void GxGDE06BA::init(Stream* pDiagnosticOutput)
 {
-  if (serial_diag_bitrate > 0) Serial1.begin(serial_diag_bitrate);
-  IO.init(serial_diag_bitrate > 0);
+  IO.init(GxEPD_HD::GDE060BA, pDiagnosticOutput);
 }
 
 void GxGDE06BA::clearScreen(uint8_t value)
@@ -92,5 +91,4 @@ void GxGDE06BA::demo()
 {
 
 }
-
 
