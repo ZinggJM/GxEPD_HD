@@ -12,25 +12,14 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 - single pixel update to the controller buffer seems possible, to be investigated, may be slow.
 
 ### Paged Drawing, Picture Loop
-<<<<<<< HEAD
 - This library uses paged drawing to limit RAM use of graphics buffer for Adafruit_GFX
 - buffer size can be selected in the application by template parameter page_height, see GxEPD_HD_Example
 - Paged drawing is implemented as picture loop, like in U8G2 (Oliver Kraus)
 - see https://github.com/olikraus/u8glib/wiki/tpictureloop
 - Paged drawing is also available using drawPaged() and drawCallback(), like in GxEPD
-´´´ // GxEPD style paged drawing; drawCallback() is called as many times as needed ´´´
-´´´ void drawPaged(void (*drawCallback)(const void*), const void* pv) ´´´
-- paged drawing is done using Adafruit_GFX methods inside picture loop or drawCallback
-=======
-#### - This library uses paged drawing to limit RAM use of graphics buffer for Adafruit_GFX
-#### - buffer size can be selected in the application by template parameter page_height, see GxEPD2_Example
-#### - Paged drawing is implemented as picture loop, like in U8G2 (Oliver Kraus)
-#### - see https://github.com/olikraus/u8glib/wiki/tpictureloop
-#### - Paged drawing is also available using drawPaged() and drawCallback(), like in GxEPD
 - ` // GxEPD style paged drawing; drawCallback() is called as many times as needed `
 - ` void drawPaged(void (*drawCallback)(const void*), const void* pv) `
-#### - paged drawing is done using Adafruit_GFX methods inside picture loop or drawCallback
->>>>>>> bbe3e321050e616f802d27347b8957e120d5308e
+- paged drawing is done using Adafruit_GFX methods inside picture loop or drawCallback
 
 ### Full Screen Buffer Support
 - full screen buffer is selected by setting template parameter page_height to display height
