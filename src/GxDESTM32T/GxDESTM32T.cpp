@@ -10,6 +10,8 @@
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571_10574&product_id=57650
 // or https://www.aliexpress.com/store/product/6-inch-HD-Interface-High-resolution-electronic-paper-display-e-ink-epaper-with-TCON-Demo-Kit/600281_32838449413.html
 
+#if defined(ARDUINO_ARCH_STM32F1)
+
 #include "GxDESTM32T.h"
 #include "DESTM32L1_board.h"
 #include <SPI.h>
@@ -364,9 +366,9 @@ void GxDESTM32T::updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t wid
   Debug_str("updateWindow end...\r\n");
 }
 
-void GxDESTM32T::writeRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value)
+void GxDESTM32T::writeFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value)
 {
-  //Debug_str("writeRect start...\r\n");
+  //Debug_str("writeFilledRect start...\r\n");
   if ((x >= tcon_init_hsize) || (y >= tcon_init_vsize)) return;
   if (x + w > tcon_init_hsize) w = tcon_init_hsize - x;
   if (y + h > tcon_init_vsize) h = tcon_init_vsize - y;
@@ -428,15 +430,15 @@ void GxDESTM32T::writeRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8
       return;
   }
   avt.avt_ld_img_end();
-  //Debug_str("writeRect end...\r\n");
+  //Debug_str("writeFilledRect end...\r\n");
 }
 
-void GxDESTM32T::drawRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value)
+void GxDESTM32T::drawFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value)
 {
-  //Debug_str("drawRect start...\r\n");
-  writeRect(x, y, w, h, depth, value);
+  //Debug_str("drawFilledRect start...\r\n");
+  writeFilledRect(x, y, w, h, depth, value);
   refresh(x, y, w, h, (depth == 1));
-  //Debug_str("drawRect end...\r\n");
+  //Debug_str("drawFilledRect end...\r\n");
 }
 
 void GxDESTM32T::demo()
@@ -967,4 +969,6 @@ void GxDESTM32T::Debug_str(const char *s)
 {
   if (_pDiagnosticOutput) _pDiagnosticOutput->print(s);
 }
+
+#endif
 

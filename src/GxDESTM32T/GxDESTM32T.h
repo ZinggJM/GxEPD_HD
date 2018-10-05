@@ -41,8 +41,8 @@ class GxDESTM32T : public GxEPD_HD_IOCTRL
     void powerOff();
     void demo();
     void updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t width, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
-    void writeRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value);
-    void drawRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value);
+    void writeFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value);
+    void drawFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value);
   private:
     void epd_draw_pic_start(void);
     void epd_draw_pic_buff(uint8_t* buff, uint16_t len);

@@ -15,7 +15,6 @@
 
 #include <Arduino.h>
 #include <Adafruit_GFX.h>
-#include "GxFont_GFX.h"
 
 // the only colors supported by any of these displays; mapping of other colors is class specific
 #define GxEPD_BLACK     0x0000
@@ -24,8 +23,7 @@
 #define GxEPD_WHITE     0xFFFF
 #define GxEPD_RED       0xF800      /* 255,   0,   0 */
 
-//class GxEPD_HD : public Adafruit_GFX
-class GxEPD_HDG : public GxFont_GFX
+class GxEPD_HD : public Adafruit_GFX
 {
   public:
     // bitmap presentation modes may be partially implemented by subclasses
@@ -45,10 +43,9 @@ class GxEPD_HDG : public GxFont_GFX
       bm_transparent = (1 << 8)
     };
   public:
-    //GxEPD_HDG(int16_t w, int16_t h) : Adafruit_GFX(w, h) {};
-    GxEPD_HDG(int16_t w, int16_t h) : GxFont_GFX(w, h) {};
+    GxEPD_HD(int16_t w, int16_t h) : Adafruit_GFX(w, h) {};
     virtual void drawPixel(int16_t x, int16_t y, uint16_t color) = 0;
-    virtual void init(Stream& diagnostic_stream, bool enable_diagnostic_output) = 0;
+    virtual void init(Stream* pDiagnosticOutput = 0) = 0; // (pDiagnosticOutput = 0) : disabled
     virtual void fillScreen(uint16_t color) = 0; // to buffer
     virtual void update(void) = 0;
     // to buffer, may be cropped, drawPixel() used, update needed, subclass may support some modes

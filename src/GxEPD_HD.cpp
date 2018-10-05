@@ -18,7 +18,7 @@
 #include <avr/pgmspace.h>
 #endif
 
-void  GxEPD_HDG::drawBitmapBM(const uint8_t *bitmap, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color, int16_t mode)
+void  GxEPD_HD::drawBitmapBM(const uint8_t *bitmap, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color, int16_t mode)
 {
   uint16_t inverse_color = (color != GxEPD_WHITE) ? GxEPD_WHITE : GxEPD_BLACK;
   uint16_t fg_color = (mode & bm_invert) ? inverse_color : color;
