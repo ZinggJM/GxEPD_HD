@@ -22,10 +22,18 @@
 #define GxEPD_LIGHTGREY 0xC618      /* 192, 192, 192 */
 #define GxEPD_WHITE     0xFFFF
 #define GxEPD_RED       0xF800      /* 255,   0,   0 */
+#define GxEPD_YELLOW    GxEPD_RED
+#define GxEPD_COLORED   GxEPD_RED
 
 class GxEPD_HD : public Adafruit_GFX
 {
   public:
+    enum Panel
+    {
+      GDE043A2,
+      GDE060BA,
+      GDEW080T5
+    };
     // bitmap presentation modes may be partially implemented by subclasses
     enum bm_mode //BM_ModeSet
     {

@@ -14,12 +14,18 @@
 
 // select the display io class to use, only one
 GxDESTM32T io;
+
 // select the base display class to use, only one
-GxGDE06BA base_display(io);
+//GxGDE043A2 base_display(io);
+GxGDE060BA base_display(io);
+//GxGDEW080T5 base_display(io);
 
 // select the graphics display template class to use, only one
-GxEPD_HD_BW<GxGDE06BA, GxGDE06BA::HEIGHT> display(base_display); // full height, one page, no RAM remaining
-//GxEPD_HD_BW < GxGDE06BA, GxGDE06BA::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
+//GxEPD_HD_BW<GxGDE043A2, GxGDE043A2::HEIGHT> display(base_display); // full height, one page, no RAM remaining
+GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page, no RAM remaining
+//GxEPD_HD_BW < GxGDE043A2, GxGDE043A2::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
+//GxEPD_HD_BW < GxGDE060BA, GxGDE060BA::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
+//GxEPD_HD_BW < GxGDEW080T5, GxGDEW080T5::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~11k RAM remaining
 
 //#include "bitmaps/BitmapExamples.h"
 
@@ -67,7 +73,7 @@ void setup()
   delay(200);
   display.init(&DiagnosticStream);
 #ifndef _GxBitmapExamples_H_
-  io.demo();
+  base_display.demo();
 #endif
   helloWorld();
   delay(1000);

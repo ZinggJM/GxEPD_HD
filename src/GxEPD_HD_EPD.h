@@ -15,27 +15,7 @@
 
 #include <Arduino.h>
 #include <SPI.h>
-
-#define GxEPD_BLACK     0x0000
-#define GxEPD_DARKGREY  0x7BEF      /* 128, 128, 128 */
-#define GxEPD_LIGHTGREY 0xC618      /* 192, 192, 192 */
-#define GxEPD_WHITE     0xFFFF
-#define GxEPD_RED       0xF800      /* 255,   0,   0 */
-
-#define GxEPD_YELLOW    GxEPD_RED
-#define GxEPD_COLORED   GxEPD_RED
-
-class GxEPD_HD
-{
-  public:
-    enum Panel
-    {
-      GDE043A2,
-      GDE06,
-      GDE060BA,
-      GDEW080T5
-    };
-};
+#include "GxEPD_HD.h"
 
 class GxEPD_HD_IOCTRL
 {

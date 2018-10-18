@@ -1,4 +1,4 @@
-// Class GxGDE06BA : display class for GDE06BA on DESTM32-T parallel interface e-paper display from Dalian Good Display Inc.
+// Class GxGDE043A2 : display class for GDE043A2 on DESTM32-T parallel interface e-paper display from Dalian Good Display Inc.
 //
 // Created by Jean-Marc Zingg based on demo code from Good Display for DESTM32-T board with DESTM32-Tcon-11.
 //
@@ -10,23 +10,24 @@
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571_10574&product_id=57650
 // or https://www.aliexpress.com/store/product/6-inch-HD-Interface-High-resolution-electronic-paper-display-e-ink-epaper-with-TCON-Demo-Kit/600281_32838449413.html
 
-#include "GxGDE06BA.h"
+#include "GxGDE043A2.h"
 
-GxGDE06BA::GxGDE06BA(GxDESTM32T& io) :
+GxGDE043A2::GxGDE043A2(GxDESTM32T& io) :
   GxEPD_HD_EPD(WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate), IO(io)
 {
 }
 
-void GxGDE06BA::init(Stream* pDiagnosticOutput)
+void GxGDE043A2::init(Stream* pDiagnosticOutput)
 {
-  IO.init(GxEPD_HD::GDE060BA, pDiagnosticOutput);
+  IO.init(GxEPD_HD::GDE043A2, pDiagnosticOutput);
 }
 
-void GxGDE06BA::clearScreen(uint8_t value)
+void GxGDE043A2::clearScreen(uint8_t value)
 {
+  IO.clearScreen(value);
 }
 
-void GxGDE06BA::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+void GxGDE043A2::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
   if (x >= WIDTH) return;
   if (y >= HEIGHT) return;
@@ -37,8 +38,8 @@ void GxGDE06BA::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, 
   IO.writeImage(bitmap, size, depth, x8, y, w8, h);
 }
 
-void GxGDE06BA::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                               uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
+void GxGDE043A2::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
+                                uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
 {
   if (x + dx >= WIDTH) return;
   if (y + dy >= HEIGHT) return;
@@ -49,7 +50,7 @@ void GxGDE06BA::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t dep
   IO.writeImagePart(bitmap, size, depth, width, x8, y, w8, h, dx, dy);
 }
 
-void GxGDE06BA::drawImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+void GxGDE043A2::drawImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
   if (x >= WIDTH) return;
   if (y >= HEIGHT) return;
@@ -60,8 +61,8 @@ void GxGDE06BA::drawImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, u
   IO.drawImage(bitmap, size, depth, x8, y, w8, h);
 }
 
-void GxGDE06BA::drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                              uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
+void GxGDE043A2::drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
+                               uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
 {
   if (x + dx >= WIDTH) return;
   if (y + dy >= HEIGHT) return;
@@ -72,23 +73,23 @@ void GxGDE06BA::drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t dept
   IO.drawImagePart(bitmap, size, depth, width, x8, y, w8, h, dx, dy);
 }
 
-void GxGDE06BA::refresh(bool partial_update_mode)
+void GxGDE043A2::refresh(bool partial_update_mode)
 {
   IO.refresh(partial_update_mode);
 }
 
-void GxGDE06BA::refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partial_update_mode)
+void GxGDE043A2::refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partial_update_mode)
 {
   IO.refresh(x, y, w, h, partial_update_mode);
 }
 
-void GxGDE06BA::powerOff()
+void GxGDE043A2::powerOff()
 {
   IO.powerOff();
 }
 
-void GxGDE06BA::demo()
+void GxGDE043A2::demo()
 {
-
+  IO.demo800x600();
 }
 

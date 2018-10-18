@@ -14,7 +14,9 @@
 
 #include <Adafruit_GFX.h>
 #include "GxEPD_HD_EPD.h"
-#include "GxGDE06BA.h"
+#include "GxGDE043A2.h"
+#include "GxGDE060BA.h"
+#include "GxGDEW080T5.h"
 #include "GxEPD_HD_GFX.h"
 
 template<typename GxEPD_HD_Type, const uint16_t page_height>

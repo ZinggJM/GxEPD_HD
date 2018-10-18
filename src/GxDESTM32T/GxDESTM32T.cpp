@@ -15,7 +15,8 @@
 #include "GxDESTM32T.h"
 #include "DESTM32L1_board.h"
 #include <SPI.h>
-#include "picture.h"
+#include "picture800x600.h"
+#include "picture1024x768.h"
 //#include "BitmapExamples.h"
 //#include "Bitmaps400x300.h"
 
@@ -49,11 +50,34 @@ const uint16_t GxDESTM32T::bw2grey16[] =
 
 GxDESTM32T::GxDESTM32T() : avt(tps), _pDiagnosticOutput(0)
 {
+  _width = 800;
+  _height = 600;
+  _vcom = 2000;
 }
 
 void GxDESTM32T::init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput)
 {
+  _panel = panel;
+  switch (panel)
+  {
+    case GxEPD_HD::GDE043A2:
+      _width = 800;
+      _height = 600;
+      _vcom = 2000;
+      break;
+    case GxEPD_HD::GDE060BA:
+      _width = 800;
+      _height = 600;
+      _vcom = 2000;
+      break;
+    case GxEPD_HD::GDEW080T5:
+      _width = 1024;
+      _height = 768;
+      _vcom = 2200;
+      break;
+  }
   _pDiagnosticOutput = pDiagnosticOutput;
+  avt.init(panel, pDiagnosticOutput);
   //if(pDiagnosticOutput) pDiagnosticOutput->println("GxDESTM32T::init()");
   avt.wf_mode = EPD_MODE_INIT;
   //#define PORT_A_OUT_PP        FLASH_CS_PIN
@@ -106,13 +130,13 @@ void GxDESTM32T::init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput)
   SPI.setClockDivider(SPI_CLOCK_DIV4); // 18MHz
   SYS_WAKEUP_H;
   delay(1000);
-  tps.tps_init(pDiagnosticOutput);
+  tps.tps_init(_vcom, pDiagnosticOutput);
   tps.tps_sleep_to_standby();
   avt.AVT_CONFIG_check();      //���AVT�����������Ƿ���ȷ
   //if(pDiagnosticOutput) pDiagnosticOutput->println("AVT_CONFIG_check() done");
   delay(500);
   avt.avt_waveform_update();//���ز��α�
-  avt.avt_init(pDiagnosticOutput);//˫��
+  avt.avt_init();
   avt.wf_mode = EPD_MODE_INIT;
   epd_draw_gray(0xff);
   avt.wf_mode = EPD_MODE_GC16;
@@ -131,9 +155,9 @@ void GxDESTM32T::clearScreen(uint8_t value)
 void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
   Debug_str("writeImage start...\r\n");
-  if ((x >= tcon_init_hsize) || (y >= tcon_init_vsize)) return;
-  if (x + w > tcon_init_hsize) w = tcon_init_hsize - x;
-  if (y + h > tcon_init_vsize) h = tcon_init_vsize - y;
+  if ((x >= _width) || (y >= _height)) return;
+  if (x + w > _width) w = _width - x;
+  if (y + h > _height) h = _height - y;
   uint32_t idx = 0;
   uint32_t n;
   uint16_t dw;
@@ -318,7 +342,7 @@ void GxDESTM32T::drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t dep
 
 void GxDESTM32T::refresh(bool partial_update_mode)
 {
-  refresh(0, 0, 800, 600, partial_update_mode);
+  refresh(0, 0, _width, _height, partial_update_mode);
 }
 
 void GxDESTM32T::refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partial_update_mode)
@@ -369,9 +393,9 @@ void GxDESTM32T::updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t wid
 void GxDESTM32T::writeFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value)
 {
   //Debug_str("writeFilledRect start...\r\n");
-  if ((x >= tcon_init_hsize) || (y >= tcon_init_vsize)) return;
-  if (x + w > tcon_init_hsize) w = tcon_init_hsize - x;
-  if (y + h > tcon_init_vsize) h = tcon_init_vsize - y;
+  if ((x >= _width) || (y >= _height)) return;
+  if (x + w > _width) w = _width - x;
+  if (y + h > _height) h = _height - y;
   uint32_t idx = 0;
   uint32_t n;
   uint16_t dw = value | (value << 8);
@@ -441,7 +465,7 @@ void GxDESTM32T::drawFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, 
   //Debug_str("drawFilledRect end...\r\n");
 }
 
-void GxDESTM32T::demo()
+void GxDESTM32T::demo800x600()
 {
 #if 1    //16���Ҷ���ʾ
   delay(2000);
@@ -478,7 +502,7 @@ void GxDESTM32T::demo()
 
   epd_draw_pic_part_from_rom((uint8_t*)gImage_01, EPD_DATA_2BPP, 0, 0, 800, 133); //�ֲ�ͼ1,�ֱ���800*133
   delay(1000);//10
-  epd_draw_pic_part_from_rom((uint8_t*)gImage_1, EPD_DATA_2BPP, 0, 0, 800, 600);//ȫ��ͼ1���ֱ���800*600
+  epd_draw_pic_part_from_rom((uint8_t*)gImage800x600, EPD_DATA_2BPP, 0, 0, 800, 600);//ȫ��ͼ1���ֱ���800*600
   delay(3000);//��ʱ3s
 
   for (int i = 0; i < 2; i++)
@@ -498,7 +522,7 @@ void GxDESTM32T::demo()
     epd_draw_gray(0xff);  //ȫ��
     delay(100);  //1
     ////////////////ȫ����ʾͼ/////////////////
-    epd_draw_pic_part_from_rom((uint8_t*)gImage_1, EPD_DATA_2BPP, 0, 0, 800, 600);//ȫ��ͼ1���ֱ���800*600
+    epd_draw_pic_part_from_rom((uint8_t*)gImage800x600, EPD_DATA_2BPP, 0, 0, 800, 600);//ȫ��ͼ1���ֱ���800*600
     delay(3000);//��ʱ3s
     epd_draw_pic_part_from_rom((uint8_t*)gImage_2, EPD_DATA_2BPP, 0, 0, 800, 600);//ȫ��ͼ2���ֱ���800*600
     delay(3000);//��ʱ3s
@@ -507,6 +531,54 @@ void GxDESTM32T::demo()
     epd_draw_gray(0xff);  //ȫ��
     delay(100);  //1
   }
+}
+
+void GxDESTM32T::demo1024x768()
+{
+#if 1    //16���Ҷ���ʾ
+  delay(2000); //2
+
+  avt.wf_mode = EPD_MODE_GC16;
+  epd_draw_gray_level_horizontal(16);
+  delay(2000); //2
+
+  epd_draw_gray_level_vertical(16);
+  delay(2000); //2
+
+  epd_draw_gray_level_horizontal(8);
+  delay(2000); //2
+
+  epd_draw_gray_level_vertical(8);
+  delay(2000); //2
+
+  epd_draw_gray(0xff);
+
+#endif
+  //ȫ��
+  avt.wf_mode = EPD_MODE_GC16;
+  epd_draw_gray(0xff);  //ȫ��
+  delay(1000);  //1
+
+  for (int i = 0; i < 2; i++)
+  {
+    avt.wf_mode = EPD_MODE_GC16;
+    //5~1 �ֲ���ʾ
+    epd_draw_pic_part_from_rom((uint8_t*)gImage_num1, EPD_DATA_2BPP, 100 , 300, 48, 104); //�ֲ�ͼ1,�ֱ���48*104
+    epd_draw_pic_part_from_rom((uint8_t*)gImage_num2, EPD_DATA_2BPP, 300 , 300, 48, 104); //�ֲ�ͼ1,�ֱ���48*104
+    epd_draw_pic_part_from_rom((uint8_t*)gImage_num3, EPD_DATA_2BPP, 500 , 300, 48, 104); //�ֲ�ͼ1,�ֱ���48*104
+    epd_draw_pic_part_from_rom((uint8_t*)gImage_num4, EPD_DATA_2BPP, 700 , 300, 48, 104); //�ֲ�ͼ1,�ֱ���48*104
+    epd_draw_pic_part_from_rom((uint8_t*)gImage_num5, EPD_DATA_2BPP, 900 , 300, 48, 104); //�ֲ�ͼ1,�ֱ���48*104
+    //ȫ��
+    avt.wf_mode = EPD_MODE_GC16;
+    epd_draw_gray(0xff);  //ȫ��
+    delay(1000);  //1
+    //4��ȫ����ʾ
+    epd_draw_pic_part_from_rom((uint8_t*)gImage1024x768, EPD_DATA_2BPP, 0 , 0, 1024, 758); //�ֲ�ͼ1,�ֱ���1024*758
+  }
+  delay(1000);  //1
+  avt.wf_mode = EPD_MODE_GC16;
+  epd_draw_gray(0xff);  //ȫ��
+  delay(100);  //1
 }
 
 void GxDESTM32T::epd_draw_pic_start(void)
@@ -565,9 +637,9 @@ void GxDESTM32T::epd_draw_pic_from_spiflash(uint32_t addr)
   avt.avt_ld_img(EPD_DATA_8BPP);
   avt.avt_wr_reg_addr(0x0154);
 
-  for (i = 0; i < tcon_init_vsize; i++)
+  for (i = 0; i < _height; i++)
   {
-    for (j = 0; j < tcon_init_hsize / 2; j++)
+    for (j = 0; j < _width / 2; j++)
     {
       value = avt.SpiFlash_ReadWriteByte(0xff);
       dat = value & 0x0f;
@@ -582,9 +654,9 @@ void GxDESTM32T::epd_draw_pic_from_spiflash(uint32_t addr)
   avt.avt_ld_img(EPD_DATA_4BPP);
   avt.avt_wr_reg_addr(0x0154);
 
-  for (i = 0; i < tcon_init_vsize; i++)
+  for (i = 0; i < _height; i++)
   {
-    for (j = 0; j < tcon_init_hsize / 4; j++)
+    for (j = 0; j < _width / 4; j++)
     {
       value = avt.SpiFlash_ReadWriteByte(0xff);
       dat = value;
@@ -620,9 +692,9 @@ void GxDESTM32T::epd_draw_gray(uint8_t gray)
   avt.avt_ld_img(EPD_DATA_8BPP);
   avt.avt_wr_reg_addr(0x0154);
 
-  for (i = 0; i < tcon_init_vsize; i++)
+  for (i = 0; i < _height; i++)
   {
-    for (j = 0; j < (tcon_init_hsize / 2); j++)
+    for (j = 0; j < (_width / 2); j++)
     {
       dat = gray;
       dat = ((dat << 8) & 0xff00) + gray;
@@ -647,7 +719,7 @@ void GxDESTM32T::epd_draw_gray_level_horizontal(uint8_t div)
   uint16_t h, i, j, dat;
   uint8_t v, gray;
 
-  v = tcon_init_vsize % div;
+  v = _height % div;
   Debug_str("epd_draw_gray_level_horizontal start...\r\n");
   avt.avt_run_sys();
   avt.avt_ld_img(EPD_DATA_8BPP);
@@ -656,9 +728,9 @@ void GxDESTM32T::epd_draw_gray_level_horizontal(uint8_t div)
   gray = 0;
   for (i = 0; i < div; i++)
   {
-    for (j = 0; j < (tcon_init_vsize - v) / div; j++)
+    for (j = 0; j < (_height - v) / div; j++)
     {
-      for (h = 0; h < (tcon_init_hsize / 2); h++)
+      for (h = 0; h < (_width / 2); h++)
       {
         dat = gray;
         dat = ((dat << 8) & 0xff00) + gray;
@@ -669,7 +741,7 @@ void GxDESTM32T::epd_draw_gray_level_horizontal(uint8_t div)
   }
   for (i = 0; i < v; i++)
   {
-    for (h = 0; h < (tcon_init_hsize / 2); h++)
+    for (h = 0; h < (_width / 2); h++)
     {
       dat = 255;
       dat = ((dat << 8) & 0xff00) + 255;
@@ -694,18 +766,18 @@ void GxDESTM32T::epd_draw_gray_level_vertical(uint8_t div)
   uint16_t h, i, j, dat;
   uint8_t v, gray;
 
-  v = (tcon_init_hsize / 2) % div;
+  v = (_width / 2) % div;
   Debug_str("epd_draw_gray_level_vertical start...\r\n");
   avt.avt_run_sys();
   avt.avt_ld_img(EPD_DATA_8BPP);
   avt.avt_wr_reg_addr(0x0154);
 
-  for (i = 0; i < tcon_init_vsize; i++)
+  for (i = 0; i < _height; i++)
   {
     gray = 0;
     for (j = 0; j < div; j++)
     {
-      for (h = 0; h < ((tcon_init_hsize / 2) - v) / div; h++)
+      for (h = 0; h < ((_width / 2) - v) / div; h++)
       {
         dat = gray;
         dat = ((dat << 8) & 0xff00) + gray;

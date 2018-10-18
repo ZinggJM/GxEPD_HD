@@ -19,6 +19,8 @@
 //
 // My GDE043A2 shows degradation of white parts after some seconds, could be timing issue, needs further investigation.
 
+#if defined(ARDUINO_ARCH_STM32) && (defined(STM32F407VE) || defined(STM32F407ZE) || defined(STM32F407ZG))
+
 #include "GxGDE043A2.h"
 
 #include "BitmapExamples.h"
@@ -400,4 +402,5 @@ void GxGDE043A2::fillScreenTest()
   }
 }
 
+#endif
 

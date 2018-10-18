@@ -14,9 +14,10 @@
 #define _AVT6203A_H_
 
 #include <Arduino.h>
+#include "../GxEPD_HD_EPD.h"
 #include "TPS65185.h"
 
-#define GDE043A2 // GDE060BA or GDE043A2 800*600
+//#define GDE043A2 // GDE060BA or GDE043A2 800*600
 //#define GDE060F3 // GDE060F3 6.0" 1024*758     
 
 #define EPD_WF_ADDR				(0x3000)		//����ֽģ�����������ļ���SPI_FLASH����ʼ��ַ
@@ -31,9 +32,11 @@
 #define EPD_DATA_4BPP           (2<<4)       	// 1����ռ4bit, ��1�ֽڰ���2����
 #define EPD_DATA_8BPP           (3<<4)       	// 1����ռ8bit, ��1�ֽڰ���1����
 
+#if 0 // disable original macros
+
 #if 1	//800x600 85Hz
-#define  tcon_init_hsize        800
-#define  tcon_init_vsize        600
+//#define  tcon_init_hsize        800
+//#define  tcon_init_vsize        600
 #define  tcon_init_fslen        4
 #define  tcon_init_fblen        4
 #define  tcon_init_felen        10
@@ -43,33 +46,19 @@
 #define  tcon_init_pixclkdiv    3
 #define  tcon_init_sdrv_cfg     (100 | (1 << 8) | (1 << 9))
 #ifdef  GDE043A2 // GDE060BA or GDE043A2 800*600
-#define  tcon_init_gdrv_cfg     0x00
+//#define  tcon_init_gdrv_cfg     0x00
 #else            // GDE060BA
-#define  tcon_init_gdrv_cfg     0x02
+//#define  tcon_init_gdrv_cfg     0x02
 #endif
 #define  tcon_init_lutidxfmt    (4 | (1 << 7))
 #endif
 
-#if 0	//800x600 50Hz
-#define  tcon_init_hsize        800
-#define  tcon_init_vsize        600
-#define  tcon_init_fslen        4
-#define  tcon_init_fblen        4
-#define  tcon_init_felen        10
-#define  tcon_init_lslen        10
-#define  tcon_init_lblen        4
-#define  tcon_init_lelen        44
-#define  tcon_init_pixclkdiv    5
-#define  tcon_init_sdrv_cfg     (100 | (1 << 8) | (1 << 9))
-#define  tcon_init_gdrv_cfg     0x02
-#define  tcon_init_lutidxfmt    (4 | (1 << 7))
-#endif
 #if 0	//1024x576 85Hz
-#define  tcon_init_hsize        1024
+//#define  tcon_init_hsize        1024
 #ifdef GDE060F3  //6" 1024*758
-#define  tcon_init_vsize        758 
+//#define  tcon_init_vsize        758 
 #else           //8" 1024*768
-#define  tcon_init_vsize        768 
+//#define  tcon_init_vsize        768 
 #endif
 #define  tcon_init_fslen        13
 #define  tcon_init_fblen        4
@@ -79,10 +68,12 @@
 #define  tcon_init_lelen        42
 #define  tcon_init_pixclkdiv    2
 #define  tcon_init_sdrv_cfg     (128 | (1 << 8) | (1 << 9))
-#define  tcon_init_gdrv_cfg     0x00
+//#define  tcon_init_gdrv_cfg     0x00
 #define  tcon_init_lutidxfmt    (4 | (1 << 7))
 
 #endif
+
+#endif // disable original macros
 
 class AVT6203A
 {
@@ -90,6 +81,7 @@ class AVT6203A
     uint8_t wf_mode;
   public:
     AVT6203A(TPS65185& _tps) : tps(_tps), _pDiagnosticOutput(0) {};
+    void init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput); // (pDiagnosticOutput = 0) : disabled
     void avt_delay(void);
     void avt_reset();
     void avt_busy_wait(void);
@@ -153,7 +145,7 @@ class AVT6203A
     void avt_spi_flash_write_waveform_end(void);
     void avt_waveform_update(void);
     void AVT_CONFIG_check(void);
-    void avt_init(Stream* pDiagnosticOutput);
+    void avt_init();
     uint8_t SpiFlash_ReadWriteByte(uint8_t TxData);
     void SpiFlash_EraseBlock32K(uint32_t addr);
     void SpiFlash_PageProgram(uint32_t addr, uint8_t *data);
@@ -167,6 +159,18 @@ class AVT6203A
     TPS65185& tps;
     Stream* _pDiagnosticOutput;
     uint16_t Reg0x0204Save;
+    uint16_t tcon_init_hsize;
+    uint16_t tcon_init_vsize;
+    uint16_t tcon_init_fslen;
+    uint16_t tcon_init_fblen;
+    uint16_t tcon_init_felen;
+    uint16_t tcon_init_lslen;
+    uint16_t tcon_init_lblen;
+    uint16_t tcon_init_lelen;
+    uint16_t tcon_init_pixclkdiv;
+    uint16_t tcon_init_sdrv_cfg;
+    uint16_t tcon_init_gdrv_cfg;
+    uint16_t tcon_init_lutidxfmt;
 };
 
 #endif

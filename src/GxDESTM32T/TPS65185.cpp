@@ -343,7 +343,7 @@ void TPS65185::tps_sleep_to_standby(void)
 
   tps_power_sequence_set();
   //tps_vposvneg_set();
-  tps_vcom_set(2000);			//VCOM����Ϊ-2.00V
+  tps_vcom_set(_vcom);			//VCOM����Ϊ-2.00V
 }
 
 void TPS65185::tps_standby_to_sleep(void)
@@ -375,8 +375,9 @@ void TPS65185::tps_vcom_disable(void)
 
 
 //��ʼ��
-void TPS65185::tps_init(Stream* pDiagnosticOutput)
+void TPS65185::tps_init(uint16_t vcom, Stream* pDiagnosticOutput)
 {
+  _vcom = vcom;
   _pDiagnosticOutput = pDiagnosticOutput;
   TPS_WAKEUP_L;
   TPS_SDA_H;
@@ -391,7 +392,7 @@ void TPS65185::tps_init(Stream* pDiagnosticOutput)
 
   tps_power_sequence_set();
   //tps_vposvneg_set();
-  tps_vcom_set(2000);			//VCOM����Ϊ-2.00V
+  tps_vcom_set(vcom);			//VCOM����Ϊ-2.00V
 
   tps_read_all_reg();
 }

@@ -39,10 +39,11 @@ class GxDESTM32T : public GxEPD_HD_IOCTRL
     // screen refresh from controller memory, partial screen
     void refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partial_update_mode = false);
     void powerOff();
-    void demo();
     void updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t width, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
     void writeFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value);
     void drawFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value);
+    void demo800x600();
+    void demo1024x768();
   private:
     void epd_draw_pic_start(void);
     void epd_draw_pic_buff(uint8_t* buff, uint16_t len);
@@ -60,6 +61,10 @@ class GxDESTM32T : public GxEPD_HD_IOCTRL
   private:
     TPS65185 tps;
     AVT6203A avt;
+    GxEPD_HD::Panel _panel;
+    uint16_t _width;
+    uint16_t _height;
+    uint16_t _vcom;
     Stream* _pDiagnosticOutput;
     static const uint8_t bw2grey8[];
     static const uint16_t bw2grey16[];

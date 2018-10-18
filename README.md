@@ -45,7 +45,13 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 - CPU Speed(MHz): "72MHz (Normal)"
 - Upload method: "STLink"
 
-### Version 0.0.3
+### Version 0.0.4
+- renamed GxGDE06BA to GxGDE060BA
+- added GxGDE043A2
+- added GxGDEW080T5
+- some fixes
+- preliminary
+#### Version 0.0.3
 - interim check-in for old big red STM32F103VE DESTM32L board (ex GxEPD)
 - preliminary
 #### Version 0.0.2

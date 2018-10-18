@@ -17,6 +17,8 @@
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_8371&product_id=15441
 // or https://www.aliexpress.com/store/product/GDE080A1-with-demo-8-epaper-display-panel-1024X768-with-demo/600281_32810750410.html
 
+#if defined(ARDUINO_ARCH_STM32) && (defined(STM32F407VE) || defined(STM32F407ZE) || defined(STM32F407ZG))
+
 #include "GxGDEW080T5.h"
 
 #include "BitmapExamples.h"
@@ -391,4 +393,5 @@ void GxGDEW080T5::fillScreenTest()
   }
 }
 
+#endif
 

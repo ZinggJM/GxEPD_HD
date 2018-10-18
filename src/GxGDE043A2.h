@@ -1,4 +1,4 @@
-// Class GxGDE06BA : display class for GDE06BA on DESTM32-T parallel interface e-paper display from Dalian Good Display Inc.
+// Class GxGDE043A2 : display class for GDE043A2 on DESTM32-T parallel interface e-paper display from Dalian Good Display Inc.
 //
 // Created by Jean-Marc Zingg based on demo code from Good Display for DESTM32-T board with DESTM32-Tcon-11.
 //
@@ -10,13 +10,13 @@
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571_10574&product_id=57650
 // or https://www.aliexpress.com/store/product/6-inch-HD-Interface-High-resolution-electronic-paper-display-e-ink-epaper-with-TCON-Demo-Kit/600281_32838449413.html
 
-#ifndef _GxGDE06BA_H_
-#define _GxGDE06BA_H_
+#ifndef _GxGDE043A2_H_
+#define _GxGDE043A2_H_
 
 #include "GxEPD_HD_EPD.h"
 #include "GxDESTM32T/GxDESTM32T.h"
 
-class GxGDE06BA : public GxEPD_HD_EPD
+class GxGDE043A2 : public GxEPD_HD_EPD
 {
   public:
     // attributes
@@ -27,7 +27,7 @@ class GxGDE06BA : public GxEPD_HD_EPD
     static const bool hasPartialUpdate = true;
     static const bool hasFastPartialUpdate = true;
     // constructor
-    GxGDE06BA(GxDESTM32T& io);
+    GxGDE043A2(GxDESTM32T& io);
     // methods (virtual)
     void init(Stream* pDiagnosticOutput = 0); // (pDiagnosticOutput = 0) : disabled
     //  Support for Bitmaps (Sprites) to Controller Buffer and to Screen

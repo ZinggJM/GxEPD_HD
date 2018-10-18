@@ -28,6 +28,56 @@
 #define avt_info_hex(s)
 #endif
 
+void AVT6203A::init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput)
+{
+  _pDiagnosticOutput = pDiagnosticOutput;
+  switch (panel)
+  {
+    case GxEPD_HD::GDE043A2:
+      tcon_init_hsize = 800;
+      tcon_init_vsize = 600;
+      tcon_init_fslen = 4;
+      tcon_init_fblen = 4;
+      tcon_init_felen = 10;
+      tcon_init_lslen = 10;
+      tcon_init_lblen = 4;
+      tcon_init_lelen = 13;
+      tcon_init_pixclkdiv = 3;
+      tcon_init_sdrv_cfg = (100 | (1 << 8) | (1 << 9));
+      tcon_init_gdrv_cfg = 0x00;
+      tcon_init_lutidxfmt = (4 | (1 << 7));
+      break;
+    case GxEPD_HD::GDE060BA:
+      tcon_init_hsize = 800;
+      tcon_init_vsize = 600;
+      tcon_init_fslen = 4;
+      tcon_init_fblen = 4;
+      tcon_init_felen = 10;
+      tcon_init_lslen = 10;
+      tcon_init_lblen = 4;
+      tcon_init_lelen = 13;
+      tcon_init_pixclkdiv = 3;
+      tcon_init_sdrv_cfg = (100 | (1 << 8) | (1 << 9));
+      tcon_init_gdrv_cfg = 0x00;
+      tcon_init_lutidxfmt = (4 | (1 << 7));
+      break;
+    case GxEPD_HD::GDEW080T5:
+      tcon_init_hsize = 1024;
+      tcon_init_vsize = 768;
+      tcon_init_fslen = 13;
+      tcon_init_fblen = 4;
+      tcon_init_felen = 10;
+      tcon_init_lslen = 10;
+      tcon_init_lblen = 4;
+      tcon_init_lelen = 42;
+      tcon_init_pixclkdiv = 2;
+      tcon_init_sdrv_cfg = (128 | (1 << 8) | (1 << 9));
+      tcon_init_gdrv_cfg = 0x00;
+      tcon_init_lutidxfmt = (4 | (1 << 7));
+      break;
+  }
+}
+
 void AVT6203A::avt_delay(void)
 {
   //vuint32_t nCount=1;
@@ -771,9 +821,8 @@ void AVT6203A::AVT_CONFIG_check(void)
 
 //avt init
 
-void AVT6203A::avt_init(Stream* pDiagnosticOutput)
+void AVT6203A::avt_init()
 {
-  _pDiagnosticOutput = pDiagnosticOutput;
   avt_reset();
   delay(100);
   Reg0x0204Save = avt_rd_reg(0x0204);

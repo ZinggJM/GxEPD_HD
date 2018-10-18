@@ -17,6 +17,8 @@
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571&product_id=22833
 // or https://www.aliexpress.com/store/product/Epaper-demo-kit-for-6-800X600-epaper-display-GDE060BA/600281_32812255729.html
 
+#if defined(ARDUINO_ARCH_STM32) && (defined(STM32F407VE) || defined(STM32F407ZE) || defined(STM32F407ZG))
+
 #include "GxGDE060BA.h"
 
 #include "BitmapExamples.h"
@@ -391,4 +393,5 @@ void GxGDE060BA::fillScreenTest()
   }
 }
 
+#endif
 
