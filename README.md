@@ -45,7 +45,12 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 - CPU Speed(MHz): "72MHz (Normal)"
 - Upload method: "STLink"
 
-### Version 0.0.4
+### Version 0.0.5
+- added example GxEPD_HD_SerialFlash_Loader (runs on ESP8266, ESP32)
+- added example GxEPD_HD_SerialFlash_Example
+- these examples use a modified SerialFlash library, see example source
+- initial versions, GxEPD_HD_SerialFlash_Example shows b/w only
+#### Version 0.0.4
 - renamed GxGDE06BA to GxGDE060BA
 - added GxGDE043A2
 - added GxGDEW080T5

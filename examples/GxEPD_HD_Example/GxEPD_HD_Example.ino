@@ -1,8 +1,16 @@
 // GxEPD_HD_Example : example for HD e-Paper displays from Dalian Good Display Inc. (parallel interface).
 //
+// Display Library based on Demo Example available from Good Display
+//
+// Author: Jean-Marc Zingg
+//
+// Version: see library.properties
+//
+// Library: https://github.com/ZinggJM/GxEPD_HD
+//
 // To be used with "STM32F103VE" of "Generic STM32F103V series" of package "STM32 Boards (STM32Duino.com)" for Arduino.
-// install package with Boards Manager after adding to preferences in additional Boards Manager URLs:
-// https://raw.githubusercontent.com/stm32duino/BoardManagerFiles/master/STM32/package_stm_index.json
+// download this package as .zip file from https://github.com/rogerclarkmelbourne/Arduino_STM32
+// and install it as described in https://github.com/rogerclarkmelbourne/Arduino_STM32/wiki/Installation
 //
 // The e-paper display and demo board is available from:
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571_10574&product_id=57650
@@ -443,5 +451,3 @@ void showPartialUpdatePaged()
     delay(1000);
   }
 }
-
-
