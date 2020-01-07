@@ -87,9 +87,3 @@ void GxGDEW080T5::powerOff()
 {
   IO.powerOff();
 }
-
-void GxGDEW080T5::demo()
-{
-  IO.demo1024x768();
-}
-

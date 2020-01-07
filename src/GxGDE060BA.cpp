@@ -87,9 +87,3 @@ void GxGDE060BA::powerOff()
 {
   IO.powerOff();
 }
-
-void GxGDE060BA::demo()
-{
-  IO.demo800x600();
-}
-

@@ -146,12 +146,6 @@ class AVT6203A
     void avt_waveform_update(void);
     void AVT_CONFIG_check(void);
     void avt_init();
-    uint8_t SpiFlash_ReadWriteByte(uint8_t TxData);
-    void SpiFlash_EraseBlock32K(uint32_t addr);
-    void SpiFlash_PageProgram(uint32_t addr, uint8_t *data);
-    uint16_t SpiFlash_ReadID(void);
-    void SpiFlash_StatusWait(void);
-    void SpiFlash_ReadData(uint32_t addr, uint8_t *data);
     void Debug_str(const char *s);
     void Debug_hex(unsigned int dat);
     void Debug_dec(unsigned int dat);
@@ -174,4 +168,3 @@ class AVT6203A
 };
 
 #endif
-

@@ -42,21 +42,8 @@ class GxDESTM32T : public GxEPD_HD_IOCTRL
     void updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t width, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
     void writeFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value);
     void drawFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value);
-    void demo800x600();
-    void demo1024x768();
   private:
-    void epd_draw_pic_start(void);
-    void epd_draw_pic_buff(uint8_t* buff, uint16_t len);
-    void epd_draw_pic_end(void);
-    void epd_draw_pic_from_spiflash(uint32_t addr);
-
     void epd_draw_gray(uint8_t gray);
-    void epd_draw_gray_level_horizontal(uint8_t div);
-    void epd_draw_gray_level_vertical(uint8_t div);
-    void epd_draw_gray_part(uint8_t gray, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
-    void epd_draw_gray_part_lut(uint8_t gray, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
-    void epd_draw_pic_part_from_rom(uint8_t* ptr, uint8_t bpp, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
-    void avt_lut_demo(uint8_t gray);
     void Debug_str(const char *s);
   private:
     TPS65185 tps;
@@ -68,6 +55,7 @@ class GxDESTM32T : public GxEPD_HD_IOCTRL
     Stream* _pDiagnosticOutput;
     static const uint8_t bw2grey8[];
     static const uint16_t bw2grey16[];
+    friend class DESTM32T_DEMO;
 };
 
 #endif

@@ -87,9 +87,3 @@ void GxGDE043A2::powerOff()
 {
   IO.powerOff();
 }
-
-void GxGDE043A2::demo()
-{
-  IO.demo800x600();
-}
-

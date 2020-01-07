@@ -45,10 +45,8 @@ class GxGDE043A2 : public GxEPD_HD_EPD
     // screen refresh from controller memory, partial screen
     void refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partial_update_mode = false);
     void powerOff();
-    void demo();
   private:
     GxDESTM32T& IO;
 };
 
 #endif
-

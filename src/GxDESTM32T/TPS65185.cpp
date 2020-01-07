@@ -326,7 +326,7 @@ void TPS65185::tps_read_all_reg(void)
   I2C_Read_Frame(TPS65185_ADDR, TI_REG_TMST_VALUE, 16, buff);
 
   Debug_str("tps read reg start ...\r\n");
-  for (i = 0; i < 17; i++)
+  for (i = 0; i < 16; i++)
   {
     Debug_str("\r\nreg:");
     Debug_hex(i);
@@ -501,4 +501,3 @@ void TPS65185::Debug_dec(unsigned int dat)
 }
 
 #endif
-

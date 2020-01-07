@@ -71,9 +71,9 @@
 
 #define FLASH_PAGE_SIZE     2048
 
-#define FLASH_CS_PORT     GPIOA     //OUT - PP
-#define FLASH_CS_PIN      GPIO_Pin_4
-#define FLASH_CS_PP       PA4
+//#define FLASH_CS_PORT     GPIOA     //OUT - PP
+//#define FLASH_CS_PIN      GPIO_Pin_4
+//#define FLASH_CS_PP       PA4
 
 #define LED_03_PORT       GPIOA     //OUT - PP    H:ON
 #define LED_03_PIN        GPIO_Pin_8
@@ -206,4 +206,3 @@
 #define SYS_WAKEUP_L      (SYS_WAKEUP_PORT->BRR =  SYS_WAKEUP_PIN)
 
 #endif
-

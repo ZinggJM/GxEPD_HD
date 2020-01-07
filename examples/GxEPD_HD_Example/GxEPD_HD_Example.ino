@@ -30,12 +30,16 @@ GxGDE060BA base_display(io);
 
 // select the graphics display template class to use, only one
 //GxEPD_HD_BW<GxGDE043A2, GxGDE043A2::HEIGHT> display(base_display); // full height, one page, no RAM remaining
-GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page, no RAM remaining
+//GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page, no RAM remaining
 //GxEPD_HD_BW < GxGDE043A2, GxGDE043A2::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
-//GxEPD_HD_BW < GxGDE060BA, GxGDE060BA::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
+GxEPD_HD_BW < GxGDE060BA, GxGDE060BA::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
 //GxEPD_HD_BW < GxGDEW080T5, GxGDEW080T5::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~11k RAM remaining
 
+// uncomment to see bitmap examples
 //#include "bitmaps/BitmapExamples.h"
+
+// comment out to not use the demo part
+#include "GxDESTM32T/DESTM32T_DEMO.h"
 
 // FreeFonts from Adafruit_GFX
 #include <Fonts/FreeMonoBold9pt7b.h>
@@ -51,27 +55,6 @@ HardwareSerial& DiagnosticStream = Serial2; // pins PA2, PA3 for USB jumpers
 
 void setup()
 {
-  //  Serial.begin(115200);
-  //  delay(200);
-  //  Serial.println();
-  //  Serial.println("setup");
-  //  Serial.println("hello Serial");
-  //  delay(200);
-
-  //  Serial1.begin(115200);
-  //  delay(200);
-  //  Serial1.println();
-  //  Serial1.println("setup");
-  //  Serial1.println("hello Serial1");
-  //  delay(200);
-
-  //  Serial2.begin(115200);
-  //  delay(200);
-  //  Serial2.println();
-  //  Serial2.println("setup");
-  //  Serial2.println("hello Serial2");
-  //  delay(200);
-
   DiagnosticStream.begin(115200);
   delay(200);
   DiagnosticStream.println();
@@ -81,7 +64,10 @@ void setup()
   delay(200);
   display.init(&DiagnosticStream);
 #ifndef _GxBitmapExamples_H_
-  base_display.demo();
+#ifdef _DESTM32T_DEMO_H_
+  if (base_display.WIDTH == 800) DESTM32T_DEMO(io).demo800x600();
+  if (base_display.WIDTH == 1024) DESTM32T_DEMO(io).demo1024x768();
+#endif
 #endif
   helloWorld();
   delay(1000);
@@ -97,6 +83,7 @@ void setup()
   showFont("FreeMonoBold24pt7b", &FreeMonoBold24pt7b);
   showPartialUpdate();
   //showPartialUpdatePaged();
+  display.powerOff();
   DiagnosticStream.println("setup done");
 }
 
@@ -386,7 +373,7 @@ void showPartialUpdate()
     display.displayWindow(box_x, box_y, box_w, box_h);
   }
   display.setRotation(0);
-  //display.powerDown();
+  display.powerOff();
 }
 
 void showPartialUpdatePaged()
@@ -450,4 +437,5 @@ void showPartialUpdatePaged()
     while (display.nextPage());
     delay(1000);
   }
+  display.powerOff();
 }

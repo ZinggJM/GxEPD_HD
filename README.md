@@ -45,7 +45,16 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 - CPU Speed(MHz): "72MHz (Normal)"
 - Upload method: "STLink"
 
-### Version 0.0.5
+### Version 0.0.6
+- cleanup: moved demo part to class DESTM32T_DEMO
+- SPI usage: SPI (SPI1) is no longer used or initialized by the library itself
+- SPI usage: GxEPD_HD_SerialFlash_Example releases all SPI pins after every drawBitmapFromSerialFlash
+- SPI usage: GxEPD_HD_SerialFlash_Loader asks for confirmation before using SPI
+- SPI usage: GxEPD_HD_SerialFlash_Loader releases all SPI pins at the end
+- SPI usage: onboard SPI-flash (N_J16) can safely be connected in parallel to ESP32 or ESP8266
+- SPI usage: make sure only one processor uses SPI at any point in time, if connected in parallel
+- SPI usage: SPI1 may be used for interprocessor communication in a future version
+#### Version 0.0.5
 - added example GxEPD_HD_SerialFlash_Loader (runs on ESP8266, ESP32)
 - added example GxEPD_HD_SerialFlash_Example
 - these examples use a modified SerialFlash library, see example source

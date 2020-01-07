@@ -1,5 +1,4 @@
 // GxEPD_HD_SerialFlash_Loader : Display Library example for SPI e-paper panels from Dalian Good Display and boards from Waveshare.
-// Requires HW SPI and Adafruit_GFX. Caution: these e-papers require 3.3V supply AND data lines!
 //
 // Display Library based on Demo Example available from Good Display
 //
@@ -14,16 +13,18 @@
 // Good Display ePaper for Arduino : https://forum.arduino.cc/index.php?topic=436411.0
 //
 // this example uses the SerialFlash library from: https://github.com/PaulStoffregen/SerialFlash
-// with a modification for use with the STM32 package available here: https://github.com/ZinggJM/SerialFlash
+// with a modification for use with ESP32 or the STM32 package available here: https://github.com/ZinggJM/SerialFlash
 // download it as .zip file and install with Library Mananger method "Add .ZIP Library..."
 //
 // this example can run on ESP6266 or ESP32 using WiFi connection
 
 #include <SerialFlash.h>
+#include <SPI.h>
 
 // digital pin for flash chip CS pin:
 //const int FlashChipSelect = SS; // for standard slave select pin
-const int FlashChipSelect = 5; // use D1 on my Wemos D1 mini wired for e-papers
+//const int FlashChipSelect = 5; // use D1 on my Wemos D1 mini wired for e-papers
+const int FlashChipSelect = 17; // for standard slave select pin
 
 #if defined (ESP8266)
 #include <ESP8266WiFi.h>
@@ -92,10 +93,16 @@ void setup()
 
   // Print the IP address
   Serial.println(WiFi.localIP());
+  Serial.println();
 
-  if (!SerialFlash.begin(FlashChipSelect)) 
+  // comment out for standalone use
+  waitForStartConfirmation();
+
+  if (!SerialFlash.begin(FlashChipSelect))
   {
     Serial.println("Unable to access SPI Flash chip");
+    SPI.end(); // release SPI pins
+    pinMode(FlashChipSelect, INPUT); // CS also!
     return;
   }
   Serial.println("SerialFlash started");
@@ -105,21 +112,38 @@ void setup()
   downloadBitmaps_other();
   downloadBitmaps_test();
   listFiles();
+  SPI.end(); // release SPI pins
+  pinMode(FlashChipSelect, INPUT); // CS also!
+  Serial.println("GxEPD2_SerialFlash_Loader done");
 }
 
 void loop()
 {
 }
 
+void waitForStartConfirmation()
+{
+  bool ok = false;
+  while (!ok)
+  {
+    Serial.print("type OK to allow start (SPI access) : ");
+    while (Serial.available() < 2) yield();
+    String response = Serial.readString();
+    Serial.println(response);
+    ok = response.indexOf("OK") >= 0;
+  }
+}
+
 void listFiles()
 {
+  Serial.println("All Files on SPI Flash chip:");
   SerialFlash.opendir();
-  while (1) 
+  while (1)
   {
     char filename[64];
     uint32_t filesize;
 
-    if (SerialFlash.readdir(filename, sizeof(filename), filesize)) 
+    if (SerialFlash.readdir(filename, sizeof(filename), filesize))
     {
       Serial.print("  ");
       Serial.print(filename);
@@ -128,8 +152,8 @@ void listFiles()
       Serial.print(filesize);
       Serial.print(" bytes");
       Serial.println();
-    } 
-    else 
+    }
+    else
     {
       Serial.println("no more files...");
       break; // no more files
@@ -137,9 +161,9 @@ void listFiles()
   }
 }
 
-void spaces(int num) 
+void spaces(int num)
 {
-  for (int i=0; i < num; i++) 
+  for (int i = 0; i < num; i++)
   {
     Serial.print(" ");
   }
@@ -388,7 +412,7 @@ void eraseSerialFlash()
   unsigned long size = SerialFlash.capacity(id);
   unsigned long startMillis = millis();
 
-  if (size > 0) 
+  if (size > 0)
   {
     Serial.print("Flash Memory has ");
     Serial.print(size);
@@ -403,19 +427,20 @@ void eraseSerialFlash()
     SerialFlash.eraseAll();
     unsigned long dotMillis = millis();
     unsigned char dotcount = 0;
-    while (SerialFlash.ready() == false) 
+    while (SerialFlash.ready() == false)
     {
-      if (millis() - dotMillis > 1000) 
+      if (millis() - dotMillis > 1000)
       {
         dotMillis = dotMillis + 1000;
         Serial.print(".");
         dotcount = dotcount + 1;
-        if (dotcount >= 60) 
+        if (dotcount >= 60)
         {
           Serial.println();
           dotcount = 0;
         }
       }
+      yield();
     }
     if (dotcount > 0) Serial.println();
     Serial.println("Erase completed");
@@ -426,7 +451,7 @@ void eraseSerialFlash()
   }
 }
 
-float eraseBytesPerSecond(const unsigned char *id) 
+float eraseBytesPerSecond(const unsigned char *id)
 {
   if (id[0] == 0x20) return 152000.0; // Micron
   if (id[0] == 0x01) return 500000.0; // Spansion

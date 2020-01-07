@@ -16,7 +16,6 @@
 #include "DESTM32L1_board.h"
 #include "waveform_table.h"
 #include "AVT_CONFIG.h"
-#include <SPI.h>
 
 #define AVT_SPI_FLASH_INIT
 
@@ -886,102 +885,6 @@ void AVT6203A::avt_init()
   avt_info_str("\r\n");
 }
 
-uint8_t AVT6203A::SpiFlash_ReadWriteByte(uint8_t TxData)
-{
-  return SPI.transfer(TxData);
-}
-
-uint16_t AVT6203A::SpiFlash_ReadID(void)
-{
-  uint16_t Temp = 0;
-  FLASH_CS_L;
-  SpiFlash_ReadWriteByte(0x90);//���Ͷ�ȡID����
-  SpiFlash_ReadWriteByte(0x00);
-  SpiFlash_ReadWriteByte(0x00);
-  SpiFlash_ReadWriteByte(0x00);
-  Temp |= SpiFlash_ReadWriteByte(0xFF) << 8;
-  Temp |= SpiFlash_ReadWriteByte(0xFF);
-  FLASH_CS_H;
-  return Temp;
-}
-
-void AVT6203A::SpiFlash_StatusWait(void)
-{
-  uint8_t ret = 0;
-  while (1)
-  {
-    FLASH_CS_L;
-    SpiFlash_ReadWriteByte(0x05);//���Ͷ�ȡID����
-    ret = SpiFlash_ReadWriteByte(0xFF);
-    FLASH_CS_H;
-    if ((ret & 0x1) == 0)
-      break;
-    Debug_str("w");
-  }
-}
-
-void AVT6203A::SpiFlash_EraseBlock32K(uint32_t addr)
-{
-  uint8_t addr3, addr2, addr1;
-  addr1 = addr;
-  addr2 = (addr >> 8);
-  addr3 = (addr >> 16);
-  FLASH_CS_L;
-  SpiFlash_ReadWriteByte(0x06);//write enable
-  FLASH_CS_H;
-  FLASH_CS_L;
-  SpiFlash_ReadWriteByte(0x52);
-  SpiFlash_ReadWriteByte(addr3);
-  SpiFlash_ReadWriteByte(addr2);
-  SpiFlash_ReadWriteByte(addr1);
-  FLASH_CS_H;
-  SpiFlash_StatusWait();
-  FLASH_CS_L;
-  SpiFlash_ReadWriteByte(0x04);//write disable
-  FLASH_CS_H;
-}
-
-void AVT6203A::SpiFlash_PageProgram(uint32_t addr, uint8_t *data)
-{
-  uint8_t addr3, addr2, addr1;
-  uint16_t i;
-  addr1 = addr;
-  addr2 = (addr >> 8);
-  addr3 = (addr >> 16);
-  FLASH_CS_L;
-  SpiFlash_ReadWriteByte(0x06);//write enable
-  FLASH_CS_H;
-  FLASH_CS_L;
-  SpiFlash_ReadWriteByte(0x02);
-  SpiFlash_ReadWriteByte(addr3);
-  SpiFlash_ReadWriteByte(addr2);
-  SpiFlash_ReadWriteByte(addr1);
-  for (i = 0; i < 256; i++)
-  {
-    SpiFlash_ReadWriteByte(data[i]);
-  }
-  FLASH_CS_H;
-  SpiFlash_StatusWait();
-  FLASH_CS_L;
-  SpiFlash_ReadWriteByte(0x04);//write disable
-  FLASH_CS_H;
-}
-
-
-void AVT6203A::SpiFlash_ReadData(uint32_t addr, uint8_t *data)
-{
-  uint8_t addr3, addr2, addr1;
-  addr1 = addr;
-  addr2 = (addr >> 8);
-  addr3 = (addr >> 16);
-  FLASH_CS_L;
-  SpiFlash_ReadWriteByte(0x03);
-  SpiFlash_ReadWriteByte(addr3);
-  SpiFlash_ReadWriteByte(addr2);
-  SpiFlash_ReadWriteByte(addr1);
-  FLASH_CS_H;
-}
-
 void AVT6203A::Debug_str(const char *s)
 {
   if (_pDiagnosticOutput) _pDiagnosticOutput->print(s);
@@ -1043,4 +946,3 @@ void AVT6203A::Debug_dec(unsigned int dat)
 }
 
 #endif
-
