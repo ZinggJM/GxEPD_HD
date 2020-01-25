@@ -110,6 +110,12 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
       epd_hd.drawImage(_buffer, sizeof(_buffer), 1, 0, 0, WIDTH, HEIGHT);
     }
 
+    // transfer buffer content to controller buffer, useful for full screen buffer
+    void transfer()
+    {
+      epd_hd.writeImage(_buffer, sizeof(_buffer), 1, 0, 0, WIDTH, HEIGHT);
+    }
+
     // display part of buffer content to screen, useful for full screen buffer
     void displayWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool using_rotation = true)
     {
@@ -147,7 +153,7 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
       _second_phase = false;
     }
 
-    bool nextPage()
+    bool nextPage(bool norefresh = false)
     {
       if (1 == _pages)
       {
@@ -155,12 +161,12 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
         {
           uint32_t offset = _reverse ? (HEIGHT - _pw_h) * _pw_w / 8 : 0;
           epd_hd.writeImage(_buffer + offset, sizeof(_buffer), 1, _pw_x, _pw_y, _pw_w, _pw_h);
-          epd_hd.refresh(_pw_x, _pw_y, _pw_w, _pw_h, true);
+          if (!norefresh) epd_hd.refresh(_pw_x, _pw_y, _pw_w, _pw_h, true);
         }
         else
         {
           epd_hd.writeImage(_buffer, sizeof(_buffer), 1, 0, 0, WIDTH, HEIGHT);
-          epd_hd.refresh(false);
+          if (!norefresh) epd_hd.refresh(false);
         }
         return false;
       }
@@ -179,7 +185,7 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
         if (_current_page == _pages)
         {
           _current_page = 0;
-          epd_hd.refresh(_pw_x, _pw_y, _pw_w, _pw_h, true);
+          if (!norefresh) epd_hd.refresh(_pw_x, _pw_y, _pw_w, _pw_h, true);
           return false;
         }
         fillScreen(GxEPD_WHITE);
@@ -192,7 +198,7 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
         if (_current_page == _pages)
         {
           _current_page = 0;
-          epd_hd.refresh(false);
+          if (!norefresh) epd_hd.refresh(false);
           //epd_hd.powerOff();
           return false;
         }
@@ -349,4 +355,3 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
 };
 
 #endif
-

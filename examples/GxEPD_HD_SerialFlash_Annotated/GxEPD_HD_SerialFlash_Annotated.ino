@@ -1,4 +1,4 @@
-// GxEPD_HD_SerialFlash_Example : example for HD e-Paper displays from Dalian Good Display Inc. (parallel interface).
+// GxEPD_HD_SerialFlash_Annotated : example for HD e-Paper displays from Dalian Good Display Inc. (parallel interface).
 //
 // Display Library based on Demo Example available from Good Display
 //
@@ -28,6 +28,12 @@
 
 #include <SerialFlash.h>
 #include <SPI.h>
+
+// FreeFonts from Adafruit_GFX
+#include <Fonts/FreeMonoBold9pt7b.h>
+#include <Fonts/FreeMonoBold12pt7b.h>
+#include <Fonts/FreeMonoBold18pt7b.h>
+#include <Fonts/FreeMonoBold24pt7b.h>
 
 // digital pin for flash chip CS pin:
 const int FlashChipSelect = SS; // for onboard W25Q16BVSIG
@@ -67,15 +73,11 @@ void setup()
 
   display.init();
 
-  listFiles();
+  //listFiles();
 
-  //drawBitmaps_200x200();
-  //drawBitmaps_other();
-  //drawBitmaps_test();
-
-  drawBitmaps_200x200_16G();
-  drawBitmaps_other_16G();
-  drawBitmaps_test_16G();
+  showPage1();
+  delay(2000);
+  showPage2();
 
   display.powerOff();
 
@@ -84,6 +86,87 @@ void setup()
 
 void loop(void)
 {
+}
+
+void showPage1()
+{
+  // BMP bitmaps are drawn at physical position in physical orientation of the screen
+  int16_t x1 = 40;
+  int16_t y1 = 40;
+  int16_t x2 = display.epd_hd.WIDTH / 2;
+  int16_t y2 = display.epd_hd.HEIGHT / 3;
+  display.setFont(&FreeMonoBold12pt7b);
+  display.setTextColor(GxEPD_BLACK);
+  display.setFullWindow();
+  display.firstPage();
+  do
+  {
+    display.fillScreen(GxEPD_WHITE);
+    placeText(x1, y1 + 320 + 20, "betty_1.bmp");
+    placeText(x2, y2 + 252 + 20, "betty_4.bmp");
+  }
+  while (display.nextPage(true)); // norefresh
+  drawBitmapFromSerialFlash_16G("betty_1.bmp", x1, y1, false, true);
+  drawBitmapFromSerialFlash_16G("betty_4.bmp", x2, y2, false, true);
+  display.refresh();
+}
+
+void showPage2()
+{
+  // BMP bitmaps are drawn at physical position in physical orientation of the screen
+  int16_t x1 = display.epd_hd.WIDTH / 2 - 40;
+  int16_t y1 = (display.epd_hd.HEIGHT - 240) / 2;
+  int16_t x2 = display.epd_hd.WIDTH / 2;
+  int16_t y2 = display.epd_hd.HEIGHT / 3;
+  display.setFont(&FreeMonoBold12pt7b);
+  display.setTextColor(GxEPD_BLACK);
+  display.setFullWindow();
+  display.firstPage();
+  do
+  {
+    display.fillScreen(GxEPD_WHITE);
+    display.setRotation(0);
+    display.setCursor(x1, y1 + 240 + 20);
+    display.println("tiger.bmp");
+    display.setRotation(3);
+    display.setCursor(0, 0);
+    display.setTextSize(2);
+    display.println();
+    display.println("Groop");
+    display.println("I implore thee,");
+    display.setTextSize(1);
+    display.println("my foonting turlingdromes.");
+    display.println("And hooptiously drangle me");
+    display.println("with crinkly bindlewurdles,");
+    display.println("Or I will rend thee");
+    display.println("in the gobberwarts");
+    display.println("with my blurglecruncheon,");
+    display.println("see if I don't!");
+    //display.setCursor(y1, x1 + 320 + 20);
+    //display.println();
+    placeCenteredText(x1 + 320 + 40, "the quick brown fox");
+    placeCenteredText(x1 + 320 + 60, "jumps over the lazy dog");
+  }
+  while (display.nextPage(true)); // norefresh
+  drawBitmapFromSerialFlash_16G("tiger.bmp", x1, y1, false, true);
+  display.refresh();
+}
+
+void placeText(int16_t x, int16_t y, const char* text)
+{
+  display.setCursor(x, y);
+  display.print(text);
+}
+
+void placeCenteredText(int16_t y, const char* text)
+{
+  int16_t tbx, tby; uint16_t tbw, tbh;
+  display.getTextBounds(text, 0, 0, &tbx, &tby, &tbw, &tbh);
+  // center bounding box by transposition of origin:
+  uint16_t x = ((display.width() - tbw) / 2) - tbx;
+  //uint16_t y = ((display.height() - tbh) / 2) - tby;
+  display.setCursor(x, y);
+  display.print(text);
 }
 
 void listFiles()
@@ -128,146 +211,6 @@ void spaces(int num)
   {
     DiagnosticStream.print(" ");
   }
-}
-
-void drawBitmaps_200x200()
-{
-  int16_t x = (display.width() - 200) / 2;
-  int16_t y = (display.height() - 200) / 2;
-  drawBitmapFromSerialFlash("logo200x200.bmp", x, y);
-  delay(2000);
-  drawBitmapFromSerialFlash("first200x200.bmp", x, y);
-  delay(2000);
-  drawBitmapFromSerialFlash("second200x200.bmp", x, y);
-  delay(2000);
-  drawBitmapFromSerialFlash("third200x200.bmp", x, y);
-  delay(2000);
-  drawBitmapFromSerialFlash("fourth200x200.bmp", x, y);
-  delay(2000);
-  drawBitmapFromSerialFlash("fifth200x200.bmp", x, y);
-  delay(2000);
-  drawBitmapFromSerialFlash("sixth200x200.bmp", x, y);
-  delay(2000);
-  drawBitmapFromSerialFlash("seventh200x200.bmp", x, y);
-  delay(2000);
-  drawBitmapFromSerialFlash("eighth200x200.bmp", x, y);
-  delay(2000);
-}
-
-void drawBitmaps_other()
-{
-  int16_t w2 = display.width() / 2;
-  int16_t h2 = display.height() / 2;
-  drawBitmapFromSerialFlash("chanceflurries.bmp", w2 - 50, h2 - 50, false);
-  delay(2000);
-  drawBitmapFromSerialFlash("betty_1.bmp", w2 - 100, h2 - 160);
-  delay(2000);
-  drawBitmapFromSerialFlash("betty_4.bmp", w2 - 102, h2 - 126);
-  delay(2000);
-  drawBitmapFromSerialFlash("marilyn_240x240x8.bmp", w2 - 120, h2 - 120);
-  delay(2000);
-  drawBitmapFromSerialFlash("miniwoof.bmp", w2 - 60, h2 - 80);
-  delay(2000);
-  drawBitmapFromSerialFlash("tiger.bmp", w2 - 160, h2 - 120);
-  delay(2000);
-  drawBitmapFromSerialFlash("tiger_178x160x4.bmp", w2 - 89, h2 - 80);
-  delay(2000);
-  drawBitmapFromSerialFlash("tiger_240x317x4.bmp", w2 - 120, h2 - 160);
-  delay(2000);
-  drawBitmapFromSerialFlash("tiger_320x200x24.bmp", w2 - 160, h2 - 100);
-  delay(2000);
-  drawBitmapFromSerialFlash("woof.bmp", w2 - 120, h2 - 160);
-  delay(2000);
-}
-
-void drawBitmaps_test()
-{
-  drawBitmapFromSerialFlash("output5.bmp", 0, 0);
-  delay(2000);
-  drawBitmapFromSerialFlash("output6.bmp", 0, 0);
-  delay(2000);
-  drawBitmapFromSerialFlash("tractor_1.bmp", 0, 0);
-  delay(2000);
-  drawBitmapFromSerialFlash("tractor_4.bmp", 0, 0);
-  delay(2000);
-  drawBitmapFromSerialFlash("tractor_8.bmp", 0, 0);
-  delay(2000);
-  drawBitmapFromSerialFlash("tractor_11.bmp", 0, 0);
-  delay(2000);
-  drawBitmapFromSerialFlash("tractor_44.bmp", 0, 0);
-  delay(2000);
-  drawBitmapFromSerialFlash("tractor_88.bmp", 0, 0);
-  delay(2000);
-}
-
-void drawBitmaps_200x200_16G()
-{
-  int16_t x = (display.width() - 200) / 2;
-  int16_t y = (display.height() - 200) / 2;
-  drawBitmapFromSerialFlash_16G("logo200x200.bmp", x, y);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("first200x200.bmp", x, y);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("second200x200.bmp", x, y);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("third200x200.bmp", x, y);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("fourth200x200.bmp", x, y);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("fifth200x200.bmp", x, y);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("sixth200x200.bmp", x, y);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("seventh200x200.bmp", x, y);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("eighth200x200.bmp", x, y);
-  delay(2000);
-}
-
-void drawBitmaps_other_16G()
-{
-  int16_t w2 = display.width() / 2;
-  int16_t h2 = display.height() / 2;
-  drawBitmapFromSerialFlash_16G("chanceflurries.bmp", w2 - 50, h2 - 50, false);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("betty_1.bmp", w2 - 100, h2 - 160);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("betty_4.bmp", w2 - 102, h2 - 126);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("marilyn_240x240x8.bmp", w2 - 120, h2 - 120);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("miniwoof.bmp", w2 - 60, h2 - 80);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("tiger.bmp", w2 - 160, h2 - 120);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("tiger_178x160x4.bmp", w2 - 89, h2 - 80);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("tiger_240x317x4.bmp", w2 - 120, h2 - 160);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("tiger_320x200x24.bmp", w2 - 160, h2 - 100);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("woof.bmp", w2 - 120, h2 - 160);
-  delay(2000);
-}
-
-void drawBitmaps_test_16G()
-{
-  drawBitmapFromSerialFlash_16G("output5.bmp", 0, 0);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("output6.bmp", 0, 0);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("tractor_1.bmp", 0, 0);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("tractor_4.bmp", 0, 0);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("tractor_8.bmp", 0, 0);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("tractor_11.bmp", 0, 0);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("tractor_44.bmp", 0, 0);
-  delay(2000);
-  drawBitmapFromSerialFlash_16G("tractor_88.bmp", 0, 0);
-  delay(2000);
 }
 
 static const uint16_t input_buffer_pixels = 800; // may affect performance

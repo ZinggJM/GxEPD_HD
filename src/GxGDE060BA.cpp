@@ -12,7 +12,8 @@
 
 #include "GxGDE060BA.h"
 
-GxGDE060BA::GxGDE060BA(GxDESTM32T& io) :
+//GxGDE060BA::GxGDE060BA(GxDESTM32T& io) :
+GxGDE060BA::GxGDE060BA(GxEPD_HD_IOCTRL& io) :
   GxEPD_HD_EPD(WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate), IO(io)
 {
 }

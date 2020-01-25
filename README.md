@@ -45,7 +45,13 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 - CPU Speed(MHz): "72MHz (Normal)"
 - Upload method: "STLink"
 
-### Version 0.0.6
+### Version 0.0.7
+- added grey level support to GxEPD_HD_SerialFlash_Example
+- added delayed refresh option to GxEPD_HD_SerialFlash_Example functions
+- added transfer() method: transfer graphics buffer to controller buffer without refresh
+- added norefresh parameter to nextPage() method, default is false
+- added GxEPD_HD_SerialFlash_Annotated example, shows use of delayed refresh
+#### Version 0.0.6
 - cleanup: moved demo part to class DESTM32T_DEMO
 - SPI usage: SPI (SPI1) is no longer used or initialized by the library itself
 - SPI usage: GxEPD_HD_SerialFlash_Example releases all SPI pins after every drawBitmapFromSerialFlash

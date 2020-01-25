@@ -28,7 +28,7 @@ class GxEPD_HD_GFX : public Adafruit_GFX
     virtual void setFullWindow() = 0;
     virtual void setPartialWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h) = 0;
     virtual void firstPage() = 0;
-    virtual bool nextPage() = 0;
+    virtual bool nextPage(bool norefresh = false) = 0;
     virtual void drawPaged(void (*drawCallback)(const void*), const void* pv) = 0;
     virtual void drawInvertedBitmap(int16_t x, int16_t y, const uint8_t bitmap[], int16_t w, int16_t h, uint16_t color) = 0;
     //  Support for Bitmaps (Sprites) to Controller Buffer and to Screen
@@ -49,4 +49,3 @@ class GxEPD_HD_GFX : public Adafruit_GFX
 };
 
 #endif
-

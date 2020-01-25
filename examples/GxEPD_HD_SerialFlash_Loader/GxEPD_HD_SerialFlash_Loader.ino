@@ -22,9 +22,9 @@
 #include <SPI.h>
 
 // digital pin for flash chip CS pin:
-//const int FlashChipSelect = SS; // for standard slave select pin
+const int FlashChipSelect = SS; // for standard slave select pin
 //const int FlashChipSelect = 5; // use D1 on my Wemos D1 mini wired for e-papers
-const int FlashChipSelect = 17; // for standard slave select pin
+//const int FlashChipSelect = 17; // as used with my ESP32 breadboard
 
 #if defined (ESP8266)
 #include <ESP8266WiFi.h>
