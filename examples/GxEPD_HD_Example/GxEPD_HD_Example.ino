@@ -22,6 +22,9 @@
 
 // select the display io class to use, only one
 GxDESTM32T io;
+// next is for my DESP32T (proto board) for TCon-11 parallel interface
+//#include <GxDESP32T/GxDESP32T.h>
+//GxDESP32T io;
 
 // select the base display class to use, only one
 //GxGDE043A2 base_display(io);
@@ -36,10 +39,10 @@ GxEPD_HD_BW < GxGDE060BA, GxGDE060BA::HEIGHT / 2 > display(base_display); // hal
 //GxEPD_HD_BW < GxGDEW080T5, GxGDEW080T5::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~11k RAM remaining
 
 // uncomment to see bitmap examples
-//#include "bitmaps/BitmapExamples.h"
+#include "bitmaps/BitmapExamples.h"
 
 // comment out to not use the demo part
-#include "GxDESTM32T/DESTM32T_DEMO.h"
+//#include "GxDESTM32T/DESTM32T_DEMO.h"
 
 // FreeFonts from Adafruit_GFX
 #include <Fonts/FreeMonoBold9pt7b.h>
@@ -52,6 +55,7 @@ GxEPD_HD_BW < GxGDE060BA, GxGDE060BA::HEIGHT / 2 > display(base_display); // hal
 HardwareSerial& DiagnosticStream = Serial2; // pins PA2, PA3 for USB jumpers
 //HardwareSerial& DiagnosticStream = Serial3; // pins PB10, PB11
 //USBSerial& DiagnosticStream = Serial; // pins PA11, PA12 USB direct?
+//HardwareSerial& DiagnosticStream = Serial; // ESP32
 
 void setup()
 {

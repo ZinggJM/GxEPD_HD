@@ -26,7 +26,7 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
     static const uint16_t DEPTH = 1; // 1 bit per pixel, black / white
     static const uint16_t GREYLEVELS = 2;
     GxEPD_HD_Type epd_hd;
-    GxEPD_HD_BW(GxEPD_HD_Type epd_hd_instance) : epd_hd(epd_hd_instance), GxEPD_HD_GFX(epd_hd, GxEPD_HD_Type::WIDTH, GxEPD_HD_Type::HEIGHT)
+    GxEPD_HD_BW(GxEPD_HD_Type epd_hd_instance) : GxEPD_HD_GFX(epd_hd, GxEPD_HD_Type::WIDTH, GxEPD_HD_Type::HEIGHT), epd_hd(epd_hd_instance)
     {
       _page_height = page_height;
       _pages = (HEIGHT / _page_height) + ((HEIGHT % _page_height) > 0);

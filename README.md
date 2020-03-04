@@ -45,7 +45,12 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 - CPU Speed(MHz): "72MHz (Normal)"
 - Upload method: "STLink"
 
-### Version 0.0.7
+### Version 0.0.8
+- added GxDESP32T driver class for use with ESP32 with my ESP32-Tcon-11 proto board
+- the proto board uses a MCP23S17 breakout for the AVT6203A 16bit interface
+- the wiring used is documented in the DESP32T_wiring.h header file
+- the GxDESP32T driver class is in experimental state
+#### Version 0.0.7
 - added grey level support to GxEPD_HD_SerialFlash_Example
 - added delayed refresh option to GxEPD_HD_SerialFlash_Example functions
 - added transfer() method: transfer graphics buffer to controller buffer without refresh

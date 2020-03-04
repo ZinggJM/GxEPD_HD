@@ -158,7 +158,7 @@ void drawBitmaps_other()
 {
   int16_t w2 = display.width() / 2;
   int16_t h2 = display.height() / 2;
-  drawBitmapFromSerialFlash("chanceflurries.bmp", w2 - 50, h2 - 50, false);
+  drawBitmapFromSerialFlash("chanceflurries.bmp", w2 - 50, h2 - 50);
   delay(2000);
   drawBitmapFromSerialFlash("betty_1.bmp", w2 - 100, h2 - 160);
   delay(2000);
@@ -228,7 +228,7 @@ void drawBitmaps_other_16G()
 {
   int16_t w2 = display.width() / 2;
   int16_t h2 = display.height() / 2;
-  drawBitmapFromSerialFlash_16G("chanceflurries.bmp", w2 - 50, h2 - 50, false);
+  drawBitmapFromSerialFlash_16G("chanceflurries.bmp", w2 - 50, h2 - 50);
   delay(2000);
   drawBitmapFromSerialFlash_16G("betty_1.bmp", w2 - 100, h2 - 160);
   delay(2000);
