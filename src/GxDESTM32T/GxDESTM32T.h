@@ -58,6 +58,7 @@ class GxDESTM32T : public GxEPD_HD_IOCTRL
     uint16_t _width;
     uint16_t _height;
     uint16_t _vcom;
+    bool _power_is_on;
     Stream* _pDiagnosticOutput;
     static const uint8_t bw2grey8[];
     static const uint16_t bw2grey16[];

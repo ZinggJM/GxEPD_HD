@@ -10,7 +10,7 @@
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571_10574&product_id=57650
 // or https://www.aliexpress.com/store/product/6-inch-HD-Interface-High-resolution-electronic-paper-display-e-ink-epaper-with-TCON-Demo-Kit/600281_32838449413.html
 
-#if defined(ARDUINO_ARCH_STM32F1)
+#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
 
 #include "GxDESTM32T.h"
 #include "DESTM32L1_board.h"
@@ -52,6 +52,7 @@ GxDESTM32T::GxDESTM32T() : avt(tps), _pDiagnosticOutput(0)
   _width = 800;
   _height = 600;
   _vcom = 2000;
+  _power_is_on = false;
 }
 
 void GxDESTM32T::init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput)
@@ -124,6 +125,7 @@ void GxDESTM32T::init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput)
   delay(1000);
   tps.tps_init(_vcom, pDiagnosticOutput);
   tps.tps_sleep_to_standby();
+  _power_is_on = true;
   avt.AVT_CONFIG_check();      //���AVT�����������Ƿ���ȷ
   //if(pDiagnosticOutput) pDiagnosticOutput->println("AVT_CONFIG_check() done");
   delay(500);
@@ -529,6 +531,8 @@ void GxDESTM32T::refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partia
 {
   uint8_t wf_mode = partial_update_mode ? EPD_MODE_DU : EPD_MODE_GC16;
   avt.avt_upd_full_area((wf_mode << 8), x, y, w, h);
+  if (!_power_is_on) tps.tps_sleep_to_standby();
+  _power_is_on = true;
   tps.tps_vcom_enable();
   avt.avt_wait_dspe_trg();
   avt.avt_wait_dspe_frend();
@@ -541,6 +545,7 @@ void GxDESTM32T::powerOff()
   tps.tps_vcom_disable();
   avt.avt_slp();
   tps.tps_standby_to_sleep();
+  _power_is_on = false;
 }
 
 void GxDESTM32T::updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t width, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
@@ -563,6 +568,8 @@ void GxDESTM32T::updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t wid
   avt.avt_ld_img_end();
   //avt.avt_upd_full_area((avt.wf_mode << 8), x, y, w, h);
   avt.avt_upd_full_area((EPD_MODE_DU << 8), x, y, w, h);
+  if (!_power_is_on) tps.tps_sleep_to_standby();
+  _power_is_on = true;
   tps.tps_vcom_enable();
   avt.avt_wait_dspe_trg();
   avt.avt_wait_dspe_frend();
