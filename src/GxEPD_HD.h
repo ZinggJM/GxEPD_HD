@@ -78,7 +78,9 @@ class GxEPD_HD : public Adafruit_GFX
     };
     virtual void eraseDisplay(bool using_partial_update = false) {};
     // partial update of rectangle from buffer to screen, does not power off
-    virtual void updateWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool using_rotation = true) {};
+    virtual void updateWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool using_rotation = true) = 0;
+    virtual void powerOff() = 0; // turns off generation of panel driving voltages
+    virtual void hibernate() = 0; // turns powerOff() and sets controller to deep sleep for minimum power use
   protected:
     void drawBitmapBM(const uint8_t *bitmap, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color, int16_t m);
     static inline uint16_t gx_uint16_min(uint16_t a, uint16_t b) {return (a < b ? a : b);};
@@ -86,4 +88,3 @@ class GxEPD_HD : public Adafruit_GFX
 };
 
 #endif
-

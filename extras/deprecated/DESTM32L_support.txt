@@ -1,0 +1,6 @@
+The DESTM32L board is no longer available, and support for DESTM32L in this library is in conflict with DESTM32-T.
+
+To compile for DESTM32L you would need to copy extras/deprecated/src/GxDESTM32L to src/GxDESTM32L.
+And remove conflicting sources from src.
+
+The example is in extras/deprecated/examples/GxEPD_HD_DESTM32L_Example.

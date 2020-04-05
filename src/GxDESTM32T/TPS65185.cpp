@@ -1,4 +1,4 @@
-// Class TPS65185 : display IO component class for GDE06BA on DESTM32-T parallel interface e-paper display from Dalian Good Display Inc.
+// Class TPS65185 : display IO component class for GDE060BA on DESTM32-T parallel interface e-paper display from Dalian Good Display Inc.
 //
 // Created by Jean-Marc Zingg based on demo code from Good Display for DESTM32-T board with DESTM32-Tcon-11.
 //
@@ -10,7 +10,7 @@
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571_10574&product_id=57650
 // or https://www.aliexpress.com/store/product/6-inch-HD-Interface-High-resolution-electronic-paper-display-e-ink-epaper-with-TCON-Demo-Kit/600281_32838449413.html
 
-#if defined(ARDUINO_ARCH_STM32F1)
+#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
 
 #include "TPS65185.h"
 #include "DESTM32L1_board.h"

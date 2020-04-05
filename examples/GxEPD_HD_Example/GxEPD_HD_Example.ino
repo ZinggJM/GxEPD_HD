@@ -21,10 +21,16 @@
 #include <GxEPD_HD_BW.h>
 
 // select the display io class to use, only one
+#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
 GxDESTM32T io;
+#else
 // next is for my DESP32T (proto board) for TCon-11 parallel interface
 //#include <GxDESP32T/GxDESP32T.h>
 //GxDESP32T io;
+// next is for my DESP32T_BP (proto board) for TCon-11 parallel interface
+#include <GxDESP32T_BP/GxDESP32T_BP.h>
+GxDESP32T_BP io;
+#endif
 
 // select the base display class to use, only one
 //GxGDE043A2 base_display(io);
@@ -32,11 +38,14 @@ GxGDE060BA base_display(io);
 //GxGDEW080T5 base_display(io);
 
 // select the graphics display template class to use, only one
-//GxEPD_HD_BW<GxGDE043A2, GxGDE043A2::HEIGHT> display(base_display); // full height, one page, no RAM remaining
-//GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page, no RAM remaining
+#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
 //GxEPD_HD_BW < GxGDE043A2, GxGDE043A2::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
 GxEPD_HD_BW < GxGDE060BA, GxGDE060BA::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
 //GxEPD_HD_BW < GxGDEW080T5, GxGDEW080T5::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~11k RAM remaining
+#else
+//GxEPD_HD_BW<GxGDE043A2, GxGDE043A2::HEIGHT> display(base_display); // full height, one page
+GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page
+#endif
 
 // uncomment to see bitmap examples
 #include "bitmaps/BitmapExamples.h"
@@ -50,12 +59,15 @@ GxEPD_HD_BW < GxGDE060BA, GxGDE060BA::HEIGHT / 2 > display(base_display); // hal
 #include <Fonts/FreeMonoBold18pt7b.h>
 #include <Fonts/FreeMonoBold24pt7b.h>
 
+#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
 // select diagnostic output stream, only one
 //HardwareSerial& DiagnosticStream = Serial1; // pins PA9, PA10
 HardwareSerial& DiagnosticStream = Serial2; // pins PA2, PA3 for USB jumpers
 //HardwareSerial& DiagnosticStream = Serial3; // pins PB10, PB11
 //USBSerial& DiagnosticStream = Serial; // pins PA11, PA12 USB direct?
-//HardwareSerial& DiagnosticStream = Serial; // ESP32
+#else
+HardwareSerial& DiagnosticStream = Serial; // ESP32
+#endif
 
 void setup()
 {
@@ -85,9 +97,11 @@ void setup()
   delay(1000);
   showBitmapExample();
   showFont("FreeMonoBold24pt7b", &FreeMonoBold24pt7b);
+  showFont("FreeMonoBold12pt7b", &FreeMonoBold12pt7b);
   showPartialUpdate();
   //showPartialUpdatePaged();
-  display.powerOff();
+  //display.powerOff();
+  deepSleepTest();
   DiagnosticStream.println("setup done");
 }
 
@@ -142,11 +156,11 @@ void helloFullScreenPartialMode()
     y = display.height() * 3 / 4;
     if (display.width() <= 200) x = 0;
     display.setCursor(x, y);
-    if (display.epd2.hasFastPartialUpdate)
+    if (display.epd_hd.hasFastPartialUpdate)
     {
       display.println("fast partial mode");
     }
-    else if (display.epd2.hasPartialUpdate)
+    else if (display.epd_hd.hasPartialUpdate)
     {
       display.println("slow partial mode");
     }
@@ -164,7 +178,7 @@ void helloArduino()
   //DiagnosticStream.println("helloArduino");
   display.setRotation(1);
   display.setFont(&FreeMonoBold9pt7b);
-  display.setTextColor(display.epd2.hasColor ? GxEPD_RED : GxEPD_BLACK);
+  display.setTextColor(display.epd_hd.hasColor ? GxEPD_RED : GxEPD_BLACK);
   uint16_t x = (display.width() - 160) / 2;
   uint16_t y = display.height() / 4;
   display.setPartialWindow(0, y - 14, display.width(), 20);
@@ -185,7 +199,7 @@ void helloEpaper()
   //DiagnosticStream.println("helloEpaper");
   display.setRotation(1);
   display.setFont(&FreeMonoBold9pt7b);
-  display.setTextColor(display.epd2.hasColor ? GxEPD_RED : GxEPD_BLACK);
+  display.setTextColor(display.epd_hd.hasColor ? GxEPD_RED : GxEPD_BLACK);
   uint16_t x = (display.width() - 160) / 2;
   uint16_t y = display.height() * 3 / 4;
   display.setPartialWindow(0, y - 14, display.width(), 20);
@@ -309,6 +323,20 @@ void showFont(const char name[], const GFXfont* f)
     display.println("PQRSTUVWXYZ[\\]^_");
     display.println("`abcdefghijklmno");
     display.println("pqrstuvwxyz{|}~ ");
+    display.println("The quick brown fox");
+    display.println("jumps over a lazy dog");
+    //    display.println("again");
+    //    display.println("The quick brown fox");
+    //    display.println("jumps over a lazy dog");
+    //    display.println("again");
+    //    display.println("The quick brown fox");
+    //    display.println("jumps over a lazy dog");
+    //    display.println("again");
+    //    display.println("The quick brown fox");
+    //    display.println("jumps over a lazy dog");
+    //    display.println("again");
+    //    display.println("The quick brown fox");
+    //    display.println("jumps over a lazy dog");
   }
   while (display.nextPage());
   delay(2000);
@@ -392,7 +420,7 @@ void showPartialUpdatePaged()
   uint16_t box_h = 20;
   uint16_t cursor_y = box_y + box_h - 6;
   float value = 13.95;
-  uint16_t incr = display.epd2.hasFastPartialUpdate ? 1 : 3;
+  uint16_t incr = display.epd_hd.hasFastPartialUpdate ? 1 : 3;
   display.setFont(&FreeMonoBold9pt7b);
   display.setTextColor(GxEPD_BLACK);
   // show where the update box is
@@ -442,4 +470,67 @@ void showPartialUpdatePaged()
     delay(1000);
   }
   display.powerOff();
+}
+
+void deepSleepTest()
+{
+  //Serial.println("deepSleepTest");
+  const char hibernating[] = "hibernating ...";
+  const char wokeup[] = "woke up";
+  const char from[] = "from deep sleep";
+  const char again[] = "again";
+  display.setRotation(1);
+  display.setFont(&FreeMonoBold9pt7b);
+  display.setTextColor(GxEPD_BLACK);
+  int16_t tbx, tby; uint16_t tbw, tbh;
+  // center text
+  display.getTextBounds(hibernating, 0, 0, &tbx, &tby, &tbw, &tbh);
+  uint16_t x = ((display.width() - tbw) / 2) - tbx;
+  uint16_t y = ((display.height() - tbh) / 2) - tby;
+  display.setFullWindow();
+  display.firstPage();
+  do
+  {
+    display.fillScreen(GxEPD_WHITE);
+    display.setCursor(x, y);
+    display.print(hibernating);
+  }
+  while (display.nextPage());
+  display.hibernate();
+  delay(5000);
+  display.getTextBounds(wokeup, 0, 0, &tbx, &tby, &tbw, &tbh);
+  uint16_t wx = (display.width() - tbw) / 2;
+  uint16_t wy = (display.height() / 3) + tbh / 2; // y is base line!
+  display.getTextBounds(from, 0, 0, &tbx, &tby, &tbw, &tbh);
+  uint16_t fx = (display.width() - tbw) / 2;
+  uint16_t fy = (display.height() * 2 / 3) + tbh / 2; // y is base line!
+  display.firstPage();
+  do
+  {
+    display.fillScreen(GxEPD_WHITE);
+    display.setCursor(wx, wy);
+    display.print(wokeup);
+    display.setCursor(fx, fy);
+    display.print(from);
+  }
+  while (display.nextPage());
+  delay(5000);
+  display.getTextBounds(hibernating, 0, 0, &tbx, &tby, &tbw, &tbh);
+  uint16_t hx = (display.width() - tbw) / 2;
+  uint16_t hy = (display.height() / 3) + tbh / 2; // y is base line!
+  display.getTextBounds(again, 0, 0, &tbx, &tby, &tbw, &tbh);
+  uint16_t ax = (display.width() - tbw) / 2;
+  uint16_t ay = (display.height() * 2 / 3) + tbh / 2; // y is base line!
+  display.firstPage();
+  do
+  {
+    display.fillScreen(GxEPD_WHITE);
+    display.setCursor(hx, hy);
+    display.print(hibernating);
+    display.setCursor(ax, ay);
+    display.print(again);
+  }
+  while (display.nextPage());
+  display.hibernate();
+  //Serial.println("deepSleepTest done");
 }

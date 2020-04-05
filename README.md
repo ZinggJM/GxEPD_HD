@@ -45,7 +45,15 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 - CPU Speed(MHz): "72MHz (Normal)"
 - Upload method: "STLink"
 
-### Version 0.0.9
+### Version 0.0.10
+- added hibernate() support, switches off TCon-11 for minimal power use
+- added GxDESP32T_BP driver class for use with ESP32 with my other ESP32-Tcon-11 proto board
+- the proto board uses a STM32F103C8T6 (Blue Pill) for most TCon-11 control and data lines.
+- the wiring used is documented in the DESP32T_PB_wiring.h header file
+- the driver code for the STM32F103C8T6 is in examples/STM32F103C8T6_IO_DRIVER
+- the GxDESP32T_BP driver class is in experimental state
+- support for the old DESTM32L is deprecated and moved to extras/deprecated
+#### Version 0.0.9
 - fixed powerOff() handling: power on for refresh if powered off
 #### Version 0.0.8
 - added GxDESP32T driver class for use with ESP32 with my ESP32-Tcon-11 proto board

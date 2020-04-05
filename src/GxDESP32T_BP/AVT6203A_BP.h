@@ -1,4 +1,4 @@
-// Class AVT6203A : display IO component class for GDE060BA on my DESP32T (proto board) for TCon-11 parallel interface e-paper display from Dalian Good Display Inc.
+// Class AVT6203A_BP : display IO component class for GDE060BA on my DESP32T_BP (proto board) for TCon-11 parallel interface e-paper display from Dalian Good Display Inc.
 //
 // Created by Jean-Marc Zingg based on demo code from Good Display for DESTM32-T board with DESTM32-Tcon-11.
 //
@@ -6,13 +6,13 @@
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571_10574&product_id=57650
 // or https://www.aliexpress.com/store/product/6-inch-HD-Interface-High-resolution-electronic-paper-display-e-ink-epaper-with-TCON-Demo-Kit/600281_32838449413.html
 
-#ifndef _AVT6203A_H_
-#define _AVT6203A_H_
+#ifndef _AVT6203A_BP_H_
+#define _AVT6203A_BP_H_
 
 #include <Arduino.h>
 #include "../GxEPD_HD_EPD.h"
-#include "TPS65185.h"
-#include "MCP23S17.h"
+#include "TPS65185_BP.h"
+#include "STM32F103C8T6_IO.h"
 
 #define EPD_WF_ADDR				(0x3000)
 #define EPD_IMG_ADDR			(0x200000)
@@ -26,12 +26,12 @@
 #define EPD_DATA_4BPP           (2<<4)
 #define EPD_DATA_8BPP           (3<<4)
 
-class AVT6203A
+class AVT6203A_BP
 {
   public:
     uint8_t wf_mode;
   public:
-    AVT6203A(TPS65185& _tps) : tps(_tps), _pDiagnosticOutput(0) {};
+    AVT6203A_BP(TPS65185_BP& _tps, STM32F103C8T6_IO& io) : tps(_tps), IO(io), _pDiagnosticOutput(0) {};
     void init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput); // (pDiagnosticOutput = 0) : disabled
     void avt_reset();
     void avt_busy_wait(void);
@@ -96,15 +96,15 @@ class AVT6203A
     void avt_waveform_update(void);
     void AVT_CONFIG_check(void);
     void avt_init();
-    void startTransfer();
+    void startTransfer(uint32_t length);
     void transfer16(uint16_t value);
     void endTransfer();
     void Debug_str(const char *s);
     void Debug_hex(unsigned int dat);
     void Debug_dec(unsigned int dat);
   private:
-    TPS65185& tps;
-    MCP23S17 pinio16;
+    TPS65185_BP& tps;
+    STM32F103C8T6_IO& IO;
     Stream* _pDiagnosticOutput;
     uint16_t Reg0x0204Save;
     uint16_t tcon_init_hsize;

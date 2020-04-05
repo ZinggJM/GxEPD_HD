@@ -35,7 +35,8 @@ class GxEPD_HD_IOCTRL
     virtual void refresh(bool partial_update_mode = false) = 0;
     // screen refresh from controller memory, partial screen
     virtual void refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partial_update_mode = false) = 0;
-    virtual void powerOff() = 0;
+    virtual void powerOff() = 0; // turns off generation of panel driving voltages
+    virtual void hibernate() = 0;
 };
 
 class GxEPD_HD_EPD
@@ -68,7 +69,7 @@ class GxEPD_HD_EPD
     // screen refresh from controller memory, partial screen
     virtual void refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partial_update_mode = false) = 0;
     virtual void powerOff() = 0;
+    virtual void hibernate() = 0;
 };
 
 #endif
-

@@ -1,13 +1,13 @@
 // Display Library for SPI e-paper panels from Dalian Good Display and boards from Waveshare.
 // Requires HW SPI and Adafruit_GFX. Caution: these e-papers require 3.3V supply AND data lines!
 //
-// based on Demo Example from Good Display: http://www.good-display.com/download_list/downloadcategoryid=34&isMode=false.html
+// based on Demo Example from Good Display: http://www.e-paper-display.com/download_list/downloadcategoryid=34&isMode=false.html
 //
 // Author: Jean-Marc Zingg
 //
 // Version: see library.properties
 //
-// Library: https://github.com/ZinggJM/Gxepd_hd
+// Library: https://github.com/ZinggJM/GxEPD_HD
 
 #ifndef _GxEPD_HD_BW_H_
 #define _GxEPD_HD_BW_H_
@@ -25,8 +25,8 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
   public:
     static const uint16_t DEPTH = 1; // 1 bit per pixel, black / white
     static const uint16_t GREYLEVELS = 2;
-    GxEPD_HD_Type epd_hd;
-    GxEPD_HD_BW(GxEPD_HD_Type epd_hd_instance) : GxEPD_HD_GFX(epd_hd, GxEPD_HD_Type::WIDTH, GxEPD_HD_Type::HEIGHT), epd_hd(epd_hd_instance)
+    GxEPD_HD_Type& epd_hd;
+    GxEPD_HD_BW(GxEPD_HD_Type& epd_hd_instance) : GxEPD_HD_GFX(epd_hd_instance, GxEPD_HD_Type::WIDTH, GxEPD_HD_Type::HEIGHT), epd_hd(epd_hd_instance)
     {
       _page_height = page_height;
       _pages = (HEIGHT / _page_height) + ((HEIGHT % _page_height) > 0);
@@ -48,7 +48,7 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
 
     bool mirror(bool m)
     {
-      swap (_mirror, m);
+      _swap_ (_mirror, m);
       return m;
     }
 
@@ -60,7 +60,7 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
       switch (getRotation())
       {
         case 1:
-          swap(x, y);
+          _swap_(x, y);
           x = WIDTH - x - 1;
           break;
         case 2:
@@ -68,19 +68,21 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
           y = HEIGHT - y - 1;
           break;
         case 3:
-          swap(x, y);
+          _swap_(x, y);
           y = HEIGHT - y - 1;
           break;
       }
       // transpose partial window to 0,0
       x -= _pw_x;
       y -= _pw_y;
+      // clip to (partial) window
+      if ((x < 0) || (x >= _pw_w) || (y < 0) || (y >= _pw_h)) return;
       // adjust for current page
       y -= _current_page * _page_height;
       if (_reverse) y = _page_height - y - 1;
       // check if in current page
       if ((y < 0) || (y >= _page_height)) return;
-      uint16_t i = x / 8 + y * (_pw_w / 8);
+      uint32_t i = x / 8 + y * (_pw_w / 8);
       if (color)
         _buffer[i] = (_buffer[i] | (1 << (7 - x % 8)));
       else
@@ -98,7 +100,7 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
     void fillScreen(uint16_t color) // 0x0 black, >0x0 white, to buffer
     {
       uint8_t data = (color == GxEPD_BLACK) ? 0x00 : 0xFF;
-      for (uint16_t x = 0; x < sizeof(_buffer); x++)
+      for (uint32_t x = 0; x < sizeof(_buffer); x++)
       {
         _buffer[x] = data;
       }
@@ -119,6 +121,10 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
     // display part of buffer content to screen, useful for full screen buffer
     void displayWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool using_rotation = true)
     {
+      x = gx_uint16_min(x, width());
+      y = gx_uint16_min(y, height());
+      w = gx_uint16_min(w, width() - x);
+      h = gx_uint16_min(h, height() - y);
       if (using_rotation) _rotate(x, y, w, h);
       epd_hd.drawImagePart(_buffer, sizeof(_buffer), 1, WIDTH, x, y, w, h);
     }
@@ -134,12 +140,12 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
 
     void setPartialWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
     {
-      _rotate(x, y, w, h);
+      _pw_x = gx_uint16_min(x, width());
+      _pw_y = gx_uint16_min(y, height());
+      _pw_w = gx_uint16_min(w, width() - _pw_x);
+      _pw_h = gx_uint16_min(h, height() - _pw_y);
+      _rotate(_pw_x, _pw_y, _pw_w, _pw_h);
       _using_partial_mode = true;
-      _pw_x = gx_uint16_min(x, WIDTH);
-      _pw_y = gx_uint16_min(y, HEIGHT);
-      _pw_w = gx_uint16_min(w, WIDTH - _pw_x);
-      _pw_h = gx_uint16_min(h, HEIGHT - _pw_y);
       // make _pw_x, _pw_w multiple of 8
       _pw_w += _pw_x % 8;
       if (_pw_w % 8 > 0) _pw_w += 8 - _pw_w % 8;
@@ -163,7 +169,7 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
           epd_hd.writeImage(_buffer + offset, sizeof(_buffer), 1, _pw_x, _pw_y, _pw_w, _pw_h);
           if (!norefresh) epd_hd.refresh(_pw_x, _pw_y, _pw_w, _pw_h, true);
         }
-        else
+        else // full update
         {
           epd_hd.writeImage(_buffer, sizeof(_buffer), 1, 0, 0, WIDTH, HEIGHT);
           if (!norefresh) epd_hd.refresh(false);
@@ -309,9 +315,14 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
     {
       epd_hd.powerOff();
     }
+    void hibernate()
+    {
+      //Serial.println("GxEPD_HD_BW::hibernate()");
+      epd_hd.hibernate();
+    }
   private:
     template <typename T> static inline void
-    swap(T & a, T & b)
+    _swap_(T & a, T & b)
     {
       T t = a;
       a = b;
@@ -330,8 +341,8 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
       switch (getRotation())
       {
         case 1:
-          swap(x, y);
-          swap(w, h);
+          _swap_(x, y);
+          _swap_(w, h);
           x = WIDTH - x - w;
           break;
         case 2:
@@ -339,8 +350,8 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
           y = HEIGHT - y - h;
           break;
         case 3:
-          swap(x, y);
-          swap(w, h);
+          _swap_(x, y);
+          _swap_(w, h);
           y = HEIGHT - y - h;
           break;
       }

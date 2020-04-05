@@ -14,7 +14,6 @@
 #define _GxGDE043A2_H_
 
 #include "GxEPD_HD_EPD.h"
-#include "GxDESTM32T/GxDESTM32T.h"
 
 class GxGDE043A2 : public GxEPD_HD_EPD
 {
@@ -27,7 +26,7 @@ class GxGDE043A2 : public GxEPD_HD_EPD
     static const bool hasPartialUpdate = true;
     static const bool hasFastPartialUpdate = true;
     // constructor
-    GxGDE043A2(GxDESTM32T& io);
+    GxGDE043A2(GxEPD_HD_IOCTRL& io);
     // methods (virtual)
     void init(Stream* pDiagnosticOutput = 0); // (pDiagnosticOutput = 0) : disabled
     //  Support for Bitmaps (Sprites) to Controller Buffer and to Screen
@@ -45,8 +44,9 @@ class GxGDE043A2 : public GxEPD_HD_EPD
     // screen refresh from controller memory, partial screen
     void refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partial_update_mode = false);
     void powerOff();
+    void hibernate();
   private:
-    GxDESTM32T& IO;
+    GxEPD_HD_IOCTRL& IO;
 };
 
 #endif

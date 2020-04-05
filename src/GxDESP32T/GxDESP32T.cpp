@@ -1,4 +1,4 @@
-// Class GxDESP32T : display IO class for GDE06BA on my DESP32T (proto board) for TCon-11 parallel interface e-paper display from Dalian Good Display Inc.
+// Class GxDESP32T : display IO class for GDE060BA on my DESP32T (proto board) for TCon-11 parallel interface e-paper display from Dalian Good Display Inc.
 //
 // Created by Jean-Marc Zingg based on demo code from Good Display for DESTM32-T board with DESTM32-Tcon-11.
 //
@@ -10,10 +10,6 @@
 
 #include "GxDESP32T.h"
 #include "DESP32T_wiring.h"
-//#include "picture800x600.h"
-//#include "picture1024x768.h"
-//#include "BitmapExamples.h"
-//#include "Bitmaps400x300.h"
 
 #define SerialDiag if (_pDiagnosticOutput) (*_pDiagnosticOutput)
 
@@ -51,6 +47,7 @@ GxDESP32T::GxDESP32T() : avt(tps), _pDiagnosticOutput(0)
   _height = 600;
   _vcom = 2000;
   _power_is_on = false;
+  _hibernating = true;
 }
 
 void GxDESP32T::init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput)
@@ -75,25 +72,21 @@ void GxDESP32T::init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput)
       break;
   }
   _pDiagnosticOutput = pDiagnosticOutput;
-  avt.init(panel, pDiagnosticOutput);
   //if(pDiagnosticOutput) pDiagnosticOutput->println("GxDESP32T::init()");
-  avt.wf_mode = EPD_MODE_INIT;
-  //#define PORT_B_OUT_PIN        TPS_PWRCOM_PIN | TPS_PWRUP_PIN
   pinMode(TPS_PWRCOM_PIN, OUTPUT);
   pinMode(TPS_PWRUP_PIN, OUTPUT);
-  //#define PORT_B_OUT_OD        TPS_SCL_PIN|TPS_SDA_PIN
-  //  pinMode(TPS_SCL_PIN, OUTPUT); // PB15
-  //  pinMode(TPS_SDA_PIN, OUTPUT); // PB14
-  //  // need to change SCL & SDA to open drain
-  //  GPIOB->CRH = (GPIOB->CRH & ~0xFF000000) | 0x77000000; // open drain 50MHz
-  // suitable STM32 Arduino package is:
-  // STM32 Boards (STM32Duino.com)
-  // Board: "Generic STM32F103V series"
-  pinMode(TPS_SCL_PIN, OUTPUT_OPEN_DRAIN); // PB15
-  pinMode(TPS_SDA_PIN, OUTPUT_OPEN_DRAIN); // PB14
-  //#define PORT_C_OUT_PIN        SYS_WAKEUP_PIN
   pinMode(SYS_WAKEUP_PIN, OUTPUT);
-  //#define PORT_D_OUT_PIN        AVT_HCS_PIN | AVT_HDC_PIN | AVT_HRD_PIN | AVT_RST_PIN | AVT_HWE_PIN | TPS_WAKEUP_PIN
+  SYS_WAKEUP_L;
+  AVT_RST_H;
+  AVT_HDC_H;
+  AVT_HWE_H;
+  AVT_HRD_H;
+  AVT_HCS_H;
+  TPS_WAKEUP_L;
+  TPS_PWRCOM_L;
+  TPS_PWRUP_L;
+  SYS_WAKEUP_H;
+  _hibernating = false;
   AVT_HCS_H;
   AVT_HDC_H;
   AVT_HRD_H;
@@ -105,48 +98,29 @@ void GxDESP32T::init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput)
   pinMode(AVT_RST_PIN, OUTPUT);
   pinMode(AVT_HWE_PIN, OUTPUT);
   pinMode(TPS_WAKEUP_PIN, OUTPUT);
-  //#define PORT_D_IN_NOPULL    AVT_RDY_PIN | AVT_IRQ_PIN
   pinMode(AVT_RDY_PIN, INPUT_PULLUP);
   pinMode(AVT_IRQ_PIN, INPUT);
-  // enable RCC clock on AVT_DAT_PORT
-  //pinMode(AVT_DAT_PIN0, INPUT);
-  SYS_WAKEUP_L;
-  //LED_01_OFF;
-  //LED_02_OFF;
-  //?AVT_RST_L;
-  //?AVT_HDC_L;
-  AVT_RST_H;
-  AVT_HDC_H;
-  AVT_HWE_H;
-  AVT_HRD_H;
-  AVT_HCS_H;
-  //AVT_DAT_SETIN;
-  TPS_WAKEUP_L;
-  TPS_PWRCOM_L;
-  TPS_PWRUP_L;
-  TPS_SCL_H;
-  TPS_SDA_H;
-  SYS_WAKEUP_H;
-  delay(1000);
+  delay(300);
+  avt.init(panel, pDiagnosticOutput);
+  avt.wf_mode = EPD_MODE_INIT;
   tps.tps_init(_vcom, pDiagnosticOutput);
   tps.tps_sleep_to_standby();
   _power_is_on = true;
-  avt.AVT_CONFIG_check();      //���AVT�����������Ƿ���ȷ
+  avt.AVT_CONFIG_check();
   //if(pDiagnosticOutput) pDiagnosticOutput->println("AVT_CONFIG_check() done");
   delay(500);
-  avt.avt_waveform_update();//���ز��α�
+  avt.avt_waveform_update();
   avt.avt_init();
   avt.wf_mode = EPD_MODE_INIT;
   epd_draw_gray(0xff);
   avt.wf_mode = EPD_MODE_GC16;
   avt.avt_slp();
-  //epd_draw_gray(0xff);//ȫ��ɫ
-  //delay(2000);
   //if(pDiagnosticOutput) pDiagnosticOutput->println("GxDESP32T::init() done");
 }
 
 void GxDESP32T::clearScreen(uint8_t value)
 {
+  if (_hibernating) _wake_up();
   avt.wf_mode = EPD_MODE_GC16;
   epd_draw_gray(value);
 }
@@ -154,6 +128,7 @@ void GxDESP32T::clearScreen(uint8_t value)
 void GxDESP32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
   Debug_str("writeImage start...\r\n");
+  if (_hibernating) _wake_up();
   uint32_t start = micros();
   if ((x >= _width) || (y >= _height)) return;
   if (x + w > _width) w = _width - x;
@@ -259,6 +234,7 @@ void GxDESP32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t dep
                                uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
 {
   Debug_str("writeImagePart start...\r\n");
+  if (_hibernating) _wake_up();
   switch (depth)
   {
     case 1:
@@ -365,6 +341,7 @@ void GxDESP32T::refresh(bool partial_update_mode)
 
 void GxDESP32T::refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partial_update_mode)
 {
+  if (_hibernating) _wake_up();
   uint8_t wf_mode = partial_update_mode ? EPD_MODE_DU : EPD_MODE_GC16;
   avt.avt_upd_full_area((wf_mode << 8), x, y, w, h);
   if (!_power_is_on) tps.tps_sleep_to_standby();
@@ -376,17 +353,10 @@ void GxDESP32T::refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partial
   avt.avt_slp();
 }
 
-void GxDESP32T::powerOff()
-{
-  tps.tps_vcom_disable();
-  avt.avt_slp();
-  tps.tps_standby_to_sleep();
-  _power_is_on = false;
-}
-
 void GxDESP32T::updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t width, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
   Debug_str("updateWindow start...\r\n");
+  if (_hibernating) _wake_up();
   avt.avt_run_sys();
   avt.avt_wr_reg(0x0020, 0x2);  //big endian
   avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
@@ -419,6 +389,7 @@ void GxDESP32T::updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t widt
 void GxDESP32T::writeFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value)
 {
   //Debug_str("writeFilledRect start...\r\n");
+  if (_hibernating) _wake_up();
   if ((x >= _width) || (y >= _height)) return;
   if (x + w > _width) w = _width - x;
   if (y + h > _height) h = _height - y;
@@ -494,6 +465,57 @@ void GxDESP32T::drawFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, u
   writeFilledRect(x, y, w, h, depth, value);
   refresh(x, y, w, h, (depth == 1));
   //Debug_str("drawFilledRect end...\r\n");
+}
+
+void GxDESP32T::powerOff()
+{
+  tps.tps_vcom_disable();
+  avt.avt_slp();
+  tps.tps_standby_to_sleep();
+  _power_is_on = false;
+}
+
+void GxDESP32T::hibernate()
+{
+  //SerialDiag.println("GxDESP32T::hibernate()");
+  powerOff();
+  tps.tps_end();
+  pinMode(AVT_HCS_PIN, INPUT);
+  pinMode(AVT_HDC_PIN, INPUT);
+  pinMode(AVT_HRD_PIN, INPUT);
+  pinMode(AVT_RST_PIN, INPUT);
+  pinMode(AVT_HWE_PIN, INPUT);
+  SYS_WAKEUP_L;
+  _hibernating = true;
+}
+
+void GxDESP32T::_wake_up()
+{
+  SYS_WAKEUP_H;
+  _hibernating = false;
+  AVT_HCS_H;
+  AVT_HDC_H;
+  AVT_HRD_H;
+  AVT_RST_H;
+  AVT_HWE_H;
+  pinMode(AVT_HCS_PIN, OUTPUT);
+  pinMode(AVT_HDC_PIN, OUTPUT);
+  pinMode(AVT_HRD_PIN, OUTPUT);
+  pinMode(AVT_RST_PIN, OUTPUT);
+  pinMode(AVT_HWE_PIN, OUTPUT);
+  delay(300);
+  avt.init(_panel, _pDiagnosticOutput);
+  tps.tps_init(_vcom, _pDiagnosticOutput);
+  tps.tps_sleep_to_standby();
+  _power_is_on = true;
+  //avt.AVT_CONFIG_check();
+  //delay(500);
+  //avt.avt_waveform_update();
+  avt.avt_init();
+  avt.wf_mode = EPD_MODE_INIT;
+  epd_draw_gray(0xff);
+  avt.wf_mode = EPD_MODE_GC16;
+  avt.avt_slp();
 }
 
 void GxDESP32T::epd_draw_gray(uint8_t gray)

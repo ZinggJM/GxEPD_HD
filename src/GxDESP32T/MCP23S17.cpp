@@ -1,4 +1,4 @@
-// Class MCP23S17 : display IO helper class for GDE06BA on my DESP32T (proto board) for TCon-11 parallel interface e-paper display from Dalian Good Display Inc.
+// Class MCP23S17 : display IO helper class for GDE060BA on my DESP32T (proto board) for TCon-11 parallel interface e-paper display from Dalian Good Display Inc.
 //
 // Created by Jean-Marc Zingg based on demo code from Good Display for DESTM32-T board with DESTM32-Tcon-11.
 //
@@ -94,6 +94,7 @@ void MCP23S17::init(uint8_t cs)
   _writeByte(IOCONA, IOCONVAL);
   _writeByte(IODIRA, 0x00); // output
   _writeByte(IODIRB, 0x00); // output
+  write16(0xFFFF);
 }
 
 void MCP23S17::portModeA(uint8_t mode)

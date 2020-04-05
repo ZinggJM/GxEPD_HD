@@ -12,7 +12,7 @@
 
 #include "GxGDE043A2.h"
 
-GxGDE043A2::GxGDE043A2(GxDESTM32T& io) :
+GxGDE043A2::GxGDE043A2(GxEPD_HD_IOCTRL& io) :
   GxEPD_HD_EPD(WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate), IO(io)
 {
 }
@@ -86,4 +86,9 @@ void GxGDE043A2::refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partia
 void GxGDE043A2::powerOff()
 {
   IO.powerOff();
+}
+
+void GxGDE043A2::hibernate()
+{
+  IO.hibernate();
 }

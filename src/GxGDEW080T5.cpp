@@ -12,7 +12,7 @@
 
 #include "GxGDEW080T5.h"
 
-GxGDEW080T5::GxGDEW080T5(GxDESTM32T& io) :
+GxGDEW080T5::GxGDEW080T5(GxEPD_HD_IOCTRL& io) :
   GxEPD_HD_EPD(WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate), IO(io)
 {
 }
@@ -86,4 +86,9 @@ void GxGDEW080T5::refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool parti
 void GxGDEW080T5::powerOff()
 {
   IO.powerOff();
+}
+
+void GxGDEW080T5::hibernate()
+{
+  IO.hibernate();
 }

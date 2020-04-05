@@ -17,7 +17,7 @@
 class GxEPD_HD_GFX : public Adafruit_GFX
 {
   public:
-    GxEPD_HD_GFX(GxEPD_HD_EPD& _epd2, int16_t w, int16_t h) : Adafruit_GFX(w, h), epd2(_epd2) {};
+    GxEPD_HD_GFX(GxEPD_HD_EPD& _epd_hd, int16_t w, int16_t h) : Adafruit_GFX(w, h), epd_hd(_epd_hd) {};
     virtual uint16_t pages() = 0;
     virtual uint16_t pageHeight() = 0;
     virtual bool mirror(bool m) = 0;
@@ -44,8 +44,9 @@ class GxEPD_HD_GFX : public Adafruit_GFX
     virtual void refresh(bool partial_update_mode = false) = 0; // screen refresh from controller memory to full screen
     virtual void refresh(int16_t x, int16_t y, int16_t w, int16_t h) = 0; // screen refresh from controller memory, partial screen
     virtual void powerOff() = 0;
+    virtual void hibernate() = 0;
   public:
-    GxEPD_HD_EPD& epd2;
+    GxEPD_HD_EPD& epd_hd;
 };
 
 #endif

@@ -1,18 +1,21 @@
-// DESP32T_wiring : IO port definitions for display IO component class for GDE06BA on my DESP32T (proto board) for TCon-11 for parallel interface e-paper display from Dalian Good Display Inc.
+// DESP32T_wiring : IO port definitions for display IO component class for GDE060BA on my DESP32T (proto board) for TCon-11 for parallel interface e-paper display from Dalian Good Display Inc.
 //
 // Created by Jean-Marc Zingg based on demo code from Good Display for DESTM32-T board with DESTM32-Tcon-11.
 //
+// This DESP32T proto board uses a MCP23S17 SPI to 16 pin IO port expander for AVT6203A 16 bit bus
 //
 // The e-paper display and demo board is available from:
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571_10574&product_id=57650
 // or https://www.aliexpress.com/store/product/6-inch-HD-Interface-High-resolution-electronic-paper-display-e-ink-epaper-with-TCON-Demo-Kit/600281_32838449413.html
-
+//
 // processor on proto board is ESP32-Wrover, e.g. https://www.aliexpress.com/item/4000165144198.html
-
+//
 // TCon-11 schematics: http://www.e-paper-display.com/download_detail/downloadsId=562.html
 //
 // warning: output connector J1 has pin 1 of schematics on bottom left, top (component) view!
-
+//
+// NOTE: the MCP23S17 supply can be taken from VCC 3.3V out (7,8) of J14 for minimum power use during hibernate
+//
 // wiring list for 40pin input connector J14, top (component) view, pin 1 is top left
 // pin nr., signal name -- destination pin, destination
 //
@@ -22,9 +25,9 @@
 // 4  GND              --  GND
 // 5  GND              --  GND
 // 6  GND              --  GND
-// 7  VCC 3.3V out     --  not connected
-// 8  VCC 3.3V out     --  not connected
-// 9  HDB0_AVT6203A    --  B0 MCP17S23
+// 7  VCC 3.3V out     --  VCC MCP23S17
+// 8  VCC 3.3V out     --  VCC MCP23S17
+// 9  HDB0_AVT6203A    --  B0  MCP23S17
 // 10 HDB1_AVT6203A    --  B1
 // 11 HDB2_AVT6203A    --  B2
 // 12 HDB3_AVT6203A    --  B3
@@ -57,24 +60,26 @@
 // 39 VIN 5V           -- VIN ESP32
 // 40 VIN 5V           -- VIN ESP32
 //
-// wiring list of input side of MCP17S23
+// wiring list of input side of MCP23S17
 //
 // A2      --  GND
 // A1      --  GND
 // A0      --  GND
-// RESET   --  3V3 ESP32
+// RESET   --  3V3 ESP32 or J14 VCC 3.3V out
 // NC/SO   --  19  ESP32 MISO
 // NC/CS   --   5  ESP32 SS
 // SDA/SI  --  23  ESP32 MOSI
 // SCL/SCK --  18  ESP32 SCK
+// GND     --  GND
+// VCC     -- 3V3 ESP32 or J14 VCC 3.3V out
 
 #ifndef _DESP32T_wiring_H_
 #define _DESP32T_wiring_H_
 
 #define  DEBUG_USART
 
-#define TPS_SCL_PIN       22 // HW SCL
-#define TPS_SDA_PIN       21 // HW SDA
+//#define TPS_SCL_PIN     22 // HW SCL
+//#define TPS_SDA_PIN     21 // HW SDA
 #define TPS_PWRUP_PIN     34
 #define TPS_PWRCOM_PIN     4
 

@@ -40,7 +40,7 @@ void GxGDE060BA::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth,
 }
 
 void GxGDE060BA::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                               uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
+                                uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
 {
   if (x + dx >= WIDTH) return;
   if (y + dy >= HEIGHT) return;
@@ -63,7 +63,7 @@ void GxGDE060BA::drawImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, 
 }
 
 void GxGDE060BA::drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                              uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
+                               uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
 {
   if (x + dx >= WIDTH) return;
   if (y + dy >= HEIGHT) return;
@@ -87,4 +87,9 @@ void GxGDE060BA::refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partia
 void GxGDE060BA::powerOff()
 {
   IO.powerOff();
+}
+
+void GxGDE060BA::hibernate()
+{
+  IO.hibernate();
 }

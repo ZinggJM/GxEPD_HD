@@ -1,27 +1,19 @@
-// Class GxDESTM32T : display IO class for GDE060BA on DESTM32-T parallel interface e-paper display from Dalian Good Display Inc.
+// Class GxDESP32T_BP : display IO class for GDE060BA on my DESP32T_BP (proto board) for TCon-11 parallel interface e-paper display from Dalian Good Display Inc.
 //
 // Created by Jean-Marc Zingg based on demo code from Good Display for DESTM32-T board with DESTM32-Tcon-11.
-//
-// To be used with "STM32F103VE" of "Generic STM32F103V series" of package "STM32 Boards (STM32Duino.com)" for Arduino.
-// install package with Boards Manager after adding to preferences in additional Boards Manager URLs:
-// https://raw.githubusercontent.com/stm32duino/BoardManagerFiles/master/STM32/package_stm_index.json
 //
 // The e-paper display and demo board is available from:
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571_10574&product_id=57650
 // or https://www.aliexpress.com/store/product/6-inch-HD-Interface-High-resolution-electronic-paper-display-e-ink-epaper-with-TCON-Demo-Kit/600281_32838449413.html
 
-#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
+#if defined(ARDUINO_ARCH_ESP32)
 
-#include "GxDESTM32T.h"
-#include "DESTM32L1_board.h"
-#include "picture800x600.h"
-#include "picture1024x768.h"
-//#include "BitmapExamples.h"
-//#include "Bitmaps400x300.h"
+#include "GxDESP32T_BP.h"
+#include "DESP32T_BP_wiring.h"
 
 #define SerialDiag if (_pDiagnosticOutput) (*_pDiagnosticOutput)
 
-const uint8_t GxDESTM32T::bw2grey8[] =
+const uint8_t GxDESP32T_BP::bw2grey8[] =
 {
   0b00000000, 0b00000011, 0b00001100, 0b00001111,
   0b00110000, 0b00110011, 0b00111100, 0b00111111,
@@ -29,7 +21,7 @@ const uint8_t GxDESTM32T::bw2grey8[] =
   0b11110000, 0b11110011, 0b11111100, 0b11111111,
 };
 
-const uint16_t GxDESTM32T::bw2grey16[] =
+const uint16_t GxDESP32T_BP::bw2grey16[] =
 {
   0x0000, 0x0003, 0x000C, 0x000F, 0x0030, 0x0033, 0x003C, 0x003F, 0x00C0, 0x00C3, 0x00CC, 0x00CF, 0x00F0, 0x00F3, 0x00FC, 0x00FF,
   0x0300, 0x0303, 0x030C, 0x030F, 0x0330, 0x0333, 0x033C, 0x033F, 0x03C0, 0x03C3, 0x03CC, 0x03CF, 0x03F0, 0x03F3, 0x03FC, 0x03FF,
@@ -49,7 +41,7 @@ const uint16_t GxDESTM32T::bw2grey16[] =
   0xFF00, 0xFF03, 0xFF0C, 0xFF0F, 0xFF30, 0xFF33, 0xFF3C, 0xFF3F, 0xFFC0, 0xFFC3, 0xFFCC, 0xFFCF, 0xFFF0, 0xFFF3, 0xFFFC, 0xFFFF
 };
 
-GxDESTM32T::GxDESTM32T() : avt(tps), _pDiagnosticOutput(0)
+GxDESP32T_BP::GxDESP32T_BP() : tps(IO), avt(tps, IO), _pDiagnosticOutput(0)
 {
   _width = 800;
   _height = 600;
@@ -58,7 +50,7 @@ GxDESTM32T::GxDESTM32T() : avt(tps), _pDiagnosticOutput(0)
   _hibernating = true;
 }
 
-void GxDESTM32T::init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput)
+void GxDESP32T_BP::init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput)
 {
   _panel = panel;
   switch (panel)
@@ -80,81 +72,46 @@ void GxDESTM32T::init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput)
       break;
   }
   _pDiagnosticOutput = pDiagnosticOutput;
+  IO.init();
   avt.init(panel, pDiagnosticOutput);
-  //if(pDiagnosticOutput) pDiagnosticOutput->println("GxDESTM32T::init()");
+  //if(pDiagnosticOutput) pDiagnosticOutput->println("GxDESP32T_BP::init()");
   avt.wf_mode = EPD_MODE_INIT;
-  //#define PORT_B_OUT_PP        TPS_PWRCOM_PIN | TPS_PWRUP_PIN
-  pinMode(TPS_PWRCOM_PP, OUTPUT);
-  pinMode(TPS_PWRUP_PP, OUTPUT);
-  //#define PORT_B_OUT_OD        TPS_SCL_PIN|TPS_SDA_PIN
-  //  pinMode(TPS_SCL_PP, OUTPUT); // PB15
-  //  pinMode(TPS_SDA_PP, OUTPUT); // PB14
-  //  // need to change SCL & SDA to open drain
-  //  GPIOB->CRH = (GPIOB->CRH & ~0xFF000000) | 0x77000000; // open drain 50MHz
-  // suitable STM32 Arduino package is:
-  // STM32 Boards (STM32Duino.com)
-  // Board: "Generic STM32F103V series"
-  pinMode(TPS_SCL_PP, OUTPUT_OPEN_DRAIN); // PB15
-  pinMode(TPS_SDA_PP, OUTPUT_OPEN_DRAIN); // PB14
-  //#define PORT_C_OUT_PP        SYS_WAKEUP_PIN
-  pinMode(SYS_WAKEUP_PP, OUTPUT);
-  //#define PORT_D_OUT_PP        AVT_HCS_PIN | AVT_HDC_PIN | AVT_HRD_PIN | AVT_RST_PIN | AVT_HWE_PIN | TPS_WAKEUP_PIN
-  pinMode(AVT_HCS_PP, OUTPUT);
-  pinMode(AVT_HDC_PP, OUTPUT);
-  pinMode(AVT_HRD_PP, OUTPUT);
-  pinMode(AVT_RST_PP, OUTPUT);
-  pinMode(AVT_HWE_PP, OUTPUT);
-  pinMode(TPS_WAKEUP_PP, OUTPUT);
-  //#define PORT_D_IN_NOPULL    AVT_RDY_PIN | AVT_IRQ_PIN
-  pinMode(AVT_RDY_PP, INPUT_PULLUP);
-  pinMode(AVT_IRQ_PP, INPUT);
-  // enable RCC clock on AVT_DAT_PORT
-  pinMode(AVT_DAT_PP0, INPUT);
   SYS_WAKEUP_L;
-  LED_01_OFF;
-  LED_02_OFF;
-  AVT_RST_L;
-  AVT_HDC_L;
-  AVT_HWE_H;
-  AVT_HRD_H;
-  AVT_HCS_H;
-  AVT_DAT_SETIN;
+  pinMode(SYS_WAKEUP_PIN, OUTPUT);
   TPS_WAKEUP_L;
   TPS_PWRCOM_L;
   TPS_PWRUP_L;
-  TPS_SCL_H;
-  TPS_SDA_H;
+  AVT_RST_L;
   SYS_WAKEUP_H;
   _hibernating = false;
   delay(300);
   tps.tps_init(_vcom, pDiagnosticOutput);
   tps.tps_sleep_to_standby();
   _power_is_on = true;
-  avt.AVT_CONFIG_check();      //���AVT�����������Ƿ���ȷ
+  avt.AVT_CONFIG_check();
   //if(pDiagnosticOutput) pDiagnosticOutput->println("AVT_CONFIG_check() done");
   delay(500);
-  avt.avt_waveform_update();//���ز��α�
+  avt.avt_waveform_update();
   avt.avt_init();
   avt.wf_mode = EPD_MODE_INIT;
   epd_draw_gray(0xff);
   avt.wf_mode = EPD_MODE_GC16;
   avt.avt_slp();
-  //epd_draw_gray(0xff);//ȫ��ɫ
-  //delay(2000);
-  //if(pDiagnosticOutput) pDiagnosticOutput->println("GxDESTM32T::init() done");
+  //if(pDiagnosticOutput) pDiagnosticOutput->println("GxDESP32T_BP::init() done");
 }
 
-void GxDESTM32T::clearScreen(uint8_t value)
+void GxDESP32T_BP::clearScreen(uint8_t value)
 {
   if (_hibernating) _wake_up();
   avt.wf_mode = EPD_MODE_GC16;
   epd_draw_gray(value);
 }
 
-void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+void GxDESP32T_BP::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
   Debug_str("writeImage start...\r\n");
   if (_hibernating) _wake_up();
+  uint32_t start = micros();
   if ((x >= _width) || (y >= _height)) return;
   if (x + w > _width) w = _width - x;
   if (y + h > _height) h = _height - y;
@@ -167,6 +124,8 @@ void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth,
       avt.avt_run_sys();
       avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
       avt.avt_wr_reg_addr(0x0154);
+      n = uint32_t(w) * uint32_t(h) / 8;
+      avt.startTransfer(n);
       for (uint16_t y1 = 0; y1 < h; y1++)
       {
         for (uint16_t x1 = 0; x1 < w; x1 += 8)
@@ -176,9 +135,10 @@ void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth,
           if ((x1 >= w - 48) && (y1 < 48)) dw = 0;
           if ((x1 >= w - 64) && (y1 > h - 64)) dw = 0;
           if ((x1 < 80) && (y1 > h - 80)) dw = 0x0003;
-          avt.avt_i80_write_dat(dw);
+          avt.transfer16(dw);
         }
       }
+      avt.endTransfer();
       break;
     case 1:
       avt.avt_run_sys();
@@ -186,12 +146,14 @@ void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth,
       avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
       avt.avt_wr_reg_addr(0x0154);
       n = uint32_t(w) * uint32_t(h) / 8;
+      avt.startTransfer(n);
       for (uint32_t i = 0; i < n; i++)
       {
         uint8_t sb = idx < size ? bitmap[idx++] : 0xFF;
         dw = bw2grey16[sb];
-        avt.avt_i80_write_dat(dw);
+        avt.transfer16(dw);
       }
+      avt.endTransfer();
       break;
     case 2:
       avt.avt_run_sys();
@@ -199,14 +161,16 @@ void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth,
       avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
       avt.avt_wr_reg_addr(0x0154);
       n = uint32_t(w) * uint32_t(h) / 8;
+      avt.startTransfer(n);
       for (uint32_t i = 0; i < n; i++)
       {
         uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
         uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
         //dw = sb1 | (sb2 << 8);
         dw = sb2 | (sb1 << 8);
-        avt.avt_i80_write_dat(dw);
+        avt.transfer16(dw);
       }
+      avt.endTransfer();
       break;
     case 4:
       avt.avt_run_sys();
@@ -214,13 +178,15 @@ void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth,
       avt.avt_ld_img_area(EPD_DATA_4BPP, x, y, w, h);
       avt.avt_wr_reg_addr(0x0154);
       n = uint32_t(w) * uint32_t(h) / 4;
+      avt.startTransfer(n);
       for (uint32_t i = 0; i < n; i++)
       {
         uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
         uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
         dw = sb2 | (sb1 << 8);
-        avt.avt_i80_write_dat(dw);
+        avt.transfer16(dw);
       }
+      avt.endTransfer();
       break;
     case 8:
       avt.avt_run_sys();
@@ -228,118 +194,31 @@ void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth,
       avt.avt_ld_img_area(EPD_DATA_8BPP, x, y, w, h);
       avt.avt_wr_reg_addr(0x0154);
       n = uint32_t(w) * uint32_t(h) / 2;
+      avt.startTransfer(n);
       for (uint32_t i = 0; i < n; i++)
       {
         uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
         uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
         dw = sb2 | (sb1 << 8);
-        avt.avt_i80_write_dat(dw);
+        avt.transfer16(dw);
       }
+      avt.endTransfer();
       break;
-    default:
-      return;
   }
+  uint32_t trf = micros() - start;
   avt.avt_ld_img_end();
   Debug_str("writeImage end...\r\n");
+  uint32_t total = micros() - start;
+  //SerialDiag.print("trf : "); SerialDiag.print(trf); SerialDiag.print(" total : "); SerialDiag.println(total);
+  (void) trf; (void) total; // (void) warning unused
 }
 
-void GxDESTM32T::writeImage(uint8_t (*get)(uint32_t), uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
-{
-  Debug_str("writeImage start...\r\n");
-  if (_hibernating) _wake_up();
-  if ((x >= _width) || (y >= _height)) return;
-  if (x + w > _width) w = _width - x;
-  if (y + h > _height) h = _height - y;
-  uint32_t idx = 0;
-  uint32_t n;
-  uint16_t dw;
-  switch (depth)
-  {
-    case 0: // corner test
-      avt.avt_run_sys();
-      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      for (uint16_t y1 = 0; y1 < h; y1++)
-      {
-        for (uint16_t x1 = 0; x1 < w; x1 += 8)
-        {
-          uint16_t dw = 0xFFFF;
-          if ((x1 < 32) && (y1 < 32)) dw = 0;
-          if ((x1 >= w - 48) && (y1 < 48)) dw = 0;
-          if ((x1 >= w - 64) && (y1 > h - 64)) dw = 0;
-          if ((x1 < 80) && (y1 > h - 80)) dw = 0x0003;
-          avt.avt_i80_write_dat(dw);
-        }
-      }
-      break;
-    case 1:
-      avt.avt_run_sys();
-      avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      n = uint32_t(w) * uint32_t(h) / 8;
-      for (uint32_t i = 0; i < n; i++)
-      {
-        uint8_t sb = idx < size ? get(idx++) : 0xFF;
-        dw = bw2grey16[sb];
-        avt.avt_i80_write_dat(dw);
-      }
-      break;
-    case 2:
-      avt.avt_run_sys();
-      avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      n = uint32_t(w) * uint32_t(h) / 8;
-      for (uint32_t i = 0; i < n; i++)
-      {
-        uint8_t sb1 = idx < size ? get(idx++) : 0xFF;
-        uint8_t sb2 = idx < size ? get(idx++) : 0xFF;
-        //dw = sb1 | (sb2 << 8);
-        dw = sb2 | (sb1 << 8);
-        avt.avt_i80_write_dat(dw);
-      }
-      break;
-    case 4:
-      avt.avt_run_sys();
-      avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_4BPP, x, y, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      n = uint32_t(w) * uint32_t(h) / 4;
-      for (uint32_t i = 0; i < n; i++)
-      {
-        uint8_t sb1 = idx < size ? get(idx++) : 0xFF;
-        uint8_t sb2 = idx < size ? get(idx++) : 0xFF;
-        dw = sb2 | (sb1 << 8);
-        avt.avt_i80_write_dat(dw);
-      }
-      break;
-    case 8:
-      avt.avt_run_sys();
-      avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_8BPP, x, y, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      n = uint32_t(w) * uint32_t(h) / 2;
-      for (uint32_t i = 0; i < n; i++)
-      {
-        uint8_t sb1 = idx < size ? get(idx++) : 0xFF;
-        uint8_t sb2 = idx < size ? get(idx++) : 0xFF;
-        dw = sb2 | (sb1 << 8);
-        avt.avt_i80_write_dat(dw);
-      }
-      break;
-    default:
-      return;
-  }
-  avt.avt_ld_img_end();
-  Debug_str("writeImage end...\r\n");
-}
-
-void GxDESTM32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                                uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
+void GxDESP32T_BP::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
+                                  uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
 {
   Debug_str("writeImagePart start...\r\n");
   if (_hibernating) _wake_up();
+  uint32_t n;
   switch (depth)
   {
     case 1:
@@ -347,6 +226,8 @@ void GxDESTM32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t de
       avt.avt_wr_reg(0x0020, 0x2);  //big endian
       avt.avt_ld_img_area(EPD_DATA_2BPP, x + dx, y + dy, w, h);
       avt.avt_wr_reg_addr(0x0154);
+      n = uint32_t(w) * uint32_t(h) / 8;
+      avt.startTransfer(n);
       for (uint32_t y1 = y; y1 < y + h; y1++)
       {
         for (uint32_t x1 = x; x1 < x + w; x1 += 8) // pixels per loop
@@ -354,15 +235,18 @@ void GxDESTM32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t de
           uint32_t idx = y1 * (width / 8) + x1 / 8; // pixels per byte
           uint8_t sb = idx < size ? bitmap[idx] : 0xFF;
           uint16_t dw = bw2grey16[sb];
-          avt.avt_i80_write_dat(dw);
+          avt.transfer16(dw);
         }
       }
+      avt.endTransfer();
       break;
     case 2:
       avt.avt_run_sys();
       avt.avt_wr_reg(0x0020, 0x2);  //big endian
       avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
       avt.avt_wr_reg_addr(0x0154);
+      n = uint32_t(w) * uint32_t(h) / 8;
+      avt.startTransfer(n);
       for (uint32_t y1 = y; y1 < y + h; y1++)
       {
         for (uint32_t x1 = x; x1 < x + w; x1 += 8) // pixels per loop
@@ -371,15 +255,18 @@ void GxDESTM32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t de
           uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
           uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
           uint16_t dw = sb2 | (sb1 << 8);
-          avt.avt_i80_write_dat(dw);
+          avt.transfer16(dw);
         }
       }
+      avt.endTransfer();
       break;
     case 4:
       avt.avt_run_sys();
       avt.avt_wr_reg(0x0020, 0x2);  //big endian
       avt.avt_ld_img_area(EPD_DATA_4BPP, x, y, w, h);
       avt.avt_wr_reg_addr(0x0154);
+      n = uint32_t(w) * uint32_t(h) / 4;
+      avt.startTransfer(n);
       for (uint32_t y1 = y; y1 < y + h; y1++)
       {
         for (uint32_t x1 = x; x1 < x + w; x1 += 4) // pixels per loop
@@ -388,15 +275,18 @@ void GxDESTM32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t de
           uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
           uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
           uint16_t dw = sb2 | (sb1 << 8);
-          avt.avt_i80_write_dat(dw);
+          avt.transfer16(dw);
         }
       }
+      avt.endTransfer();
       break;
     case 8:
       avt.avt_run_sys();
       avt.avt_wr_reg(0x0020, 0x2);  //big endian
       avt.avt_ld_img_area(EPD_DATA_8BPP, x, y, w, h);
       avt.avt_wr_reg_addr(0x0154);
+      n = uint32_t(w) * uint32_t(h) / 2;
+      avt.startTransfer(n);
       for (uint32_t y1 = y; y1 < y + h; y1++)
       {
         for (uint32_t x1 = x; x1 < x + w; x1 += 2) // pixels per loop
@@ -405,99 +295,17 @@ void GxDESTM32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t de
           uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
           uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
           uint16_t dw = sb2 | (sb1 << 8);
-          avt.avt_i80_write_dat(dw);
+          avt.transfer16(dw);
         }
       }
+      avt.endTransfer();
       break;
-    default:
-      return;
   }
   avt.avt_ld_img_end();
   Debug_str("writeImagePart end...\r\n");
 }
 
-void GxDESTM32T::writeImagePart(uint8_t (*get)(uint32_t), uint32_t size, uint8_t depth, uint32_t width,
-                                uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
-{
-  Debug_str("writeImagePart start...\r\n");
-  if (_hibernating) _wake_up();
-  switch (depth)
-  {
-    case 1:
-      avt.avt_run_sys();
-      avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_2BPP, x + dx, y + dy, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      for (uint32_t y1 = y; y1 < y + h; y1++)
-      {
-        for (uint32_t x1 = x; x1 < x + w; x1 += 8) // pixels per loop
-        {
-          uint32_t idx = y1 * (width / 8) + x1 / 8; // pixels per byte
-          uint8_t sb = idx < size ? get(idx) : 0xFF;
-          uint16_t dw = bw2grey16[sb];
-          avt.avt_i80_write_dat(dw);
-        }
-      }
-      break;
-    case 2:
-      avt.avt_run_sys();
-      avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      for (uint32_t y1 = y; y1 < y + h; y1++)
-      {
-        for (uint32_t x1 = x; x1 < x + w; x1 += 8) // pixels per loop
-        {
-          uint32_t idx = y1 * (width / 4) + x1 / 4; // pixels per byte
-          uint8_t sb1 = idx < size ? get(idx++) : 0xFF;
-          uint8_t sb2 = idx < size ? get(idx++) : 0xFF;
-          uint16_t dw = sb2 | (sb1 << 8);
-          avt.avt_i80_write_dat(dw);
-        }
-      }
-      break;
-    case 4:
-      avt.avt_run_sys();
-      avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_4BPP, x, y, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      for (uint32_t y1 = y; y1 < y + h; y1++)
-      {
-        for (uint32_t x1 = x; x1 < x + w; x1 += 4) // pixels per loop
-        {
-          uint32_t idx = y1 * (width / 2) + x1 / 2; // pixels per byte
-          uint8_t sb1 = idx < size ? get(idx++) : 0xFF;
-          uint8_t sb2 = idx < size ? get(idx++) : 0xFF;
-          uint16_t dw = sb2 | (sb1 << 8);
-          avt.avt_i80_write_dat(dw);
-        }
-      }
-      break;
-    case 8:
-      avt.avt_run_sys();
-      avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_8BPP, x, y, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      for (uint32_t y1 = y; y1 < y + h; y1++)
-      {
-        for (uint32_t x1 = x; x1 < x + w; x1 += 2) // pixels per loop
-        {
-          uint32_t idx = y1 * (width / 1) + x1 / 1; // pixels per byte
-          uint8_t sb1 = idx < size ? get(idx++) : 0xFF;
-          uint8_t sb2 = idx < size ? get(idx++) : 0xFF;
-          uint16_t dw = sb2 | (sb1 << 8);
-          avt.avt_i80_write_dat(dw);
-        }
-      }
-      break;
-    default:
-      return;
-  }
-  avt.avt_ld_img_end();
-  Debug_str("writeImagePart end...\r\n");
-}
-
-void GxDESTM32T::drawImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+void GxDESP32T_BP::drawImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
   Debug_str("drawImage start...\r\n");
   writeImage(bitmap, size, depth, x, y, w, h);
@@ -505,16 +313,8 @@ void GxDESTM32T::drawImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, 
   Debug_str("drawImage end...\r\n");
 }
 
-void GxDESTM32T::drawImage(uint8_t (*get)(uint32_t), uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
-{
-  Debug_str("drawImage start...\r\n");
-  writeImage(get, size, depth, x, y, w, h);
-  refresh(x, y, w, h, (depth == 1));
-  Debug_str("drawImage end...\r\n");
-}
-
-void GxDESTM32T::drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                               uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
+void GxDESP32T_BP::drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
+                                 uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
 {
   Debug_str("drawImagePart start...\r\n");
   writeImagePart(bitmap, size, depth, width, x, y, w, h, dx, dy);
@@ -522,21 +322,12 @@ void GxDESTM32T::drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t dep
   Debug_str("drawImagePart end...\r\n");
 }
 
-void GxDESTM32T::drawImagePart(uint8_t (*get)(uint32_t), uint32_t size, uint8_t depth, uint32_t width,
-                               uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
-{
-  Debug_str("drawImagePart start...\r\n");
-  writeImagePart(get, size, depth, width, x, y, w, h, dx, dy);
-  refresh(x + dx, y + dy, w, h, (depth == 1));
-  Debug_str("drawImagePart end...\r\n");
-}
-
-void GxDESTM32T::refresh(bool partial_update_mode)
+void GxDESP32T_BP::refresh(bool partial_update_mode)
 {
   refresh(0, 0, _width, _height, partial_update_mode);
 }
 
-void GxDESTM32T::refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partial_update_mode)
+void GxDESP32T_BP::refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partial_update_mode)
 {
   if (_hibernating) _wake_up();
   uint8_t wf_mode = partial_update_mode ? EPD_MODE_DU : EPD_MODE_GC16;
@@ -550,7 +341,7 @@ void GxDESTM32T::refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partia
   avt.avt_slp();
 }
 
-void GxDESTM32T::updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t width, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+void GxDESP32T_BP::updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t width, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
   Debug_str("updateWindow start...\r\n");
   if (_hibernating) _wake_up();
@@ -558,6 +349,8 @@ void GxDESTM32T::updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t wid
   avt.avt_wr_reg(0x0020, 0x2);  //big endian
   avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
   avt.avt_wr_reg_addr(0x0154);
+  uint32_t n = uint32_t(w) * uint32_t(h) / 8;
+  avt.startTransfer(n);
   for (uint32_t y1 = y; y1 < y + h; y1++)
   {
     for (uint32_t x1 = x; x1 < x + w; x1 += 8)
@@ -565,9 +358,10 @@ void GxDESTM32T::updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t wid
       uint32_t idx = y1 * (width / 8) + x1 / 8;
       uint8_t sb = idx < size ? bitmap[idx++] : 0xFF;
       uint16_t dw = bw2grey16[sb];
-      avt.avt_i80_write_dat(dw);
+      avt.transfer16(dw);
     }
   }
+  avt.endTransfer();
   avt.avt_ld_img_end();
   //avt.avt_upd_full_area((avt.wf_mode << 8), x, y, w, h);
   avt.avt_upd_full_area((EPD_MODE_DU << 8), x, y, w, h);
@@ -581,7 +375,7 @@ void GxDESTM32T::updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t wid
   Debug_str("updateWindow end...\r\n");
 }
 
-void GxDESTM32T::writeFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value)
+void GxDESP32T_BP::writeFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value)
 {
   //Debug_str("writeFilledRect start...\r\n");
   if (_hibernating) _wake_up();
@@ -599,11 +393,13 @@ void GxDESTM32T::writeFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h,
       avt.avt_wr_reg_addr(0x0154);
       n = uint32_t(w) * uint32_t(h) / 8;
       if (n < 1) n = 1;
+      avt.startTransfer(n);
       for (uint32_t i = 0; i < n; i++)
       {
         dw = bw2grey16[value];
-        avt.avt_i80_write_dat(dw);
+        avt.transfer16(dw);
       }
+      avt.endTransfer();
       break;
     case 2:
       avt.avt_run_sys();
@@ -612,10 +408,12 @@ void GxDESTM32T::writeFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h,
       avt.avt_wr_reg_addr(0x0154);
       n = uint32_t(w) * uint32_t(h) / 8;
       if (n < 1) n = 1;
+      avt.startTransfer(n);
       for (uint32_t i = 0; i < n; i++)
       {
-        avt.avt_i80_write_dat(dw);
+        avt.transfer16(dw);
       }
+      avt.endTransfer();
       break;
     case 4:
       avt.avt_run_sys();
@@ -624,10 +422,12 @@ void GxDESTM32T::writeFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h,
       avt.avt_wr_reg_addr(0x0154);
       n = uint32_t(w) * uint32_t(h) / 4;
       if (n < 1) n = 1;
+      avt.startTransfer(n);
       for (uint32_t i = 0; i < n; i++)
       {
-        avt.avt_i80_write_dat(dw);
+        avt.transfer16(dw);
       }
+      avt.endTransfer();
       break;
     case 8:
       avt.avt_run_sys();
@@ -636,19 +436,19 @@ void GxDESTM32T::writeFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h,
       avt.avt_wr_reg_addr(0x0154);
       n = uint32_t(w) * uint32_t(h) / 2;
       if (n < 1) n = 1;
+      avt.startTransfer(n);
       for (uint32_t i = 0; i < n; i++)
       {
-        avt.avt_i80_write_dat(dw);
+        avt.transfer16(dw);
       }
+      avt.endTransfer();
       break;
-    default:
-      return;
   }
   avt.avt_ld_img_end();
   //Debug_str("writeFilledRect end...\r\n");
 }
 
-void GxDESTM32T::drawFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value)
+void GxDESP32T_BP::drawFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value)
 {
   //Debug_str("drawFilledRect start...\r\n");
   writeFilledRect(x, y, w, h, depth, value);
@@ -656,7 +456,7 @@ void GxDESTM32T::drawFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, 
   //Debug_str("drawFilledRect end...\r\n");
 }
 
-void GxDESTM32T::powerOff()
+void GxDESP32T_BP::powerOff()
 {
   tps.tps_vcom_disable();
   avt.avt_slp();
@@ -664,18 +464,21 @@ void GxDESTM32T::powerOff()
   _power_is_on = false;
 }
 
-void GxDESTM32T::hibernate()
+void GxDESP32T_BP::hibernate()
 {
-  SerialDiag.println("GxDESP32T::hibernate()");
+  //SerialDiag.println("GxDESP32T_BP::hibernate()");
   powerOff();
+  tps.tps_end();
+  IO.end();
   SYS_WAKEUP_L;
   _hibernating = true;
 }
 
-void GxDESTM32T::_wake_up()
+void GxDESP32T_BP::_wake_up()
 {
   SYS_WAKEUP_H;
   _hibernating = false;
+  IO.init();
   delay(300);
   tps.tps_init(_vcom, _pDiagnosticOutput);
   tps.tps_sleep_to_standby();
@@ -690,24 +493,31 @@ void GxDESTM32T::_wake_up()
   avt.avt_slp();
 }
 
-void GxDESTM32T::epd_draw_gray(uint8_t gray)
+void GxDESP32T_BP::epd_draw_gray(uint8_t gray)
 {
   uint16_t i, j, dat;
+
+  uint32_t start = micros();
 
   Debug_str("epd_draw_gray start...\r\n");
   avt.avt_run_sys();
   avt.avt_ld_img(EPD_DATA_8BPP);
   avt.avt_wr_reg_addr(0x0154);
 
+  uint32_t n = uint32_t(_width) * uint32_t(_height) / 2;
+  avt.startTransfer(n);
   for (i = 0; i < _height; i++)
   {
     for (j = 0; j < (_width / 2); j++)
     {
       dat = gray;
       dat = ((dat << 8) & 0xff00) + gray;
-      avt.avt_i80_write_dat(dat);
+      avt.transfer16(dat);
     }
   }
+  avt.endTransfer();
+
+  uint32_t trf = micros() - start;
 
   avt.avt_ld_img_end();
   avt.avt_upd_full((avt.wf_mode << 8));
@@ -719,9 +529,11 @@ void GxDESTM32T::epd_draw_gray(uint8_t gray)
 
   avt.avt_slp();
   Debug_str("epd_draw_gray end...\r\n");
+  uint32_t total = micros() - start;
+  SerialDiag.print("trf : "); SerialDiag.print(trf); SerialDiag.print(" total : "); SerialDiag.println(total);
 }
 
-void GxDESTM32T::Debug_str(const char *s)
+void GxDESP32T_BP::Debug_str(const char *s)
 {
   if (_pDiagnosticOutput) _pDiagnosticOutput->print(s);
 }

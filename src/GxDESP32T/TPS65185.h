@@ -1,4 +1,4 @@
-// Class TPS65185 : display IO component class for GDE06BA on DESTM32-T parallel interface e-paper display from Dalian Good Display Inc.
+// Class TPS65185 : display IO component class for GDE060BA on DESTM32-T parallel interface e-paper display from Dalian Good Display Inc.
 //
 // Created by Jean-Marc Zingg based on demo code from Good Display for DESTM32-T board with DESTM32-Tcon-11.
 //
@@ -25,24 +25,15 @@ class TPS65185
     void tps_source_gate_disable(void);
     void tps_vcom_enable(void);
     void tps_vcom_disable(void);
-    unsigned char ti_read_int_status(void);
+    uint8_t ti_read_int_status(void);
     void tps_read_all_reg(void);
     void tps_init(uint16_t vcom, Stream* pDiagnosticOutput);
+    void tps_end();
   private:
-    void i2c_delay_x(uint32_t nCount);
-    void i2c_delayus(void);
-    void i2c_delay500ns(void);
-    void i2c_test_period();
-    void i2c_start(void);
-    void i2c_stop(void);
-    bool i2c_ack(void);
-    void i2c_sendack(void);
-    void i2c_send_byte(unsigned char sdata);
-    unsigned char i2c_read_byte(void);
-    void I2C_Write(unsigned char dev_addr, unsigned char reg_addr, unsigned char dat);
-    unsigned char I2C_Read(unsigned char dev_addr, unsigned char reg_addr);
-    void I2C_Write_Frame(unsigned char dev_addr, unsigned char reg_addr, unsigned char length, unsigned char* dat);
-    void I2C_Read_Frame(unsigned char dev_addr, unsigned char reg_addr, unsigned char length, unsigned char* dat);
+    void I2C_Write(uint8_t dev_addr, uint8_t reg_addr, uint8_t dat);
+    uint8_t I2C_Read(uint8_t dev_addr, uint8_t reg_addr);
+    void I2C_Write_Frame(uint8_t dev_addr, uint8_t reg_addr, uint8_t length, uint8_t* dat);
+    void I2C_Read_Frame(uint8_t dev_addr, uint8_t reg_addr, uint8_t length, uint8_t* dat);
     void tps_power_sequence_set(void);
     void tps_vcom_set(uint16_t vcom);
     void tps_vposvneg_set(void);

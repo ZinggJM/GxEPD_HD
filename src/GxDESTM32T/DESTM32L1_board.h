@@ -1,4 +1,4 @@
-// DESTM32L1_board.h : IO port definitions for display IO component class for GDE06BA on DESTM32-T parallel interface e-paper display from Dalian Good Display Inc.
+// DESTM32L1_board.h : IO port definitions for display IO component class for GDE060BA on DESTM32-T parallel interface e-paper display from Dalian Good Display Inc.
 //
 // Created by Jean-Marc Zingg based on demo code from Good Display for DESTM32-T board with DESTM32-Tcon-11.
 //

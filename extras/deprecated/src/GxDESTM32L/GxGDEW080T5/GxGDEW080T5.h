@@ -99,6 +99,8 @@ class GxGDEW080T5 : public GxEPD_HD
     // each call of drawCallback() should draw the same
     void drawPaged(void (*drawCallback)(void)){};
     void drawCornerTest(uint8_t em = 0x01){};
+    void powerOff() {}; // not implemented
+    void hibernate() {}; // not implemented
   private:
     void init_wave_table(void);
     void clear_display();

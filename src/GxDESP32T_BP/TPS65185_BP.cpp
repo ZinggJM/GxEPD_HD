@@ -1,4 +1,4 @@
-// Class TPS65185 : display IO component class for GDE060BA on DESTM32-T parallel interface e-paper display from Dalian Good Display Inc.
+// Class TPS65185_BP : display IO component class for GDE060BA on DESTM32-T parallel interface e-paper display from Dalian Good Display Inc.
 //
 // Created by Jean-Marc Zingg based on demo code from Good Display for DESTM32-T board with DESTM32-Tcon-11.
 //
@@ -13,8 +13,8 @@
 //#if defined(ARDUINO_ARCH_STM32F1)
 #if defined(ARDUINO_ARCH_ESP32)
 
-#include "TPS65185.h"
-#include "DESP32T_wiring.h"
+#include "TPS65185_BP.h"
+#include "DESP32T_BP_wiring.h"
 #include <Wire.h>
 
 #define TI_REG_TMST_VALUE	0x00	//Thermistor value read by ADC
@@ -53,7 +53,7 @@
 #define TI_DWNLY24MS		2
 #define TI_DWNLY48MS		3
 
-void TPS65185::I2C_Write(uint8_t dev_addr, uint8_t reg_addr, uint8_t dat)
+void TPS65185_BP::I2C_Write(uint8_t dev_addr, uint8_t reg_addr, uint8_t dat)
 {
   //Serial1.println("I2C_Write");
   Wire.beginTransmission(dev_addr);
@@ -63,7 +63,7 @@ void TPS65185::I2C_Write(uint8_t dev_addr, uint8_t reg_addr, uint8_t dat)
   //Serial1.println("I2C_Write done");
 }
 
-uint8_t TPS65185::I2C_Read(uint8_t dev_addr, uint8_t reg_addr)
+uint8_t TPS65185_BP::I2C_Read(uint8_t dev_addr, uint8_t reg_addr)
 {
   uint8_t dat = 0;
   Wire.beginTransmission(dev_addr);
@@ -78,7 +78,7 @@ uint8_t TPS65185::I2C_Read(uint8_t dev_addr, uint8_t reg_addr)
 }
 
 
-void TPS65185::I2C_Write_Frame(uint8_t dev_addr, uint8_t reg_addr, uint8_t length, uint8_t* dat)
+void TPS65185_BP::I2C_Write_Frame(uint8_t dev_addr, uint8_t reg_addr, uint8_t length, uint8_t* dat)
 {
   Wire.beginTransmission(dev_addr);
   Wire.write(reg_addr);
@@ -87,7 +87,7 @@ void TPS65185::I2C_Write_Frame(uint8_t dev_addr, uint8_t reg_addr, uint8_t lengt
 }
 
 
-void TPS65185::I2C_Read_Frame(uint8_t dev_addr, uint8_t reg_addr, uint8_t length, uint8_t* dat)
+void TPS65185_BP::I2C_Read_Frame(uint8_t dev_addr, uint8_t reg_addr, uint8_t length, uint8_t* dat)
 {
   for (uint8_t i = 0; i < length; i++)
   {
@@ -103,7 +103,7 @@ void TPS65185::I2C_Read_Frame(uint8_t dev_addr, uint8_t reg_addr, uint8_t length
   }
 }
 
-void TPS65185::tps_power_sequence_set(void)
+void TPS65185_BP::tps_power_sequence_set(void)
 {
   uint8_t dat;
 
@@ -120,7 +120,7 @@ void TPS65185::tps_power_sequence_set(void)
   I2C_Write(TPS65185_ADDR, TI_REG_DWNSEQ1, dat);
 }
 
-void TPS65185::tps_vcom_set(uint16_t vcom)
+void TPS65185_BP::tps_vcom_set(uint16_t vcom)
 {
   uint8_t dat;
 
@@ -131,12 +131,12 @@ void TPS65185::tps_vcom_set(uint16_t vcom)
   I2C_Write(TPS65185_ADDR, TI_REG_VCOM2, dat);
 }
 
-void TPS65185::tps_vposvneg_set(void)
+void TPS65185_BP::tps_vposvneg_set(void)
 {
   I2C_Write(TPS65185_ADDR, TI_REG_VADJ, 0x23);	//15V
 }
 
-uint8_t TPS65185::ti_read_int_status(void)
+uint8_t TPS65185_BP::ti_read_int_status(void)
 {
   uint8_t dat;
 
@@ -144,7 +144,7 @@ uint8_t TPS65185::ti_read_int_status(void)
   return dat;
 }
 
-void TPS65185::tps_read_all_reg(void)
+void TPS65185_BP::tps_read_all_reg(void)
 {
   uint8_t i;
   uint8_t buff[16];
@@ -163,44 +163,44 @@ void TPS65185::tps_read_all_reg(void)
   Debug_str("\r\ntps read reg end\r\n\r\n");
 }
 
-void TPS65185::tps_sleep_to_standby(void)
+void TPS65185_BP::tps_sleep_to_standby(void)
 {
   TPS_WAKEUP_H;
   delay(10);
 
   tps_power_sequence_set();
   //tps_vposvneg_set();
-  tps_vcom_set(_vcom);			//VCOM����Ϊ-2.00V
+  tps_vcom_set(_vcom);
 }
 
-void TPS65185::tps_standby_to_sleep(void)
+void TPS65185_BP::tps_standby_to_sleep(void)
 {
   TPS_PWRCOM_L;
   TPS_PWRUP_L;
   TPS_WAKEUP_L;
 }
 
-void TPS65185::tps_source_gate_enable(void)
+void TPS65185_BP::tps_source_gate_enable(void)
 {
   TPS_PWRUP_H;
 }
 
-void TPS65185::tps_source_gate_disable(void)
+void TPS65185_BP::tps_source_gate_disable(void)
 {
   TPS_PWRUP_L;
 }
 
-void TPS65185::tps_vcom_enable(void)
+void TPS65185_BP::tps_vcom_enable(void)
 {
   TPS_PWRCOM_H;
 }
 
-void TPS65185::tps_vcom_disable(void)
+void TPS65185_BP::tps_vcom_disable(void)
 {
   TPS_PWRCOM_L;
 }
 
-void TPS65185::tps_init(uint16_t vcom, Stream* pDiagnosticOutput)
+void TPS65185_BP::tps_init(uint16_t vcom, Stream* pDiagnosticOutput)
 {
   _vcom = vcom;
   _pDiagnosticOutput = pDiagnosticOutput;
@@ -215,23 +215,23 @@ void TPS65185::tps_init(uint16_t vcom, Stream* pDiagnosticOutput)
 
   tps_power_sequence_set();
   //tps_vposvneg_set();
-  tps_vcom_set(vcom);			//VCOM����Ϊ-2.00V
+  tps_vcom_set(vcom);
 
   tps_read_all_reg();
 }
 
-void TPS65185::tps_end()
+void TPS65185_BP::tps_end()
 {
   //Wire.end(); // missing
   Wire.flush();
 }
 
-void TPS65185::Debug_str(const char *s)
+void TPS65185_BP::Debug_str(const char *s)
 {
   if (_pDiagnosticOutput) _pDiagnosticOutput->print(s);
 }
 
-void TPS65185::Debug_hex(unsigned int dat)
+void TPS65185_BP::Debug_hex(unsigned int dat)
 {
   char buf[8];
   unsigned char i;
@@ -270,7 +270,7 @@ void TPS65185::Debug_hex(unsigned int dat)
   Debug_str(buf);
 }
 
-void TPS65185::Debug_dec(unsigned int dat)
+void TPS65185_BP::Debug_dec(unsigned int dat)
 {
   char buf[7];
 

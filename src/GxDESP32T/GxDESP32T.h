@@ -1,4 +1,4 @@
-// Class GxDESP32T : display IO class for GDE06BA on my DESP32T (proto board) for TCon-11 parallel interface e-paper display from Dalian Good Display Inc.
+// Class GxDESP32T : display IO class for GDE060BA on my DESP32T (proto board) for TCon-11 parallel interface e-paper display from Dalian Good Display Inc.
 //
 // Created by Jean-Marc Zingg based on demo code from Good Display for DESTM32-T board with DESTM32-Tcon-11.
 //
@@ -34,11 +34,13 @@ class GxDESP32T : public GxEPD_HD_IOCTRL
     void refresh(bool partial_update_mode = false);
     // screen refresh from controller memory, partial screen
     void refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partial_update_mode = false);
-    void powerOff();
     void updateWindow(const uint8_t* bitmap, uint32_t size, uint32_t width, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
     void writeFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value);
     void drawFilledRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t depth, uint8_t value);
+    void powerOff();
+    void hibernate();
   private:
+    void _wake_up();
     void epd_draw_gray(uint8_t gray);
     void Debug_str(const char *s);
   private:
@@ -48,7 +50,7 @@ class GxDESP32T : public GxEPD_HD_IOCTRL
     uint16_t _width;
     uint16_t _height;
     uint16_t _vcom;
-    bool _power_is_on;
+    bool _power_is_on, _hibernating;
     Stream* _pDiagnosticOutput;
     static const uint8_t bw2grey8[];
     static const uint16_t bw2grey16[];
