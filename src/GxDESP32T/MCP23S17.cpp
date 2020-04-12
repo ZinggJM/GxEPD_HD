@@ -22,7 +22,7 @@
 
 #if USE_BANK == 0
 
-// defines for BANK = 1
+// defines for BANK = 0
 #define IODIRA   0x00
 #define IODIRB   0x01
 #define IPOLA    0x02

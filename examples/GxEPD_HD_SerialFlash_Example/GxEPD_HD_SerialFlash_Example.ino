@@ -30,11 +30,25 @@
 #include <SPI.h>
 
 // digital pin for flash chip CS pin:
+#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
 const int FlashChipSelect = SS; // for onboard W25Q16BVSIG
 //const int FlashChipSelect = PC4; // e.g. for breakout flash board added
+#else
+const int FlashChipSelect = 32; // for W25Q16BVSIG on my DESP32T_BP proto board
+#endif
 
 // select the display io class to use, only one
+#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
+#include <GxDESTM32T/GxDESTM32T.h>
 GxDESTM32T io;
+#else
+// next is for my DESP32T (proto board) for TCon-11 parallel interface
+//#include <GxDESP32T/GxDESP32T.h>
+//GxDESP32T io;
+// next is for my DESP32T_BP (proto board) for TCon-11 parallel interface
+#include <GxDESP32T_BP/GxDESP32T_BP.h>
+GxDESP32T_BP io;
+#endif
 
 // select the base display class to use, only one
 //GxGDE043A2 base_display(io);
@@ -42,17 +56,24 @@ GxGDE060BA base_display(io);
 //GxGDEW080T5 base_display(io);
 
 // select the graphics display template class to use, only one
-//GxEPD_HD_BW<GxGDE043A2, GxGDE043A2::HEIGHT> display(base_display); // full height, one page, no RAM remaining
-//GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page, no RAM remaining
+#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
 //GxEPD_HD_BW < GxGDE043A2, GxGDE043A2::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
 GxEPD_HD_BW < GxGDE060BA, GxGDE060BA::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
 //GxEPD_HD_BW < GxGDEW080T5, GxGDEW080T5::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~11k RAM remaining
+#else
+//GxEPD_HD_BW<GxGDE043A2, GxGDE043A2::HEIGHT> display(base_display); // full height, one page
+GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page
+#endif
 
+#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
 // select diagnostic output stream, only one
 //HardwareSerial& DiagnosticStream = Serial1; // pins PA9, PA10
 HardwareSerial& DiagnosticStream = Serial2; // pins PA2, PA3 for USB jumpers
 //HardwareSerial& DiagnosticStream = Serial3; // pins PB10, PB11
 //USBSerial& DiagnosticStream = Serial; // pins PA11, PA12 USB direct?
+#else
+HardwareSerial& DiagnosticStream = Serial; // ESP32
+#endif
 
 // function declaration with default parameter
 // note that BMP bitmaps are drawn at physical position in physical orientation of the screen
@@ -65,9 +86,10 @@ void setup()
   DiagnosticStream.println();
   DiagnosticStream.println("GxEPD_HD_SerialFlash_Example");
 
+  //display.init(&DiagnosticStream);
   display.init();
 
-  listFiles();
+  //listFiles();
 
   //drawBitmaps_200x200();
   //drawBitmaps_other();
@@ -78,6 +100,7 @@ void setup()
   drawBitmaps_test_16G();
 
   display.powerOff();
+  display.hibernate();
 
   DiagnosticStream.println("GxEPD_HD_SerialFlash_Example done");
 }
@@ -118,8 +141,10 @@ void listFiles()
   {
     DiagnosticStream.println("Unable to access SPI Flash chip");
   }
+#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
   SPI.end(); // release SPI pins
   pinMode(FlashChipSelect, INPUT); // CS also!
+#endif
 }
 
 void spaces(int num)
@@ -309,6 +334,7 @@ void drawBitmapFromSerialFlash(const char *filename, int16_t x, int16_t y, bool 
         uint16_t planes = read16(file);
         uint16_t depth = read16(file); // bits per pixel
         uint32_t format = read32(file);
+        (void) creatorBytes; // not used
         if ((planes == 1) && ((format == 0) || (format == 3))) // uncompressed is handled, 565 also
         {
           DiagnosticStream.print("File size: "); DiagnosticStream.println(fileSize);
@@ -453,8 +479,10 @@ void drawBitmapFromSerialFlash(const char *filename, int16_t x, int16_t y, bool 
     else DiagnosticStream.print("File not found");
   }
   else DiagnosticStream.println("Unable to access SPI Flash chip");
+#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
   SPI.end(); // release SPI pins
   pinMode(FlashChipSelect, INPUT); // CS also!
+#endif
 }
 
 // note that BMP bitmaps are drawn at physical position in physical orientation of the screen
@@ -485,6 +513,7 @@ void drawBitmapFromSerialFlash_16G(const char *filename, int16_t x, int16_t y, b
         uint16_t planes = read16(file);
         uint16_t depth = read16(file); // bits per pixel
         uint32_t format = read32(file);
+        (void) creatorBytes; // not used
         if ((planes == 1) && ((format == 0) || (format == 3))) // uncompressed is handled, 565 also
         {
           DiagnosticStream.print("File size: "); DiagnosticStream.println(fileSize);
@@ -627,8 +656,10 @@ void drawBitmapFromSerialFlash_16G(const char *filename, int16_t x, int16_t y, b
     else DiagnosticStream.print("File not found");
   }
   else DiagnosticStream.println("Unable to access SPI Flash chip");
+#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
   SPI.end(); // release SPI pins
   pinMode(FlashChipSelect, INPUT); // CS also!
+#endif
 }
 
 uint8_t read8(SerialFlashFile& f)

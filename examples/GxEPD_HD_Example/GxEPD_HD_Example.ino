@@ -22,6 +22,7 @@
 
 // select the display io class to use, only one
 #if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
+#include <GxDESTM32T/GxDESTM32T.h>
 GxDESTM32T io;
 #else
 // next is for my DESP32T (proto board) for TCon-11 parallel interface

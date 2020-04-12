@@ -666,7 +666,7 @@ void GxDESTM32T::powerOff()
 
 void GxDESTM32T::hibernate()
 {
-  SerialDiag.println("GxDESP32T::hibernate()");
+  //SerialDiag.println("GxDESP32T::hibernate()");
   powerOff();
   SYS_WAKEUP_L;
   _hibernating = true;
@@ -712,6 +712,8 @@ void GxDESTM32T::epd_draw_gray(uint8_t gray)
   avt.avt_ld_img_end();
   avt.avt_upd_full((avt.wf_mode << 8));
 
+  if (!_power_is_on) tps.tps_sleep_to_standby();
+  _power_is_on = true;
   tps.tps_vcom_enable();
   avt.avt_wait_dspe_trg();
   avt.avt_wait_dspe_frend();

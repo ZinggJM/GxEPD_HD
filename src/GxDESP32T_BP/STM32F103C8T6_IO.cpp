@@ -153,7 +153,7 @@ void STM32F103C8T6_IO::startTransfer(uint32_t length)
   SPI.beginTransaction(_spi_settings);
   digitalWrite(_cs, LOW);
   SPI.write16(TRANSFER_id);
-  SPI.write16(length << 16);
+  SPI.write16(length >> 16);
   SPI.write16(length);
 }
 

@@ -45,7 +45,11 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 - CPU Speed(MHz): "72MHz (Normal)"
 - Upload method: "STLink"
 
-### Version 0.0.10
+### Version 0.0.11
+- added missing #include to the examples
+- adapted GxEPD_HD_SerialFlash_Example and GxEPD_HD_SerialFlash_Annotated for GxDESP32T_BP
+- fixed long transfers in GxDESP32T_BP, e.g. for clearScreen()
+#### Version 0.0.10
 - added hibernate() support, switches off TCon-11 for minimal power use
 - added GxDESP32T_BP driver class for use with ESP32 with my other ESP32-Tcon-11 proto board
 - the proto board uses a STM32F103C8T6 (Blue Pill) for most TCon-11 control and data lines.
