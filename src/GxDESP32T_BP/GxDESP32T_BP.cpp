@@ -50,25 +50,24 @@ GxDESP32T_BP::GxDESP32T_BP() : tps(IO), avt(tps, IO), _pDiagnosticOutput(0)
   _hibernating = true;
 }
 
-void GxDESP32T_BP::init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput)
+void GxDESP32T_BP::init(GxEPD_HD::Panel panel, uint16_t vcom_mV, Stream* pDiagnosticOutput)
 {
   _panel = panel;
+  if (vcom_mV <= 5000) _vcom = vcom_mV;
+  else _vcom = 2000;
   switch (panel)
   {
     case GxEPD_HD::GDE043A2:
       _width = 800;
       _height = 600;
-      _vcom = 2000;
       break;
     case GxEPD_HD::GDE060BA:
       _width = 800;
       _height = 600;
-      _vcom = 2000;
       break;
     case GxEPD_HD::GDEW080T5:
       _width = 1024;
       _height = 768;
-      _vcom = 2200;
       break;
   }
   _pDiagnosticOutput = pDiagnosticOutput;

@@ -26,7 +26,8 @@ class GxGDEW080T5 : public GxEPD_HD_EPD
     static const bool hasPartialUpdate = true;
     static const bool hasFastPartialUpdate = true;
     // constructor
-    GxGDEW080T5(GxEPD_HD_IOCTRL& io);
+    GxGDEW080T5(GxEPD_HD_IOCTRL& io, uint16_t vcom_mV = 2200); // abs(vcom*1000)
+    GxGDEW080T5(GxEPD_HD_IOCTRL& io, double vcom);
     // methods (virtual)
     void init(Stream* pDiagnosticOutput = 0); // (pDiagnosticOutput = 0) : disabled
     //  Support for Bitmaps (Sprites) to Controller Buffer and to Screen
@@ -47,6 +48,7 @@ class GxGDEW080T5 : public GxEPD_HD_EPD
     void hibernate();
   private:
     GxEPD_HD_IOCTRL& IO;
+    uint16_t _vcom_mV; // abs(vcom*1000)
 };
 
 #endif

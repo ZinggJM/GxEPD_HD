@@ -45,7 +45,11 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 - CPU Speed(MHz): "72MHz (Normal)"
 - Upload method: "STLink"
 
-### Version 0.0.11
+### Version 0.0.12
+- updated waveform table with actual version from Good Display
+- added vcom parameter to constructor (take value from sticker on flex connector)
+- added examples GxEPD_HD_WiFi_Example, GxEPD_HD_Spiffs_Example, GxEPD_HD_Spiffs_Loader
+#### Version 0.0.11
 - added missing #include to the examples
 - adapted GxEPD_HD_SerialFlash_Example and GxEPD_HD_SerialFlash_Annotated for GxDESP32T_BP
 - fixed long transfers in GxDESP32T_BP, e.g. for clearScreen()

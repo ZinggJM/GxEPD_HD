@@ -12,15 +12,19 @@
 
 #include "GxGDE060BA.h"
 
-//GxGDE060BA::GxGDE060BA(GxDESTM32T& io) :
-GxGDE060BA::GxGDE060BA(GxEPD_HD_IOCTRL& io) :
-  GxEPD_HD_EPD(WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate), IO(io)
+GxGDE060BA::GxGDE060BA(GxEPD_HD_IOCTRL& io, uint16_t vcom_mV) :
+  GxEPD_HD_EPD(WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate), IO(io), _vcom_mV(vcom_mV)
+{
+}
+
+GxGDE060BA::GxGDE060BA(GxEPD_HD_IOCTRL& io, double vcom) :
+  GxEPD_HD_EPD(WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate), IO(io), _vcom_mV(abs(vcom * 1000))
 {
 }
 
 void GxGDE060BA::init(Stream* pDiagnosticOutput)
 {
-  IO.init(GxEPD_HD::GDE060BA, pDiagnosticOutput);
+  IO.init(GxEPD_HD::GDE060BA, _vcom_mV, pDiagnosticOutput);
 }
 
 void GxGDE060BA::clearScreen(uint8_t value)

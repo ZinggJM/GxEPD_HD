@@ -51,9 +51,11 @@ GxDESP32T_BP io;
 #endif
 
 // select the base display class to use, only one
-//GxGDE043A2 base_display(io);
-GxGDE060BA base_display(io);
-//GxGDEW080T5 base_display(io);
+//GxGDE043A2 base_display(io); // default vcom used (-2.0V)
+//GxGDE060BA base_display(io); // default vcom used (-2.0V)
+GxGDE060BA base_display(io, -2.3); // vcom from sticker on flex connector of my panel, as double
+//GxGDE060BA base_display(io, 2300); // or as abs(vcom*1000) in mV, as uint16_t 
+//GxGDEW080T5 base_display(io); // default vcom used (-2.2V)
 
 // select the graphics display template class to use, only one
 #if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
@@ -99,7 +101,7 @@ void setup()
   drawBitmaps_other_16G();
   drawBitmaps_test_16G();
 
-  display.powerOff();
+  //display.powerOff();
   display.hibernate();
 
   DiagnosticStream.println("GxEPD_HD_SerialFlash_Example done");
@@ -295,15 +297,15 @@ void drawBitmaps_test_16G()
   delay(2000);
 }
 
-static const uint16_t input_buffer_pixels = 800; // may affect performance
+static const uint16_t input_buffer_pixels = 1024; // may affect performance
 
-static const uint16_t max_row_width = 800; // for up to 7.5" display 800x480
+static const uint16_t max_row_width = 1024; // for up to 8" display 1024x768
 static const uint16_t max_palette_pixels = 256; // for depth <= 8
 
 uint8_t input_buffer[3 * input_buffer_pixels]; // up to depth 24
 uint8_t output_row_mono_buffer[max_row_width / 8]; // buffer for at least one row of b/w bits
 uint8_t mono_palette_buffer[max_palette_pixels / 8]; // palette buffer for depth <= 8 b/w
-uint8_t output_row_grey_buffer[max_row_width / 4]; // buffer for at least one row of 4 grey bits
+uint8_t output_row_grey_buffer[max_row_width / 2]; // buffer for at least one row of 4 grey bits
 uint8_t grey_palette_buffer[max_palette_pixels]; // palette buffer for depth <= 8, 8 grey bits
 
 // note that BMP bitmaps are drawn at physical position in physical orientation of the screen
@@ -476,7 +478,7 @@ void drawBitmapFromSerialFlash(const char *filename, int16_t x, int16_t y, bool 
         DiagnosticStream.println("bitmap format not handled.");
       }
     } // if (file)
-    else DiagnosticStream.print("File not found");
+    else DiagnosticStream.println("File not found");
   }
   else DiagnosticStream.println("Unable to access SPI Flash chip");
 #if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
@@ -653,7 +655,7 @@ void drawBitmapFromSerialFlash_16G(const char *filename, int16_t x, int16_t y, b
         DiagnosticStream.println("bitmap format not handled.");
       }
     } // if (file)
-    else DiagnosticStream.print("File not found");
+    else DiagnosticStream.println("File not found");
   }
   else DiagnosticStream.println("Unable to access SPI Flash chip");
 #if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)

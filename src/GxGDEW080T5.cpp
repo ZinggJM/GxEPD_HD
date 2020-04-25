@@ -12,14 +12,19 @@
 
 #include "GxGDEW080T5.h"
 
-GxGDEW080T5::GxGDEW080T5(GxEPD_HD_IOCTRL& io) :
-  GxEPD_HD_EPD(WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate), IO(io)
+GxGDEW080T5::GxGDEW080T5(GxEPD_HD_IOCTRL& io, uint16_t vcom_mV) :
+  GxEPD_HD_EPD(WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate), IO(io), _vcom_mV(vcom_mV)
+{
+}
+
+GxGDEW080T5::GxGDEW080T5(GxEPD_HD_IOCTRL& io, double vcom) :
+  GxEPD_HD_EPD(WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate), IO(io), _vcom_mV(abs(vcom * 1000))
 {
 }
 
 void GxGDEW080T5::init(Stream* pDiagnosticOutput)
 {
-  IO.init(GxEPD_HD::GDEW080T5, pDiagnosticOutput);
+  IO.init(GxEPD_HD::GDEW080T5, _vcom_mV, pDiagnosticOutput);
 }
 
 void GxGDEW080T5::clearScreen(uint8_t value)

@@ -26,7 +26,8 @@ class GxGDE060BA : public GxEPD_HD_EPD
     static const bool hasPartialUpdate = true;
     static const bool hasFastPartialUpdate = true;
     // constructor
-    GxGDE060BA(GxEPD_HD_IOCTRL& io);
+    GxGDE060BA(GxEPD_HD_IOCTRL& io, uint16_t vcom_mV = 2000); // abs(vcom*1000)
+    GxGDE060BA(GxEPD_HD_IOCTRL& io, double vcom);
     // methods (virtual)
     void init(Stream* pDiagnosticOutput = 0); // (pDiagnosticOutput = 0) : disabled
     //  Support for Bitmaps (Sprites) to Controller Buffer and to Screen
@@ -46,8 +47,8 @@ class GxGDE060BA : public GxEPD_HD_EPD
     void powerOff();
     void hibernate();
   private:
-    //GxDESTM32T& IO;
     GxEPD_HD_IOCTRL& IO;
+    uint16_t _vcom_mV; // abs(vcom*1000)
 };
 
 #endif

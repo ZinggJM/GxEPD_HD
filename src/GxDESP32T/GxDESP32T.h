@@ -19,7 +19,7 @@ class GxDESP32T : public GxEPD_HD_IOCTRL
 {
   public:
     GxDESP32T();
-    void init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput); // (pDiagnosticOutput = 0) : disabled
+    void init(GxEPD_HD::Panel panel, uint16_t vcom_mV, Stream* pDiagnosticOutput); // (pDiagnosticOutput = 0) : disabled
     //  Support for Bitmaps (Sprites) to Controller Buffer and to Screen
     void clearScreen(uint8_t value = 0xFF); // init controller memory and screen (default white)
     // write to controller memory, without screen refresh; x and w should be multiple of 8

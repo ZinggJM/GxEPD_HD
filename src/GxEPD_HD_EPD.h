@@ -20,7 +20,7 @@
 class GxEPD_HD_IOCTRL
 {
   public:
-    virtual void init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput) = 0;
+    virtual void init(GxEPD_HD::Panel panel, uint16_t vcom_mV, Stream* pDiagnosticOutput) = 0;
     //  Support for Bitmaps (Sprites) to Controller Buffer and to Screen
     virtual void clearScreen(uint8_t value = 0xFF) = 0; // init controller memory and screen (default white)
     // write to controller memory, without screen refresh; x and w should be multiple of 8

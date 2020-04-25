@@ -34,9 +34,11 @@ GxDESP32T_BP io;
 #endif
 
 // select the base display class to use, only one
-//GxGDE043A2 base_display(io);
-GxGDE060BA base_display(io);
-//GxGDEW080T5 base_display(io);
+//GxGDE043A2 base_display(io); // default vcom used (-2.0V)
+//GxGDE060BA base_display(io); // default vcom used (-2.0V)
+GxGDE060BA base_display(io, -2.3); // vcom from sticker on flex connector of my panel, as double
+//GxGDE060BA base_display(io, 2300); // or as abs(vcom*1000) in mV, as uint16_t 
+//GxGDEW080T5 base_display(io); // default vcom used (-2.2V)
 
 // select the graphics display template class to use, only one
 #if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)

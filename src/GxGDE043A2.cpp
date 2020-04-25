@@ -12,14 +12,19 @@
 
 #include "GxGDE043A2.h"
 
-GxGDE043A2::GxGDE043A2(GxEPD_HD_IOCTRL& io) :
-  GxEPD_HD_EPD(WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate), IO(io)
+GxGDE043A2::GxGDE043A2(GxEPD_HD_IOCTRL& io, uint16_t vcom_mV) :
+  GxEPD_HD_EPD(WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate), IO(io), _vcom_mV(vcom_mV)
+{
+}
+
+GxGDE043A2::GxGDE043A2(GxEPD_HD_IOCTRL& io, double vcom) :
+  GxEPD_HD_EPD(WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate), IO(io), _vcom_mV(abs(vcom * 1000))
 {
 }
 
 void GxGDE043A2::init(Stream* pDiagnosticOutput)
 {
-  IO.init(GxEPD_HD::GDE043A2, pDiagnosticOutput);
+  IO.init(GxEPD_HD::GDE043A2, _vcom_mV, pDiagnosticOutput);
 }
 
 void GxGDE043A2::clearScreen(uint8_t value)
