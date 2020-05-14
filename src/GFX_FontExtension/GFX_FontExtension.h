@@ -43,6 +43,7 @@ class GFX_FontExtension : public Adafruit_GFX
     GFX_FontExtension(int16_t w, int16_t h) : Adafruit_GFX(w, h) {};
     void drawChar(int16_t x, int16_t y, uint16_t c, uint16_t color, uint16_t bg, uint8_t size_x, uint8_t size_y, const GFX_FxFont::GFXfont* gfxFont);
     virtual size_t write(uint8_t);
+    void setFont(const GFXfont *f = NULL);
     void setFont(const GFX_FxFont::GFXfont* f); // use this to set a font (to its page)
     void setFont(const GFX_FxFont::GFXfont* f, uint8_t page); // use setFont(0, page); to remove a font, e.g. setFont(0, FreeMonoBold12pt7b.first / 256);
   private:

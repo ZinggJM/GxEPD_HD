@@ -154,22 +154,24 @@ size_t GFX_FontExtension::write(uint8_t data)
   const GFX_FxFont::GFXfont* gfxFont = gfxFonts[c / 256];
   if (!gfxFont) // 'Classic' built-in font
   {
-    if (c > 255) return 1; // Stop 16 bit characters
-    if (c == '\n') // Newline?
-    {
-      cursor_x  = 0;              // Reset x to zero,
-      cursor_y += textsize_y * 8; // advance y one line
-    }
-    else if (c != '\r') // Ignore carriage returns
-    {
-      if (wrap && ((cursor_x + textsize_x * 6) > _width)) // Off right?
-      {
-        cursor_x  = 0;              // Reset x to zero,
-        cursor_y += textsize_y * 8; // advance y one line
-      }
-      Adafruit_GFX::drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize_x, textsize_y);
-      cursor_x += textsize_x * 6;   // Advance x one char
-    }
+    // or gfxFont in Adafruit_GFX base class in this version; delegate to Adafruit_GFX
+    Adafruit_GFX::write(uint8_t(c));
+    //    if (c > 255) return 1; // Stop 16 bit characters
+    //    if (c == '\n') // Newline?
+    //    {
+    //      cursor_x  = 0;              // Reset x to zero,
+    //      cursor_y += textsize_y * 8; // advance y one line
+    //    }
+    //    else if (c != '\r') // Ignore carriage returns
+    //    {
+    //      if (wrap && ((cursor_x + textsize_x * 6) > _width)) // Off right?
+    //      {
+    //        cursor_x  = 0;              // Reset x to zero,
+    //        cursor_y += textsize_y * 8; // advance y one line
+    //      }
+    //      Adafruit_GFX::drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize_x, textsize_y);
+    //      cursor_x += textsize_x * 6;   // Advance x one char
+    //    }
   }
   else // Custom font
   {
@@ -201,6 +203,11 @@ size_t GFX_FontExtension::write(uint8_t data)
     }
   }
   return 1;
+}
+
+void GFX_FontExtension::setFont(const GFXfont *f)
+{
+  Adafruit_GFX::setFont(f);
 }
 
 void GFX_FontExtension::setFont(const GFX_FxFont::GFXfont* f)
