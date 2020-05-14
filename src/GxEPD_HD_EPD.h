@@ -1,6 +1,9 @@
-// class GxEPD_HD_EPD : Base Class for Display Classes for e-Paper Displays from Dalian Good Display Co., Ltd.: www.good-display.com
+// Display Library for parallel interface e-paper panels from Dalian Good Display Co., Ltd.: www.e-paper-display.com
 //
-// based on Demo Examples from Good Display, available here: http://www.good-display.com/download_list/downloadcategoryid=34&isMode=false.html
+// based on Demo Examples from Good Display, available here: http://www.e-paper-display.com/download_list/downloadcategoryid=34&isMode=false.html
+//
+// class GxEPD_HD_EPD : Base class for panel driving classes
+// class GxEPD_HD_IOCTRL : Base class for panel driving connection classes
 //
 // Author : J-M Zingg
 //

@@ -45,7 +45,16 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 - CPU Speed(MHz): "72MHz (Normal)"
 - Upload method: "STLink"
 
-### Version 0.0.12
+### Version 0.0.13
+- added GFX_FontExtension, UTF-8 fonts extension for up to 256 code range pages
+- GFX_FontExtension is a preliminary version, released for tests
+- GFX_FontExtension uses namespaces until new gfxfont.h is released with Adafruit_GFX
+- added Fonts/Hindi12pt8b.h for use with GFX_FontExtension
+- additional fonts can be created with fontconverter from https://github.com/Bodmer/GFX_Font_Converter
+- added example GxEPD_HD_FontExtension, shows how to use the actual GFX_FontExtension with Hindi12pt8b.h
+- removed support for old DESTM32L, is now in library GxEPDxL
+- caution: it is Version 13
+#### Version 0.0.12
 - updated waveform table with actual version from Good Display
 - added vcom parameter to constructor (take value from sticker on flex connector)
 - added examples GxEPD_HD_WiFi_Example, GxEPD_HD_Spiffs_Example, GxEPD_HD_Spiffs_Loader

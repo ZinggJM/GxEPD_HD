@@ -1,23 +1,37 @@
-// Display Library for SPI e-paper panels from Dalian Good Display and boards from Waveshare.
-// Requires HW SPI and Adafruit_GFX. Caution: these e-papers require 3.3V supply AND data lines!
+// Display Library for parallel interface e-paper panels from Dalian Good Display Co., Ltd.: www.e-paper-display.com
 //
-// based on Demo Example from Good Display: http://www.good-display.com/download_list/downloadcategoryid=34&isMode=false.html
+// based on Demo Examples from Good Display, available here: http://www.e-paper-display.com/download_list/downloadcategoryid=34&isMode=false.html
 //
-// Author: Jean-Marc Zingg
+// class GxEPD_HD_GFX : Base class for the template classes for buffered graphics and text drawing
 //
-// Version: see library.properties
+// Author : J-M Zingg
 //
-// Library: https://github.com/ZinggJM/GxEPD2
+// Version : see library.properties
+//
+// License: GNU GENERAL PUBLIC LICENSE V3, see LICENSE
+//
+// Library: https://github.com/ZinggJM/GxEPD_HD
 
 #ifndef _GxEPD_HD_GFX_H_
 #define _GxEPD_HD_GFX_H_
 
 #include <Adafruit_GFX.h>
 
+// optional, can be commented out if not needed
+#include "GFX_FontExtension/GFX_FontExtension.h"
+
+#ifndef _GFX_FontExtension_H_
 class GxEPD_HD_GFX : public Adafruit_GFX
+#else
+class GxEPD_HD_GFX : public GFX_FontExtension
+#endif
 {
   public:
+#ifndef _GFX_FontExtension_H_
     GxEPD_HD_GFX(GxEPD_HD_EPD& _epd_hd, int16_t w, int16_t h) : Adafruit_GFX(w, h), epd_hd(_epd_hd) {};
+#else
+    GxEPD_HD_GFX(GxEPD_HD_EPD& _epd_hd, int16_t w, int16_t h) : GFX_FontExtension(w, h), epd_hd(_epd_hd) {};
+#endif
     virtual uint16_t pages() = 0;
     virtual uint16_t pageHeight() = 0;
     virtual bool mirror(bool m) = 0;

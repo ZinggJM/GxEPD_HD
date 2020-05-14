@@ -1,14 +1,16 @@
+// Display Library for parallel interface e-paper panels from Dalian Good Display Co., Ltd.: www.e-paper-display.com
+//
+// based on Demo Examples from Good Display, available here: http://www.e-paper-display.com/download_list/downloadcategoryid=34&isMode=false.html
+//
 // Class GxGDE060BA : display class for GDE060BA on DESTM32-T parallel interface e-paper display from Dalian Good Display Inc.
 //
-// Created by Jean-Marc Zingg based on demo code from Good Display for DESTM32-T board with DESTM32-Tcon-11.
+// Author : J-M Zingg
 //
-// To be used with "STM32F103VE" of "Generic STM32F103V series" of package "STM32 Boards (STM32Duino.com)" for Arduino.
-// install package with Boards Manager after adding to preferences in additional Boards Manager URLs:
-// https://raw.githubusercontent.com/stm32duino/BoardManagerFiles/master/STM32/package_stm_index.json
+// Version : see library.properties
 //
-// The e-paper display and demo board is available from:
-// http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571_10574&product_id=57650
-// or https://www.aliexpress.com/store/product/6-inch-HD-Interface-High-resolution-electronic-paper-display-e-ink-epaper-with-TCON-Demo-Kit/600281_32838449413.html
+// License: GNU GENERAL PUBLIC LICENSE V3, see LICENSE
+//
+// Library: https://github.com/ZinggJM/GxEPD_HD
 
 #include "GxGDE060BA.h"
 
