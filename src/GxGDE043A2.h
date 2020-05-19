@@ -36,12 +36,12 @@ class GxGDE043A2 : public GxEPD_HD_EPD
     void clearScreen(uint8_t value = 0xFF); // init controller memory and screen (default white)
     // write to controller memory, without screen refresh; x and w should be multiple of 8
     void writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
-    void writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                                 uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx = 0, uint16_t dy = 0);
+    void writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
+                        int16_t x, int16_t y, int16_t w, int16_t h);
     // write to controller memory, with screen refresh; x and w should be multiple of 8
     void drawImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
-    void drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                         uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx = 0, uint16_t dy = 0);
+    void drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
+                       int16_t x, int16_t y, int16_t w, int16_t h);
     // screen refresh from controller memory to full screen
     void refresh(bool partial_update_mode = false);
     // screen refresh from controller memory, partial screen

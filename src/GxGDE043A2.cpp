@@ -36,48 +36,24 @@ void GxGDE043A2::clearScreen(uint8_t value)
 
 void GxGDE043A2::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
-  if (x >= WIDTH) return;
-  if (y >= HEIGHT) return;
-  if (x + w > WIDTH) w = WIDTH - x;
-  if (y + h > HEIGHT) h = HEIGHT - y;
-  uint16_t x8 = x - x % 8; // byte boundary
-  uint16_t w8 = ((w + x - x8 + 7) / 8) * 8; // byte boundary
-  IO.writeImage(bitmap, size, depth, x8, y, w8, h);
+  IO.writeImage(bitmap, size, depth, x, y, w, h);
 }
 
-void GxGDE043A2::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                                uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
+void GxGDE043A2::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
+                                int16_t x, int16_t y, int16_t w, int16_t h)
 {
-  if (x + dx >= WIDTH) return;
-  if (y + dy >= HEIGHT) return;
-  if (x + dx + w > WIDTH) w = WIDTH - x - dx;
-  if (y + dy + h > HEIGHT) h = HEIGHT - y - dy;
-  uint16_t x8 = x - x % 8; // byte boundary
-  uint16_t w8 = ((w + x - x8 + 7) / 8) * 8; // byte boundary
-  IO.writeImagePart(bitmap, size, depth, width, x8, y, w8, h, dx, dy);
+  IO.writeImagePart(bitmap, size, depth, x_part, y_part, w_bitmap, h_bitmap, x, y, w, h);
 }
 
 void GxGDE043A2::drawImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
-  if (x >= WIDTH) return;
-  if (y >= HEIGHT) return;
-  if (x + w > WIDTH) w = WIDTH - x;
-  if (y + h > HEIGHT) h = HEIGHT - y;
-  uint16_t x8 = x - x % 8; // byte boundary
-  uint16_t w8 = ((w + x - x8 + 7) / 8) * 8; // byte boundary
-  IO.drawImage(bitmap, size, depth, x8, y, w8, h);
+  IO.drawImage(bitmap, size, depth, x, y, w, h);
 }
 
-void GxGDE043A2::drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                               uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
+void GxGDE043A2::drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
+                               int16_t x, int16_t y, int16_t w, int16_t h)
 {
-  if (x + dx >= WIDTH) return;
-  if (y + dy >= HEIGHT) return;
-  if (x + dx + w > WIDTH) w = WIDTH - x - dx;
-  if (y + dy + h > HEIGHT) h = HEIGHT - y - dy;
-  uint16_t x8 = x - x % 8; // byte boundary
-  uint16_t w8 = ((w + x - x8 + 7) / 8) * 8; // byte boundary
-  IO.drawImagePart(bitmap, size, depth, width, x8, y, w8, h, dx, dy);
+  IO.drawImagePart(bitmap, size, depth, x_part, y_part, w_bitmap, h_bitmap, x, y, w, h);
 }
 
 void GxGDE043A2::refresh(bool partial_update_mode)

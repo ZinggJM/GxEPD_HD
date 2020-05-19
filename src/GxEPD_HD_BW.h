@@ -129,7 +129,7 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
       w = gx_uint16_min(w, width() - x);
       h = gx_uint16_min(h, height() - y);
       if (using_rotation) _rotate(x, y, w, h);
-      epd_hd.drawImagePart(_buffer, sizeof(_buffer), 1, WIDTH, x, y, w, h);
+      epd_hd.drawImagePart(_buffer, sizeof(_buffer), 1, x, y, WIDTH, HEIGHT, x, y, w, h);
     }
 
     void setFullWindow()
@@ -291,20 +291,20 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
     {
       epd_hd.writeImage(bitmap, size, depth, x, y, w, h);
     }
-    void writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                        uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx = 0, uint16_t dy = 0)
+    void writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
+                        int16_t x, int16_t y, int16_t w, int16_t h)
     {
-      epd_hd.writeImagePart(bitmap, size, depth, width, x, y, w, h, dx, dy);
+      epd_hd.writeImagePart(bitmap, size, depth, x_part, y_part, w_bitmap, h_bitmap, x, y, w, h);
     }
     // write to controller memory, with screen refresh; x and w should be multiple of 8
     void drawImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
     {
       epd_hd.drawImage(bitmap, size, depth, x, y, w, h);
     }
-    void drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                       uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx = 0, uint16_t dy = 0)
+    void drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
+                       int16_t x, int16_t y, int16_t w, int16_t h)
     {
-      epd_hd.drawImagePart(bitmap, size, depth, width, x, y, w, h, dx, dy);
+      epd_hd.drawImagePart(bitmap, size, depth, x_part, y_part, w_bitmap, h_bitmap, x, y, w, h);
     }
     void refresh(bool partial_update_mode = false) // screen refresh from controller memory to full screen
     {

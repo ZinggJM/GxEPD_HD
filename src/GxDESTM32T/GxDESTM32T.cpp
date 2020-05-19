@@ -153,13 +153,16 @@ void GxDESTM32T::clearScreen(uint8_t value)
 void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
   Debug_str("writeImage start...\r\n");
-  if (_hibernating) _wake_up();
   if ((x >= _width) || (y >= _height)) return;
+  if (_hibernating) _wake_up();
+  uint32_t start = micros();
+  uint16_t bm_wb = w; // copy original w here, will be width bytes of bitmap
   if (x + w > _width) w = _width - x;
   if (y + h > _height) h = _height - y;
-  uint32_t idx = 0;
-  uint32_t n;
-  uint16_t dw;
+  uint32_t idx = 0; // source index
+  uint32_t n; // words to transfer
+  uint16_t ww; // words per row
+  uint16_t dw; // destination word
   switch (depth)
   {
     case 0: // corner test
@@ -180,11 +183,12 @@ void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth,
       }
       break;
     case 1:
+      bm_wb = (bm_wb + 7) / 8;
       avt.avt_run_sys();
       avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
+      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, 8 * bm_wb, h);
       avt.avt_wr_reg_addr(0x0154);
-      n = uint32_t(w) * uint32_t(h) / 8;
+      n = uint32_t(bm_wb) * uint32_t(h);
       for (uint32_t i = 0; i < n; i++)
       {
         uint8_t sb = idx < size ? bitmap[idx++] : 0xFF;
@@ -193,304 +197,180 @@ void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth,
       }
       break;
     case 2:
+      bm_wb = (bm_wb + 3) / 4;
+      ww = (w + 7) / 8; // "must be divisible by 8"
       avt.avt_run_sys();
       avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
+      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, 8 * ww, h);
       avt.avt_wr_reg_addr(0x0154);
-      n = uint32_t(w) * uint32_t(h) / 8;
-      for (uint32_t i = 0; i < n; i++)
+      for (uint16_t r = 0; r < h; r++)
       {
-        uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
-        uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
-        //dw = sb1 | (sb2 << 8);
-        dw = sb2 | (sb1 << 8);
-        avt.avt_i80_write_dat(dw);
+        for (uint16_t cw = 0; cw < ww; cw++)
+        {
+          if (bm_wb - 2 * cw >= 2)
+          {
+            uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
+            uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
+            dw = sb2 | (sb1 << 8);
+          }
+          else dw = 0xFF | (idx < size ? bitmap[idx++] : 0xFF) << 8;
+          avt.avt_i80_write_dat(dw);
+        }
       }
       break;
     case 4:
+      bm_wb = (bm_wb + 1) / 2;
+      ww = (w + 3) / 4; // "must be divisible by 4"
       avt.avt_run_sys();
       avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_4BPP, x, y, w, h);
+      avt.avt_ld_img_area(EPD_DATA_4BPP, x, y, 4 * ww, h);
       avt.avt_wr_reg_addr(0x0154);
-      n = uint32_t(w) * uint32_t(h) / 4;
-      for (uint32_t i = 0; i < n; i++)
+      for (uint16_t r = 0; r < h; r++)
       {
-        uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
-        uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
-        dw = sb2 | (sb1 << 8);
-        avt.avt_i80_write_dat(dw);
+        for (uint16_t cw = 0; cw < ww; cw++)
+        {
+          if (bm_wb - 2 * cw >= 2)
+          {
+            uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
+            uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
+            dw = sb2 | (sb1 << 8);
+          }
+          else dw = 0xFF | (idx < size ? bitmap[idx++] : 0xFF) << 8;
+          avt.avt_i80_write_dat(dw);
+        }
       }
       break;
     case 8:
+      ww = (w + 1) / 2; // "must be divisible by 2"
       avt.avt_run_sys();
       avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_8BPP, x, y, w, h);
+      avt.avt_ld_img_area(EPD_DATA_8BPP, x, y, 2 * ww, h);
       avt.avt_wr_reg_addr(0x0154);
-      n = uint32_t(w) * uint32_t(h) / 2;
-      for (uint32_t i = 0; i < n; i++)
+      for (uint16_t r = 0; r < h; r++)
       {
-        uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
-        uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
-        dw = sb2 | (sb1 << 8);
-        avt.avt_i80_write_dat(dw);
+        for (uint16_t cw = 0; cw < ww; cw++)
+        {
+          if (bm_wb - 2 * cw >= 2)
+          {
+            uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
+            uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
+            dw = sb2 | (sb1 << 8);
+          }
+          else dw = 0xFF | (idx < size ? bitmap[idx++] : 0xFF) << 8;
+          avt.avt_i80_write_dat(dw);
+        }
       }
       break;
-    default:
-      return;
   }
+  uint32_t trf = micros() - start;
   avt.avt_ld_img_end();
   Debug_str("writeImage end...\r\n");
+  uint32_t total = micros() - start;
+  //SerialDiag.print("trf : "); SerialDiag.print(trf); SerialDiag.print(" total : "); SerialDiag.println(total);
+  (void) trf; (void) total; // (void) warning unused
 }
 
-void GxDESTM32T::writeImage(uint8_t (*get)(uint32_t), uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+void GxDESTM32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
+                                  int16_t x, int16_t y, int16_t w, int16_t h)
 {
-  Debug_str("writeImage start...\r\n");
-  if (_hibernating) _wake_up();
+  Debug_str("writeImagePart start...\r\n");
   if ((x >= _width) || (y >= _height)) return;
+  if (_hibernating) _wake_up();
   if (x + w > _width) w = _width - x;
   if (y + h > _height) h = _height - y;
-  uint32_t idx = 0;
-  uint32_t n;
-  uint16_t dw;
-  switch (depth)
-  {
-    case 0: // corner test
-      avt.avt_run_sys();
-      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      for (uint16_t y1 = 0; y1 < h; y1++)
-      {
-        for (uint16_t x1 = 0; x1 < w; x1 += 8)
-        {
-          uint16_t dw = 0xFFFF;
-          if ((x1 < 32) && (y1 < 32)) dw = 0;
-          if ((x1 >= w - 48) && (y1 < 48)) dw = 0;
-          if ((x1 >= w - 64) && (y1 > h - 64)) dw = 0;
-          if ((x1 < 80) && (y1 > h - 80)) dw = 0x0003;
-          avt.avt_i80_write_dat(dw);
-        }
-      }
-      break;
-    case 1:
-      avt.avt_run_sys();
-      avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      n = uint32_t(w) * uint32_t(h) / 8;
-      for (uint32_t i = 0; i < n; i++)
-      {
-        uint8_t sb = idx < size ? get(idx++) : 0xFF;
-        dw = bw2grey16[sb];
-        avt.avt_i80_write_dat(dw);
-      }
-      break;
-    case 2:
-      avt.avt_run_sys();
-      avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      n = uint32_t(w) * uint32_t(h) / 8;
-      for (uint32_t i = 0; i < n; i++)
-      {
-        uint8_t sb1 = idx < size ? get(idx++) : 0xFF;
-        uint8_t sb2 = idx < size ? get(idx++) : 0xFF;
-        //dw = sb1 | (sb2 << 8);
-        dw = sb2 | (sb1 << 8);
-        avt.avt_i80_write_dat(dw);
-      }
-      break;
-    case 4:
-      avt.avt_run_sys();
-      avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_4BPP, x, y, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      n = uint32_t(w) * uint32_t(h) / 4;
-      for (uint32_t i = 0; i < n; i++)
-      {
-        uint8_t sb1 = idx < size ? get(idx++) : 0xFF;
-        uint8_t sb2 = idx < size ? get(idx++) : 0xFF;
-        dw = sb2 | (sb1 << 8);
-        avt.avt_i80_write_dat(dw);
-      }
-      break;
-    case 8:
-      avt.avt_run_sys();
-      avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_8BPP, x, y, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      n = uint32_t(w) * uint32_t(h) / 2;
-      for (uint32_t i = 0; i < n; i++)
-      {
-        uint8_t sb1 = idx < size ? get(idx++) : 0xFF;
-        uint8_t sb2 = idx < size ? get(idx++) : 0xFF;
-        dw = sb2 | (sb1 << 8);
-        avt.avt_i80_write_dat(dw);
-      }
-      break;
-    default:
-      return;
-  }
-  avt.avt_ld_img_end();
-  Debug_str("writeImage end...\r\n");
-}
-
-void GxDESTM32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                                uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
-{
-  Debug_str("writeImagePart start...\r\n");
-  if (_hibernating) _wake_up();
+  if (x_part + w > w_bitmap) w = w_bitmap - x_part;
+  if (y_part + h > h_bitmap) h = h_bitmap - y_part;
+  uint16_t bm_wb;
+  uint16_t ww; // words per row
+  uint16_t dw; // destination word
   switch (depth)
   {
     case 1:
+      bm_wb = (w_bitmap + 7) / 8;
+      ww = (w + 7) / 8;
       avt.avt_run_sys();
       avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_2BPP, x + dx, y + dy, w, h);
+      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, 8 * ww, h);
       avt.avt_wr_reg_addr(0x0154);
       for (uint32_t y1 = y; y1 < y + h; y1++)
       {
-        for (uint32_t x1 = x; x1 < x + w; x1 += 8) // pixels per loop
+        uint32_t idx = (y_part + y1 - y) * bm_wb + x_part / 8;
+        for (uint16_t cw = 0; cw < ww; cw++)
         {
-          uint32_t idx = y1 * (width / 8) + x1 / 8; // pixels per byte
-          uint8_t sb = idx < size ? bitmap[idx] : 0xFF;
+          uint8_t sb = idx < size ? bitmap[idx++] : 0xFF;
           uint16_t dw = bw2grey16[sb];
           avt.avt_i80_write_dat(dw);
         }
       }
       break;
     case 2:
+      bm_wb = (w_bitmap + 3) / 4;
+      ww = (w + 7) / 8; // "must be divisible by 8"
       avt.avt_run_sys();
       avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
+      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, 8 * ww, h);
       avt.avt_wr_reg_addr(0x0154);
       for (uint32_t y1 = y; y1 < y + h; y1++)
       {
-        for (uint32_t x1 = x; x1 < x + w; x1 += 8) // pixels per loop
+        uint32_t idx = (y_part + y1 - y) * bm_wb + x_part / 4;
+        for (uint16_t cw = 0; cw < ww; cw++)
         {
-          uint32_t idx = y1 * (width / 4) + x1 / 4; // pixels per byte
-          uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
-          uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
-          uint16_t dw = sb2 | (sb1 << 8);
+          if (bm_wb - 2 * cw >= 2)
+          {
+            uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
+            uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
+            dw = sb2 | (sb1 << 8);
+          }
+          else dw = 0xFF | (idx < size ? bitmap[idx++] : 0xFF) << 8;
           avt.avt_i80_write_dat(dw);
         }
       }
       break;
     case 4:
+      bm_wb = (w_bitmap + 1) / 2;
+      ww = (w + 3) / 4; // "must be divisible by 4"
       avt.avt_run_sys();
       avt.avt_wr_reg(0x0020, 0x2);  //big endian
       avt.avt_ld_img_area(EPD_DATA_4BPP, x, y, w, h);
       avt.avt_wr_reg_addr(0x0154);
       for (uint32_t y1 = y; y1 < y + h; y1++)
       {
-        for (uint32_t x1 = x; x1 < x + w; x1 += 4) // pixels per loop
+        uint32_t idx = (y_part + y1 - y) * bm_wb + x_part / 2;
+        for (uint16_t cw = 0; cw < ww; cw++)
         {
-          uint32_t idx = y1 * (width / 2) + x1 / 2; // pixels per byte
-          uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
-          uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
-          uint16_t dw = sb2 | (sb1 << 8);
+          if (bm_wb - 2 * cw >= 2)
+          {
+            uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
+            uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
+            dw = sb2 | (sb1 << 8);
+          }
+          else dw = 0xFF | (idx < size ? bitmap[idx++] : 0xFF) << 8;
           avt.avt_i80_write_dat(dw);
         }
       }
       break;
     case 8:
+      ww = (w + 1) / 2; // "must be divisible by 2"
       avt.avt_run_sys();
       avt.avt_wr_reg(0x0020, 0x2);  //big endian
       avt.avt_ld_img_area(EPD_DATA_8BPP, x, y, w, h);
       avt.avt_wr_reg_addr(0x0154);
       for (uint32_t y1 = y; y1 < y + h; y1++)
       {
-        for (uint32_t x1 = x; x1 < x + w; x1 += 2) // pixels per loop
+        uint32_t idx = (y_part + y1 - y) * w_bitmap + x_part;
+        for (uint16_t cw = 0; cw < ww; cw++)
         {
-          uint32_t idx = y1 * (width / 1) + x1 / 1; // pixels per byte
-          uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
-          uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
-          uint16_t dw = sb2 | (sb1 << 8);
+          if (w_bitmap - 2 * cw >= 2)
+          {
+            uint8_t sb1 = idx < size ? bitmap[idx++] : 0xFF;
+            uint8_t sb2 = idx < size ? bitmap[idx++] : 0xFF;
+            dw = sb2 | (sb1 << 8);
+          }
+          else dw = 0xFF | (idx < size ? bitmap[idx++] : 0xFF) << 8;
           avt.avt_i80_write_dat(dw);
         }
       }
       break;
-    default:
-      return;
-  }
-  avt.avt_ld_img_end();
-  Debug_str("writeImagePart end...\r\n");
-}
-
-void GxDESTM32T::writeImagePart(uint8_t (*get)(uint32_t), uint32_t size, uint8_t depth, uint32_t width,
-                                uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
-{
-  Debug_str("writeImagePart start...\r\n");
-  if (_hibernating) _wake_up();
-  switch (depth)
-  {
-    case 1:
-      avt.avt_run_sys();
-      avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_2BPP, x + dx, y + dy, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      for (uint32_t y1 = y; y1 < y + h; y1++)
-      {
-        for (uint32_t x1 = x; x1 < x + w; x1 += 8) // pixels per loop
-        {
-          uint32_t idx = y1 * (width / 8) + x1 / 8; // pixels per byte
-          uint8_t sb = idx < size ? get(idx) : 0xFF;
-          uint16_t dw = bw2grey16[sb];
-          avt.avt_i80_write_dat(dw);
-        }
-      }
-      break;
-    case 2:
-      avt.avt_run_sys();
-      avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      for (uint32_t y1 = y; y1 < y + h; y1++)
-      {
-        for (uint32_t x1 = x; x1 < x + w; x1 += 8) // pixels per loop
-        {
-          uint32_t idx = y1 * (width / 4) + x1 / 4; // pixels per byte
-          uint8_t sb1 = idx < size ? get(idx++) : 0xFF;
-          uint8_t sb2 = idx < size ? get(idx++) : 0xFF;
-          uint16_t dw = sb2 | (sb1 << 8);
-          avt.avt_i80_write_dat(dw);
-        }
-      }
-      break;
-    case 4:
-      avt.avt_run_sys();
-      avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_4BPP, x, y, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      for (uint32_t y1 = y; y1 < y + h; y1++)
-      {
-        for (uint32_t x1 = x; x1 < x + w; x1 += 4) // pixels per loop
-        {
-          uint32_t idx = y1 * (width / 2) + x1 / 2; // pixels per byte
-          uint8_t sb1 = idx < size ? get(idx++) : 0xFF;
-          uint8_t sb2 = idx < size ? get(idx++) : 0xFF;
-          uint16_t dw = sb2 | (sb1 << 8);
-          avt.avt_i80_write_dat(dw);
-        }
-      }
-      break;
-    case 8:
-      avt.avt_run_sys();
-      avt.avt_wr_reg(0x0020, 0x2);  //big endian
-      avt.avt_ld_img_area(EPD_DATA_8BPP, x, y, w, h);
-      avt.avt_wr_reg_addr(0x0154);
-      for (uint32_t y1 = y; y1 < y + h; y1++)
-      {
-        for (uint32_t x1 = x; x1 < x + w; x1 += 2) // pixels per loop
-        {
-          uint32_t idx = y1 * (width / 1) + x1 / 1; // pixels per byte
-          uint8_t sb1 = idx < size ? get(idx++) : 0xFF;
-          uint8_t sb2 = idx < size ? get(idx++) : 0xFF;
-          uint16_t dw = sb2 | (sb1 << 8);
-          avt.avt_i80_write_dat(dw);
-        }
-      }
-      break;
-    default:
-      return;
   }
   avt.avt_ld_img_end();
   Debug_str("writeImagePart end...\r\n");
@@ -504,29 +384,12 @@ void GxDESTM32T::drawImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, 
   Debug_str("drawImage end...\r\n");
 }
 
-void GxDESTM32T::drawImage(uint8_t (*get)(uint32_t), uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+void GxDESTM32T::drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
+                                 int16_t x, int16_t y, int16_t w, int16_t h)
 {
-  Debug_str("drawImage start...\r\n");
-  writeImage(get, size, depth, x, y, w, h);
+  Debug_str("drawImagePart start...\r\n");
+  writeImagePart(bitmap, size, depth, x_part, y_part, w_bitmap, h_bitmap, x, y, w, h);
   refresh(x, y, w, h, (depth == 1));
-  Debug_str("drawImage end...\r\n");
-}
-
-void GxDESTM32T::drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                               uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
-{
-  Debug_str("drawImagePart start...\r\n");
-  writeImagePart(bitmap, size, depth, width, x, y, w, h, dx, dy);
-  refresh(x + dx, y + dy, w, h, (depth == 1));
-  Debug_str("drawImagePart end...\r\n");
-}
-
-void GxDESTM32T::drawImagePart(uint8_t (*get)(uint32_t), uint32_t size, uint8_t depth, uint32_t width,
-                               uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx, uint16_t dy)
-{
-  Debug_str("drawImagePart start...\r\n");
-  writeImagePart(get, size, depth, width, x, y, w, h, dx, dy);
-  refresh(x + dx, y + dy, w, h, (depth == 1));
   Debug_str("drawImagePart end...\r\n");
 }
 

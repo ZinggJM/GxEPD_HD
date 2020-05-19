@@ -45,7 +45,12 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 - CPU Speed(MHz): "72MHz (Normal)"
 - Upload method: "STLink"
 
-### Version 0.0.13
+### Version 0.0.14
+- caution: Adafruit_GFX Version 1.8.0 and higher doesn't compile for STM32 Boards (STM32Duino.com)
+- use Adafruit_GFX Version 1.7.5 for use with DESTM32-T
+- GFX_FontExtension therefore still needs to use namespaces
+- fixed writeImage, writeImagePart, drawImage, drawImagePart for "odd" bitmap widths
+#### Version 0.0.13
 - added GFX_FontExtension, UTF-8 fonts extension for up to 256 code range pages
 - GFX_FontExtension is a preliminary version, released for tests
 - GFX_FontExtension uses namespaces until new gfxfont.h is released with Adafruit_GFX

@@ -28,12 +28,12 @@ class GxEPD_HD_IOCTRL
     virtual void clearScreen(uint8_t value = 0xFF) = 0; // init controller memory and screen (default white)
     // write to controller memory, without screen refresh; x and w should be multiple of 8
     virtual void writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h) = 0;
-    virtual void writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                                uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx = 0, uint16_t dy = 0) = 0;
+    virtual void writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
+                                   int16_t x, int16_t y, int16_t w, int16_t h) = 0;
     // write to controller memory, with screen refresh; x and w should be multiple of 8
     virtual void drawImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h) = 0;
-    virtual void drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                               uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx = 0, uint16_t dy = 0) = 0;
+    virtual void drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
+                                   int16_t x, int16_t y, int16_t w, int16_t h) = 0;
     // screen refresh from controller memory to full screen
     virtual void refresh(bool partial_update_mode = false) = 0;
     // screen refresh from controller memory, partial screen
@@ -61,12 +61,12 @@ class GxEPD_HD_EPD
     virtual void clearScreen(uint8_t value = 0xFF) = 0; // init controller memory and screen (default white)
     // write to controller memory, without screen refresh; x and w should be multiple of 8
     virtual void writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h) = 0;
-    virtual void writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                                uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx = 0, uint16_t dy = 0) = 0;
+    virtual void writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
+                                   int16_t x, int16_t y, int16_t w, int16_t h) = 0;
     // write to controller memory, with screen refresh; x and w should be multiple of 8
     virtual void drawImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h) = 0;
-    virtual void drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint32_t width,
-                               uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t dx = 0, uint16_t dy = 0) = 0;
+    virtual void drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
+                                   int16_t x, int16_t y, int16_t w, int16_t h) = 0;
     // screen refresh from controller memory to full screen
     virtual void refresh(bool partial_update_mode = false) = 0;
     // screen refresh from controller memory, partial screen
