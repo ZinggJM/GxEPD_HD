@@ -45,7 +45,12 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 - CPU Speed(MHz): "72MHz (Normal)"
 - Upload method: "STLink"
 
-### Version 0.0.14
+### Version 1.0.0
+- uses my Adafruit_GFX clone Fruitless_GFX
+- download Fruitless_GFX as ZIP from https://github.com/ZinggJM/Fruitless_GFX
+- install Fruitless_GFX using Library Manager Add .ZIP Library method
+- GFX_FontExtension doesn't need namespaces with Fruitless_GFX or actual Adafruit_GFX
+#### Version 0.0.14
 - caution: Adafruit_GFX Version 1.8.0 and higher doesn't compile for STM32 Boards (STM32Duino.com)
 - use Adafruit_GFX Version 1.7.5 for use with DESTM32-T
 - GFX_FontExtension therefore still needs to use namespaces

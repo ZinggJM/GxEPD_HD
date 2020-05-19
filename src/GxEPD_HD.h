@@ -16,7 +16,6 @@
 #define _GxEPD_HD_H_
 
 #include <Arduino.h>
-#include <Adafruit_GFX.h>
 
 // the only colors supported by any of these displays; mapping of other colors is class specific, common for GxEPD, GxEPD2 and GxEPD_HD
 #define GxEPD_BLACK     0x0000

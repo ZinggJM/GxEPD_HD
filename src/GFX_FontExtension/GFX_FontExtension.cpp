@@ -16,8 +16,6 @@
 //
 // Font files can be created using the fontconverter from https://github.com/Bodmer/GFX_Font_Converter
 // see tutorial https://www.youtube.com/watch?v=L8MmTISmwZ8
-//
-// Note: GFX_FontExtension currently uses a workaround for UTF-8 fonts, until the next release of Adafruit_GFX
 
 #include "GFX_FontExtension.h"
 
@@ -43,11 +41,15 @@
 #define pgm_read_pointer(addr) ((void *)pgm_read_word(addr))
 #endif
 
-void GFX_FontExtension::drawChar(int16_t x, int16_t y, uint16_t c, uint16_t color, uint16_t bg, uint8_t size_x, uint8_t size_y, const GFX_FxFont::GFXfont* gfxFont)
+void GFX_FontExtension::drawChar(int16_t x, int16_t y, uint16_t c, uint16_t color, uint16_t bg, uint8_t size_x, uint8_t size_y, const GFXfont* gfxFont)
 {
   if (!gfxFont) // 'Classic' built-in font
   {
+#ifndef _Fruitless_GFX_H
     Adafruit_GFX::drawChar(x, y, c, color, bg, size_x, size_y);
+#else
+    Fruitless_GFX::drawChar(x, y, c, color, bg, size_x, size_y);
+#endif
   }
   else // Custom font
   {
@@ -151,27 +153,29 @@ size_t GFX_FontExtension::write(uint8_t data)
   uint16_t c = (uint16_t)data;
   c = decodeUTF8(data);
   if (c == 0) return 1;
-  const GFX_FxFont::GFXfont* gfxFont = gfxFonts[c / 256];
+  const GFXfont* gfxFont = gfxFonts[c / 256];
   if (!gfxFont) // 'Classic' built-in font
   {
-    // or gfxFont in Adafruit_GFX base class in this version; delegate to Adafruit_GFX
-    Adafruit_GFX::write(uint8_t(c));
-    //    if (c > 255) return 1; // Stop 16 bit characters
-    //    if (c == '\n') // Newline?
-    //    {
-    //      cursor_x  = 0;              // Reset x to zero,
-    //      cursor_y += textsize_y * 8; // advance y one line
-    //    }
-    //    else if (c != '\r') // Ignore carriage returns
-    //    {
-    //      if (wrap && ((cursor_x + textsize_x * 6) > _width)) // Off right?
-    //      {
-    //        cursor_x  = 0;              // Reset x to zero,
-    //        cursor_y += textsize_y * 8; // advance y one line
-    //      }
-    //      Adafruit_GFX::drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize_x, textsize_y);
-    //      cursor_x += textsize_x * 6;   // Advance x one char
-    //    }
+    if (c > 255) return 1; // Stop 16 bit characters
+    if (c == '\n') // Newline?
+    {
+      cursor_x  = 0;              // Reset x to zero,
+      cursor_y += textsize_y * 8; // advance y one line
+    }
+    else if (c != '\r') // Ignore carriage returns
+    {
+      if (wrap && ((cursor_x + textsize_x * 6) > _width)) // Off right?
+      {
+        cursor_x  = 0;              // Reset x to zero,
+        cursor_y += textsize_y * 8; // advance y one line
+      }
+#ifndef _Fruitless_GFX_H
+      Adafruit_GFX::drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize_x, textsize_y);
+#else
+      Fruitless_GFX::drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize_x, textsize_y);
+#endif
+      cursor_x += textsize_x * 6;   // Advance x one char
+    }
   }
   else // Custom font
   {
@@ -205,18 +209,13 @@ size_t GFX_FontExtension::write(uint8_t data)
   return 1;
 }
 
-void GFX_FontExtension::setFont(const GFXfont *f)
-{
-  Adafruit_GFX::setFont(f);
-}
-
-void GFX_FontExtension::setFont(const GFX_FxFont::GFXfont* f)
+void GFX_FontExtension::setFont(const GFXfont* f)
 {
   if (f) gfxFonts[f->first / 256] = f;
   else gfxFonts[0] = 0;
 }
 
-void GFX_FontExtension::setFont(const GFX_FxFont::GFXfont* f, uint8_t page)
+void GFX_FontExtension::setFont(const GFXfont* f, uint8_t page)
 {
   if (f && (page == f->first / 256)) gfxFonts[page] = f;
   else if (!f) gfxFonts[page] = 0;

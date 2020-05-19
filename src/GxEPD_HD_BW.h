@@ -15,7 +15,6 @@
 #ifndef _GxEPD_HD_BW_H_
 #define _GxEPD_HD_BW_H_
 
-#include <Adafruit_GFX.h>
 #include "GxEPD_HD_EPD.h"
 #include "GxGDE043A2.h"
 #include "GxGDE060BA.h"

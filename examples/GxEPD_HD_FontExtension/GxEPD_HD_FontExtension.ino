@@ -20,8 +20,7 @@
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571_10574&product_id=57650
 // or https://www.aliexpress.com/store/product/6-inch-HD-Interface-High-resolution-electronic-paper-display-e-ink-epaper-with-TCON-Demo-Kit/600281_32838449413.html
 //
-// Note: GFX_FontExtension currently uses a workaround for UTF-8 fonts, until the next release of Adafruit_GFX
-//       see the font #include section below
+// Note: GFX_FontExtension no longer uses a workaround for UTF-8 fonts, the new gfxfont.h of Adafruit_GFX is released
 
 // include library, include base class, make path known
 #include <GxEPD_HD_EPD.h>
@@ -63,10 +62,6 @@ GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full heigh
 // comment out to not use the demo part
 //#include "GxDESTM32T/DESTM32T_DEMO.h"
 
-// Note: GFX_FontExtension currently uses a workaround for UTF-8 fonts, until the next release of Adafruit_GFX
-namespace GFX_FX
-{
-using GFX_FxFont::GFXfont;
 // FreeFonts from Adafruit_GFX
 #include <Fonts/FreeMonoBold9pt7b.h>
 #include <Fonts/FreeMonoBold12pt7b.h>
@@ -74,7 +69,6 @@ using GFX_FxFont::GFXfont;
 #include <Fonts/FreeMonoBold24pt7b.h>
 // Additional fonts from GxEPD_HD
 #include <Fonts/Hindi12pt8b.h>
-};
 
 #if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
 // select diagnostic output stream, only one
@@ -116,8 +110,8 @@ void setup()
   helloEpaper();
   delay(1000);
   showBitmapExample();
-  showFont("FreeMonoBold24pt7b", &GFX_FX::FreeMonoBold24pt7b);
-  showFont("FreeMonoBold12pt7b", &GFX_FX::FreeMonoBold12pt7b);
+  showFont("FreeMonoBold24pt7b", &FreeMonoBold24pt7b);
+  showFont("FreeMonoBold12pt7b", &FreeMonoBold12pt7b);
   showPartialUpdate();
   //showPartialUpdatePaged();
   //display.powerOff();
@@ -141,7 +135,7 @@ void showSomeHindiText()
 {
   //DiagnosticStream.println("showSomeHindiText");
   display.setRotation(0);
-  display.setFont(&GFX_FX::Hindi12pt8b);
+  display.setFont(&Hindi12pt8b);
   display.setTextColor(GxEPD_BLACK);
   display.setFullWindow();
   display.firstPage();
@@ -160,7 +154,7 @@ void helloWorld()
 {
   //DiagnosticStream.println("helloWorld");
   display.setRotation(1);
-  display.setFont(&GFX_FX::FreeMonoBold9pt7b);
+  display.setFont(&FreeMonoBold9pt7b);
   display.setTextColor(GxEPD_BLACK);
   uint16_t x = (display.width() - 160) / 2;
   uint16_t y = display.height() / 2;
@@ -181,7 +175,7 @@ void helloFullScreenPartialMode()
   //DiagnosticStream.println("helloFullScreenPartialMode");
   display.setPartialWindow(0, 0, display.width(), display.height());
   display.setRotation(1);
-  display.setFont(&GFX_FX::FreeMonoBold9pt7b);
+  display.setFont(&FreeMonoBold9pt7b);
   display.setTextColor(GxEPD_BLACK);
   display.firstPage();
   do
@@ -218,7 +212,7 @@ void helloArduino()
 {
   //DiagnosticStream.println("helloArduino");
   display.setRotation(1);
-  display.setFont(&GFX_FX::FreeMonoBold9pt7b);
+  display.setFont(&FreeMonoBold9pt7b);
   display.setTextColor(display.epd_hd.hasColor ? GxEPD_RED : GxEPD_BLACK);
   uint16_t x = (display.width() - 160) / 2;
   uint16_t y = display.height() / 4;
@@ -239,7 +233,7 @@ void helloEpaper()
 {
   //DiagnosticStream.println("helloEpaper");
   display.setRotation(1);
-  display.setFont(&GFX_FX::FreeMonoBold9pt7b);
+  display.setFont(&FreeMonoBold9pt7b);
   display.setTextColor(display.epd_hd.hasColor ? GxEPD_RED : GxEPD_BLACK);
   uint16_t x = (display.width() - 160) / 2;
   uint16_t y = display.height() * 3 / 4;
@@ -280,7 +274,7 @@ void showBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h, bool partial)
 void drawCornerTest()
 {
   display.setFullWindow();
-  display.setFont(&GFX_FX::FreeMonoBold9pt7b);
+  display.setFont(&FreeMonoBold9pt7b);
   display.setTextColor(GxEPD_BLACK);
   for (uint16_t r = 0; r <= 4; r++)
   {
@@ -345,7 +339,7 @@ void showBitmapExample()
 #endif
 }
 
-void showFont(const char name[], const GFX_FxFont::GFXfont* f)
+void showFont(const char name[], const GFXfont* f)
 {
   display.setFullWindow();
   display.setRotation(0);
@@ -394,7 +388,7 @@ void showPartialUpdate()
   uint16_t box_h = 20;
   uint16_t cursor_y = box_y + box_h - 6;
   float value = 13.95;
-  display.setFont(&GFX_FX::FreeMonoBold9pt7b);
+  display.setFont(&FreeMonoBold9pt7b);
   display.setTextColor(GxEPD_BLACK);
   display.setRotation(0);
   // draw background
@@ -462,7 +456,7 @@ void showPartialUpdatePaged()
   uint16_t cursor_y = box_y + box_h - 6;
   float value = 13.95;
   uint16_t incr = display.epd_hd.hasFastPartialUpdate ? 1 : 3;
-  display.setFont(&GFX_FX::FreeMonoBold9pt7b);
+  display.setFont(&FreeMonoBold9pt7b);
   display.setTextColor(GxEPD_BLACK);
   // show where the update box is
   for (uint16_t r = 0; r < 4; r++)
@@ -521,7 +515,7 @@ void deepSleepTest()
   const char from[] = "from deep sleep";
   const char again[] = "again";
   display.setRotation(1);
-  display.setFont(&GFX_FX::FreeMonoBold9pt7b);
+  display.setFont(&FreeMonoBold9pt7b);
   display.setTextColor(GxEPD_BLACK);
   int16_t tbx, tby; uint16_t tbw, tbh;
   // center text

@@ -15,20 +15,35 @@
 #ifndef _GxEPD_HD_GFX_H_
 #define _GxEPD_HD_GFX_H_
 
-#include <Adafruit_GFX.h>
-
 // optional, can be commented out if not needed
 #include "GFX_FontExtension/GFX_FontExtension.h"
 
 #ifndef _GFX_FontExtension_H_
+// comment out to revert to Adafruit_GFX
+#include <Fruitless_GFX.h>
+#endif
+
+#ifndef _Fruitless_GFX_H
+#include <Adafruit_GFX.h>
+#endif
+
+#ifndef _GFX_FontExtension_H_
+#ifndef _Fruitless_GFX_H
 class GxEPD_HD_GFX : public Adafruit_GFX
+#else
+class GxEPD_HD_GFX : public Fruitless_GFX
+#endif
 #else
 class GxEPD_HD_GFX : public GFX_FontExtension
 #endif
 {
   public:
 #ifndef _GFX_FontExtension_H_
+#ifndef _Fruitless_GFX_H
     GxEPD_HD_GFX(GxEPD_HD_EPD& _epd_hd, int16_t w, int16_t h) : Adafruit_GFX(w, h), epd_hd(_epd_hd) {};
+#else
+    GxEPD_HD_GFX(GxEPD_HD_EPD& _epd_hd, int16_t w, int16_t h) : Fruitless_GFX(w, h), epd_hd(_epd_hd) {};
+#endif
 #else
     GxEPD_HD_GFX(GxEPD_HD_EPD& _epd_hd, int16_t w, int16_t h) : GFX_FontExtension(w, h), epd_hd(_epd_hd) {};
 #endif
