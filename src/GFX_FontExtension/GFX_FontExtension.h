@@ -22,20 +22,20 @@
 #define _GFX_FontExtension_H_
 
 // comment out to revert to Adafruit_GFX
-#include <Fruitless_GFX.h>
+#include <GFX.h>
 
-#ifndef _Fruitless_GFX_H
+#ifndef _GFX_H_
 #include <Adafruit_GFX.h>
 class GFX_FontExtension : public Adafruit_GFX
 #else
-class GFX_FontExtension : public Fruitless_GFX
+class GFX_FontExtension : public GFX
 #endif
 {
   public:
-#ifndef _Fruitless_GFX_H
+#ifndef _GFX_H_
     GFX_FontExtension(int16_t w, int16_t h) : Adafruit_GFX(w, h) {};
 #else
-    GFX_FontExtension(int16_t w, int16_t h) : Fruitless_GFX(w, h) {};
+    GFX_FontExtension(int16_t w, int16_t h) : GFX(w, h) {};
 #endif
     void drawChar(int16_t x, int16_t y, uint16_t c, uint16_t color, uint16_t bg, uint8_t size_x, uint8_t size_y, const GFXfont* gfxFont);
     virtual size_t write(uint8_t);

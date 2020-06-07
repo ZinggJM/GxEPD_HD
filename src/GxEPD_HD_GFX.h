@@ -20,18 +20,18 @@
 
 #ifndef _GFX_FontExtension_H_
 // comment out to revert to Adafruit_GFX
-#include <Fruitless_GFX.h>
+#include <GFX.h>
 #endif
 
-#ifndef _Fruitless_GFX_H
+#ifndef _GFX_H_
 #include <Adafruit_GFX.h>
 #endif
 
 #ifndef _GFX_FontExtension_H_
-#ifndef _Fruitless_GFX_H
+#ifndef _GFX_H_
 class GxEPD_HD_GFX : public Adafruit_GFX
 #else
-class GxEPD_HD_GFX : public Fruitless_GFX
+class GxEPD_HD_GFX : public GFX
 #endif
 #else
 class GxEPD_HD_GFX : public GFX_FontExtension
@@ -39,10 +39,10 @@ class GxEPD_HD_GFX : public GFX_FontExtension
 {
   public:
 #ifndef _GFX_FontExtension_H_
-#ifndef _Fruitless_GFX_H
+#ifndef _GFX_H_
     GxEPD_HD_GFX(GxEPD_HD_EPD& _epd_hd, int16_t w, int16_t h) : Adafruit_GFX(w, h), epd_hd(_epd_hd) {};
 #else
-    GxEPD_HD_GFX(GxEPD_HD_EPD& _epd_hd, int16_t w, int16_t h) : Fruitless_GFX(w, h), epd_hd(_epd_hd) {};
+    GxEPD_HD_GFX(GxEPD_HD_EPD& _epd_hd, int16_t w, int16_t h) : GFX(w, h), epd_hd(_epd_hd) {};
 #endif
 #else
     GxEPD_HD_GFX(GxEPD_HD_EPD& _epd_hd, int16_t w, int16_t h) : GFX_FontExtension(w, h), epd_hd(_epd_hd) {};
@@ -62,6 +62,7 @@ class GxEPD_HD_GFX : public GFX_FontExtension
     virtual void drawInvertedBitmap(int16_t x, int16_t y, const uint8_t bitmap[], int16_t w, int16_t h, uint16_t color) = 0;
     //  Support for Bitmaps (Sprites) to Controller Buffer and to Screen
     virtual void clearScreen(uint8_t value = 0xFF) = 0; // init controller memory and screen (default white)
+    virtual void writeScreenBuffer(uint8_t value = 0xFF) = 0; // init controller memory (default white)
     // write to controller memory, without screen refresh; x and w should be multiple of 8
     virtual void writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h) = 0;
     virtual void writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,

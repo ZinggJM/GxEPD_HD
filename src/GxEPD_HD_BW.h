@@ -18,6 +18,7 @@
 #include "GxEPD_HD_EPD.h"
 #include "GxGDE043A2.h"
 #include "GxGDE060BA.h"
+#include "GxGDE060F3.h"
 #include "GxGDEW080T5.h"
 #include "GxEPD_HD_GFX.h"
 

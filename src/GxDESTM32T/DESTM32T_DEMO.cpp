@@ -2,7 +2,7 @@
 //
 // Created by Jean-Marc Zingg based on demo code from Good Display for DESTM32-T board with DESTM32-Tcon-11.
 //
-#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
+#if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) || (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE))
 
 #include "DESTM32T_DEMO.h"
 #include "DESTM32L1_board.h"
@@ -11,7 +11,7 @@
 #include <SPI.h>
 
 #define FLASH_CS_PORT     GPIOA     //OUT - PP
-#define FLASH_CS_PIN      GPIO_Pin_4
+#define FLASH_CS_PIN      GPIO_PIN_4
 #define FLASH_CS_PP       PA4
 
 void DESTM32T_DEMO::demo800x600()

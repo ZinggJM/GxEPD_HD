@@ -21,7 +21,7 @@
 #include <GxEPD_HD_BW.h>
 
 // select the display io class to use, only one
-#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
+#if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) || (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE))
 #include <GxDESTM32T/GxDESTM32T.h>
 GxDESTM32T io;
 #else
@@ -37,21 +37,28 @@ GxDESP32T_BP io;
 //GxGDE043A2 base_display(io); // default vcom used (-2.0V)
 //GxGDE060BA base_display(io); // default vcom used (-2.0V)
 GxGDE060BA base_display(io, -2.3); // vcom from sticker on flex connector of my panel, as double
-//GxGDE060BA base_display(io, 2300); // or as abs(vcom*1000) in mV, as uint16_t 
+//GxGDE060BA base_display(io, uint16_t(2300)); // or as abs(vcom*1000) in mV, as uint16_t
+//GxGDE060F3 base_display(io, -2.4); // vcom from sticker on flex connector of my panel, as double
 //GxGDEW080T5 base_display(io); // default vcom used (-2.2V)
 
 // select the graphics display template class to use, only one
-#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
+#if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) || (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE))
 //GxEPD_HD_BW < GxGDE043A2, GxGDE043A2::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
 GxEPD_HD_BW < GxGDE060BA, GxGDE060BA::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
+//GxEPD_HD_BW < GxGDE060F3, GxGDE060F3::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~11k RAM remaining
 //GxEPD_HD_BW < GxGDEW080T5, GxGDEW080T5::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~11k RAM remaining
 #else
 //GxEPD_HD_BW<GxGDE043A2, GxGDE043A2::HEIGHT> display(base_display); // full height, one page
 GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page
+//GxEPD_HD_BW<GxGDE060F3, GxGDE060F3::HEIGHT> display(base_display); // full height, one page
+//GxEPD_HD_BW<GxGDEW080T5, GxGDEW080T5::HEIGHT> display(base_display); // full height, one page
 #endif
 
 // uncomment to see bitmap examples
-#include "bitmaps/BitmapExamples.h"
+//#include "bitmaps/Bitmaps640x384.h"
+#include "bitmaps/Bitmaps800x600.h"
+#include "bitmaps/Bitmaps1024x758.h" // has wrong bitorder
+//#include "bitmaps/Bitmaps1024x768.h"
 
 // comment out to not use the demo part
 //#include "GxDESTM32T/DESTM32T_DEMO.h"
@@ -62,7 +69,7 @@ GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full heigh
 #include <Fonts/FreeMonoBold18pt7b.h>
 #include <Fonts/FreeMonoBold24pt7b.h>
 
-#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
+#if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) || (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE))
 // select diagnostic output stream, only one
 //HardwareSerial& DiagnosticStream = Serial1; // pins PA9, PA10
 HardwareSerial& DiagnosticStream = Serial2; // pins PA2, PA3 for USB jumpers
@@ -265,13 +272,39 @@ void drawCornerTest()
 
 void showBitmapExample()
 {
-#ifdef _GxBitmapExamples_H_
-  display.drawImage(BitmapExample1, sizeof(BitmapExample1), 2, 0, 0, display.epd_hd.WIDTH, display.epd_hd.HEIGHT);
-  delay(2000);
-  //display.erasePicture(BitmapExample1, sizeof(BitmapExample1));
-  display.drawImage(BitmapExample2, sizeof(BitmapExample2), 2, 0, 0, display.epd_hd.WIDTH, display.epd_hd.HEIGHT);
-  delay(2000);
-  //display.erasePicture(BitmapExample2, sizeof(BitmapExample2));
+#if defined(_GxBitmaps800x600_H_)
+  if (600 == display.epd_hd.WIDTH)
+  {
+    display.drawImage(Bitmap800x600_1, sizeof(Bitmap800x600_1), 2, 0, 0, 800, 600);
+    delay(2000);
+    display.drawImage(Bitmap800x600_2, sizeof(Bitmap800x600_2), 2, 0, 0, 800, 600);
+    delay(2000);
+  }
+  else
+  {
+    uint16_t x = (display.epd_hd.WIDTH - 800) / 2;
+    uint16_t y = (display.epd_hd.HEIGHT - 600) / 2;
+    display.drawImage(Bitmap800x600_1, sizeof(Bitmap800x600_1), 2, x, y, 800, 600);
+    delay(2000);
+    display.drawImage(Bitmap800x600_2, sizeof(Bitmap800x600_2), 2, x, y, 800, 600);
+    delay(2000);
+  }
+#endif
+#if defined(_GxBitmaps1024x758_H_)
+  if ((1024 == display.epd_hd.WIDTH) && (758 == display.epd_hd.HEIGHT))
+  {
+    display.drawImage(Bitmap1024x758, sizeof(Bitmap1024x758), 2, 0, 0, 1024, 758);
+    delay(2000);
+  }
+#endif
+#if defined(_GxBitmaps1024x768_H_)
+  if ((1024 == display.epd_hd.WIDTH) && (768 == display.epd_hd.HEIGHT))
+  {
+    display.drawImage(Bitmap1024x768, sizeof(Bitmap1024x768), 2, 0, 0, 1024, 768);
+    delay(2000);
+  }
+#endif
+#if defined(_GxBitmaps640x384_H_)
   display.setRotation(0);
   display.setFullWindow();
   if (1 == display.pages())

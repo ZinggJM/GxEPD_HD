@@ -45,7 +45,11 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 - CPU Speed(MHz): "72MHz (Normal)"
 - Upload method: "STLink"
 
-### Version 1.0.0
+### Version 1.0.1
+- added GxGDE060F3 for panel GDE060F3 6" 1024x758
+- uses my Adafruit_GFX clone GFX from my library GFX_Root, available by Library Manager
+- search for GFX_Root in Library Manager to install GFX_Root
+#### Version 1.0.0
 - uses my Adafruit_GFX clone Fruitless_GFX
 - download Fruitless_GFX as ZIP from https://github.com/ZinggJM/Fruitless_GFX
 - install Fruitless_GFX using Library Manager Add .ZIP Library method

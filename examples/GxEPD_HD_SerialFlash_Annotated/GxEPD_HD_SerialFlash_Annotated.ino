@@ -36,7 +36,7 @@
 #include <Fonts/FreeMonoBold24pt7b.h>
 
 // digital pin for flash chip CS pin:
-#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
+#if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) || (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE))
 const int FlashChipSelect = SS; // for onboard W25Q16BVSIG
 //const int FlashChipSelect = PC4; // e.g. for breakout flash board added
 #else
@@ -44,7 +44,7 @@ const int FlashChipSelect = 32; // for W25Q16BVSIG on my DESP32T_BP proto board
 #endif
 
 // select the display io class to use, only one
-#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
+#if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) || (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE))
 #include <GxDESTM32T/GxDESTM32T.h>
 GxDESTM32T io;
 #else
@@ -59,22 +59,26 @@ GxDESP32T_BP io;
 // select the base display class to use, only one
 //GxGDE043A2 base_display(io); // default vcom used (-2.0V)
 //GxGDE060BA base_display(io); // default vcom used (-2.0V)
-//GxGDE060BA base_display(io, -2.3); // vcom from sticker on flex connector of my panel, as double
-GxGDE060BA base_display(io, -2.05); // vcom from sticker on flex connector of my other panel, as double
-//GxGDE060BA base_display(io, 2300); // or as abs(vcom*1000) in mV, as uint16_t 
+GxGDE060BA base_display(io, -2.3); // vcom from sticker on flex connector of my panel, as double
+//GxGDE060BA base_display(io, -2.05); // vcom from sticker on flex connector of my other panel, as double
+//GxGDE060BA base_display(io, uint16_t(2300)); // or as abs(vcom*1000) in mV, as uint16_t
+//GxGDE060F3 base_display(io, -2.4); // vcom from sticker on flex connector of my panel, as double
 //GxGDEW080T5 base_display(io); // default vcom used (-2.2V)
 
 // select the graphics display template class to use, only one
-#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
+#if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) || (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE))
 //GxEPD_HD_BW < GxGDE043A2, GxGDE043A2::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
 GxEPD_HD_BW < GxGDE060BA, GxGDE060BA::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
+//GxEPD_HD_BW < GxGDE060F3, GxGDE060F3::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~11k RAM remaining
 //GxEPD_HD_BW < GxGDEW080T5, GxGDEW080T5::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~11k RAM remaining
 #else
 //GxEPD_HD_BW<GxGDE043A2, GxGDE043A2::HEIGHT> display(base_display); // full height, one page
 GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page
+//GxEPD_HD_BW<GxGDE060F3, GxGDE060F3::HEIGHT> display(base_display); // full height, one page
+//GxEPD_HD_BW<GxGDEW080T5, GxGDEW080T5::HEIGHT> display(base_display); // full height, one page
 #endif
 
-#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
+#if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) || (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE))
 // select diagnostic output stream, only one
 //HardwareSerial& DiagnosticStream = Serial1; // pins PA9, PA10
 HardwareSerial& DiagnosticStream = Serial2; // pins PA2, PA3 for USB jumpers

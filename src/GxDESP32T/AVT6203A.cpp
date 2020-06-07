@@ -56,6 +56,20 @@ void AVT6203A::init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput)
       tcon_init_gdrv_cfg = 0x00;
       tcon_init_lutidxfmt = (4 | (1 << 7));
       break;
+    case GxEPD_HD::GDE060F3:
+      tcon_init_hsize = 1024;
+      tcon_init_vsize = 758;
+      tcon_init_fslen = 13;
+      tcon_init_fblen = 4;
+      tcon_init_felen = 10;
+      tcon_init_lslen = 10;
+      tcon_init_lblen = 4;
+      tcon_init_lelen = 42;
+      tcon_init_pixclkdiv = 2;
+      tcon_init_sdrv_cfg = (128 | (1 << 8) | (1 << 9));
+      tcon_init_gdrv_cfg = 0x00;
+      tcon_init_lutidxfmt = (4 | (1 << 7));
+      break;
     case GxEPD_HD::GDEW080T5:
       tcon_init_hsize = 1024;
       tcon_init_vsize = 768;

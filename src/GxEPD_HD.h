@@ -34,6 +34,7 @@ class GxEPD_HD
     {
       GDE043A2,
       GDE060BA,
+      GDE060F3,
       GDEW080T5
     };
 };

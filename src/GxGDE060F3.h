@@ -2,7 +2,7 @@
 //
 // based on Demo Examples from Good Display, available here: http://www.e-paper-display.com/download_list/downloadcategoryid=34&isMode=false.html
 //
-// Class GxGDE060BA : display class for GDE060BA on DESTM32-T parallel interface e-paper display from Dalian Good Display Inc.
+// Class GxGDE060F3 : display class for GDEW080T5 on DESTM32-T parallel interface e-paper display from Dalian Good Display Inc.
 //
 // Author : J-M Zingg
 //
@@ -12,24 +12,24 @@
 //
 // Library: https://github.com/ZinggJM/GxEPD_HD
 
-#ifndef _GxGDE060BA_H_
-#define _GxGDE060BA_H_
+#ifndef _GxGDE060F3_H_
+#define _GxGDE060F3_H_
 
 #include "GxEPD_HD_EPD.h"
 
-class GxGDE060BA : public GxEPD_HD_EPD
+class GxGDE060F3 : public GxEPD_HD_EPD
 {
   public:
     // attributes
-    static const uint16_t WIDTH = 800;
-    static const uint16_t HEIGHT = 600;
-    static const GxEPD_HD::Panel panel = GxEPD_HD::GDE060BA;
+    static const uint16_t WIDTH = 1024;
+    static const uint16_t HEIGHT = 758;
+    static const GxEPD_HD::Panel panel = GxEPD_HD::GDE060F3;
     static const bool hasColor = false;
     static const bool hasPartialUpdate = true;
     static const bool hasFastPartialUpdate = true;
     // constructor
-    GxGDE060BA(GxEPD_HD_IOCTRL& io, uint16_t vcom_mV = 2000); // abs(vcom*1000)
-    GxGDE060BA(GxEPD_HD_IOCTRL& io, double vcom);
+    GxGDE060F3(GxEPD_HD_IOCTRL& io, uint16_t vcom_mV = 2200); // abs(vcom*1000)
+    GxGDE060F3(GxEPD_HD_IOCTRL& io, double vcom);
     // methods (virtual)
     void init(Stream* pDiagnosticOutput = 0); // (pDiagnosticOutput = 0) : disabled
     //  Support for Bitmaps (Sprites) to Controller Buffer and to Screen

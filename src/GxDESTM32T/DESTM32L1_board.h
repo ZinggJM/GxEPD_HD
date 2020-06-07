@@ -44,22 +44,24 @@
 #ifndef _DESTM32L1_board_H_
 #define _DESTM32L1_board_H_
 
-#define GPIO_Pin_0 (0x1<<0)
-#define GPIO_Pin_1 (0x1<<1)
-#define GPIO_Pin_2 (0x1<<2)
-#define GPIO_Pin_3 (0x1<<3)
-#define GPIO_Pin_4 (0x1<<4)
-#define GPIO_Pin_5 (0x1<<5)
-#define GPIO_Pin_6 (0x1<<6)
-#define GPIO_Pin_7 (0x1<<7)
-#define GPIO_Pin_8 (0x1<<8)
-#define GPIO_Pin_9 (0x1<<9)
-#define GPIO_Pin_10 (0x1<<10)
-#define GPIO_Pin_11 (0x1<<11)
-#define GPIO_Pin_12 (0x1<<12)
-#define GPIO_Pin_13 (0x1<<13)
-#define GPIO_Pin_14 (0x1<<14)
-#define GPIO_Pin_15 (0x1<<15)
+#if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V))
+
+#define GPIO_PIN_0 (0x1<<0)
+#define GPIO_PIN_1 (0x1<<1)
+#define GPIO_PIN_2 (0x1<<2)
+#define GPIO_PIN_3 (0x1<<3)
+#define GPIO_PIN_4 (0x1<<4)
+#define GPIO_PIN_5 (0x1<<5)
+#define GPIO_PIN_6 (0x1<<6)
+#define GPIO_PIN_7 (0x1<<7)
+#define GPIO_PIN_8 (0x1<<8)
+#define GPIO_PIN_9 (0x1<<9)
+#define GPIO_PIN_10 (0x1<<10)
+#define GPIO_PIN_11 (0x1<<11)
+#define GPIO_PIN_12 (0x1<<12)
+#define GPIO_PIN_13 (0x1<<13)
+#define GPIO_PIN_14 (0x1<<14)
+#define GPIO_PIN_15 (0x1<<15)
 
 #define GPIOA GPIOA_BASE
 #define GPIOB GPIOB_BASE
@@ -67,71 +69,73 @@
 #define GPIOD GPIOD_BASE
 #define GPIOE GPIOE_BASE
 
+#endif
+
 #define  DEBUG_USART
 
 #define FLASH_PAGE_SIZE     2048
 
 //#define FLASH_CS_PORT     GPIOA     //OUT - PP
-//#define FLASH_CS_PIN      GPIO_Pin_4
+//#define FLASH_CS_PIN      GPIO_PIN_4
 //#define FLASH_CS_PP       PA4
 
 #define LED_03_PORT       GPIOA     //OUT - PP    H:ON
-#define LED_03_PIN        GPIO_Pin_8
+#define LED_03_PIN        GPIO_PIN_8
 #define LED_04_PORT       GPIOA     //OUT - PP    H:ON
-#define LED_04_PIN        GPIO_Pin_11
+#define LED_04_PIN        GPIO_PIN_11
 
 #define TPS_SCL_PORT      GPIOB     //OUT - OD        yes
-#define TPS_SCL_PIN       GPIO_Pin_15
+#define TPS_SCL_PIN       GPIO_PIN_15
 #define TPS_SCL_PP        PB15
 #define TPS_SDA_PORT      GPIOB     //OUT - OD        yes
-#define TPS_SDA_PIN       GPIO_Pin_14
+#define TPS_SDA_PIN       GPIO_PIN_14
 #define TPS_SDA_PP        PB14
 #define TPS_PWRUP_PORT    GPIOB     //OUT - PP    H:EN          yes
-#define TPS_PWRUP_PIN     GPIO_Pin_12
+#define TPS_PWRUP_PIN     GPIO_PIN_12
 #define TPS_PWRUP_PP      PB12
 #define TPS_PWRCOM_PORT   GPIOB     //OUT - PP    H:PWRCOM    yes   ?-?aPB3
-#define TPS_PWRCOM_PIN    GPIO_Pin_13
+#define TPS_PWRCOM_PIN    GPIO_PIN_13
 #define TPS_PWRCOM_PP     PB13
 
 #define SYS_WAKEUP_PORT   GPIOC     //OUT - PP    H:EN     SYSWAKEUP   yes   ?-?aPB4
-#define SYS_WAKEUP_PIN    GPIO_Pin_6
+#define SYS_WAKEUP_PIN    GPIO_PIN_6
 #define SYS_WAKEUP_PP     PC6
 
 #define LED_01_PORT       GPIOC     //OUT - PP    H:ON
-#define LED_01_PIN        GPIO_Pin_8
+#define LED_01_PIN        GPIO_PIN_8
 #define LED_02_PORT       GPIOC     //OUT - PP    H:ON
-#define LED_02_PIN        GPIO_Pin_9
+#define LED_02_PIN        GPIO_PIN_9
 
 #define AVT_HRD_PORT      GPIOD     //OUT - PP    L:EN       yes
-#define AVT_HRD_PIN       GPIO_Pin_8
+#define AVT_HRD_PIN       GPIO_PIN_8
 #define AVT_HRD_PP        PD8
 
 #define AVT_HDC_PORT      GPIOD     //OUT - PP
-#define AVT_HDC_PIN       GPIO_Pin_9  
+#define AVT_HDC_PIN       GPIO_PIN_9  
 #define AVT_HDC_PP        PD9
 
 #define AVT_RDY_PORT      GPIOD     //IN - NOPULL   RDY           yes 
-#define AVT_RDY_PIN       GPIO_Pin_10
+#define AVT_RDY_PIN       GPIO_PIN_10
 #define AVT_RDY_PP        PD10
 
 #define AVT_RST_PORT      GPIOD     //OUT - PP    L:Reset     yes 
-#define AVT_RST_PIN       GPIO_Pin_11
+#define AVT_RST_PIN       GPIO_PIN_11
 #define AVT_RST_PP        PD11
 
 #define AVT_HWE_PORT      GPIOD     //OUT - PP    L:EN    yes
-#define AVT_HWE_PIN       GPIO_Pin_12
+#define AVT_HWE_PIN       GPIO_PIN_12
 #define AVT_HWE_PP        PD12
 
 #define AVT_HCS_PORT      GPIOD     //OUT - PP    L:EN    yes   ?-?aPA15
-#define AVT_HCS_PIN       GPIO_Pin_13
+#define AVT_HCS_PIN       GPIO_PIN_13
 #define AVT_HCS_PP        PD13
 
 #define AVT_IRQ_PORT      GPIOD     //IN - NOPULL            yes
-#define AVT_IRQ_PIN       GPIO_Pin_14
+#define AVT_IRQ_PIN       GPIO_PIN_14
 #define AVT_IRQ_PP        PD14
 
 #define TPS_WAKEUP_PORT   GPIOD     //OUT - PP    H:EN       yes
-#define TPS_WAKEUP_PIN    GPIO_Pin_15
+#define TPS_WAKEUP_PIN    GPIO_PIN_15
 #define TPS_WAKEUP_PP     PD15
 
 #define AVT_DAT_PORT      GPIOE     //NC    2��?��

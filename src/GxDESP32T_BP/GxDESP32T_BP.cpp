@@ -65,6 +65,10 @@ void GxDESP32T_BP::init(GxEPD_HD::Panel panel, uint16_t vcom_mV, Stream* pDiagno
       _width = 800;
       _height = 600;
       break;
+    case GxEPD_HD::GDE060F3:
+      _width = 1024;
+      _height = 758;
+      break;
     case GxEPD_HD::GDEW080T5:
       _width = 1024;
       _height = 768;
@@ -101,9 +105,30 @@ void GxDESP32T_BP::init(GxEPD_HD::Panel panel, uint16_t vcom_mV, Stream* pDiagno
 
 void GxDESP32T_BP::clearScreen(uint8_t value)
 {
+  writeScreenBuffer(value);
+  refresh();
+  writeScreenBuffer(value);
+}
+
+void GxDESP32T_BP::writeScreenBuffer(uint8_t value)
+{
   if (_hibernating) _wake_up();
   avt.wf_mode = EPD_MODE_GC16;
-  epd_draw_gray(value);
+  avt.avt_run_sys();
+  avt.avt_ld_img_area(EPD_DATA_8BPP, 0, 0, _width, _height);
+  avt.avt_wr_reg_addr(0x0154);
+  uint32_t n = uint32_t(_width) * uint32_t(_height) / 2;
+  avt.startTransfer(n);
+  for (uint16_t i = 0; i < _height; i++)
+  {
+    for (uint16_t j = 0; j < (_width / 2); j++)
+    {
+      avt.transfer16((value << 8) | value);
+    }
+  }
+  avt.endTransfer();
+  avt.avt_ld_img_end();
+  avt.avt_slp();
 }
 
 void GxDESP32T_BP::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
@@ -385,6 +410,7 @@ void GxDESP32T_BP::refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool part
 {
   if (_hibernating) _wake_up();
   uint8_t wf_mode = partial_update_mode ? EPD_MODE_DU : EPD_MODE_GC16;
+  avt.avt_run_sys();
   avt.avt_upd_full_area((wf_mode << 8), x, y, w, h);
   if (!_power_is_on) tps.tps_sleep_to_standby();
   _power_is_on = true;

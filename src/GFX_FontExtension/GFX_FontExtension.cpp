@@ -45,10 +45,10 @@ void GFX_FontExtension::drawChar(int16_t x, int16_t y, uint16_t c, uint16_t colo
 {
   if (!gfxFont) // 'Classic' built-in font
   {
-#ifndef _Fruitless_GFX_H
+#ifndef _GFX_H_
     Adafruit_GFX::drawChar(x, y, c, color, bg, size_x, size_y);
 #else
-    Fruitless_GFX::drawChar(x, y, c, color, bg, size_x, size_y);
+    GFX::drawChar(x, y, c, color, bg, size_x, size_y);
 #endif
   }
   else // Custom font
@@ -74,7 +74,6 @@ void GFX_FontExtension::drawChar(int16_t x, int16_t y, uint16_t c, uint16_t colo
       xo16 = xo;
       yo16 = yo;
     }
-    startWrite();
     for (yy = 0; yy < h; yy++)
     {
       for (xx = 0; xx < w; xx++)
@@ -87,17 +86,16 @@ void GFX_FontExtension::drawChar(int16_t x, int16_t y, uint16_t c, uint16_t colo
         {
           if (size_x == 1 && size_y == 1)
           {
-            writePixel(x + xo + xx, y + yo + yy, color);
+            drawPixel(x + xo + xx, y + yo + yy, color);
           }
           else
           {
-            writeFillRect(x + (xo16 + xx) * size_x, y + (yo16 + yy) * size_y, size_x, size_y, color);
+            fillRect(x + (xo16 + xx) * size_x, y + (yo16 + yy) * size_y, size_x, size_y, color);
           }
         }
         bits <<= 1;
       }
     }
-    endWrite();
 
   } // End classic vs custom font
 }
@@ -169,10 +167,10 @@ size_t GFX_FontExtension::write(uint8_t data)
         cursor_x  = 0;              // Reset x to zero,
         cursor_y += textsize_y * 8; // advance y one line
       }
-#ifndef _Fruitless_GFX_H
+#ifndef _GFX_H_
       Adafruit_GFX::drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize_x, textsize_y);
 #else
-      Fruitless_GFX::drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize_x, textsize_y);
+      GFX::drawChar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize_x, textsize_y);
 #endif
       cursor_x += textsize_x * 6;   // Advance x one char
     }

@@ -26,12 +26,17 @@ GxGDEW080T5::GxGDEW080T5(GxEPD_HD_IOCTRL& io, double vcom) :
 
 void GxGDEW080T5::init(Stream* pDiagnosticOutput)
 {
-  IO.init(GxEPD_HD::GDEW080T5, _vcom_mV, pDiagnosticOutput);
+  IO.init(panel, _vcom_mV, pDiagnosticOutput);
 }
 
 void GxGDEW080T5::clearScreen(uint8_t value)
 {
   IO.clearScreen(value);
+}
+
+void GxGDEW080T5::writeScreenBuffer(uint8_t value)
+{
+  IO.writeScreenBuffer(value);
 }
 
 void GxGDEW080T5::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)

@@ -26,12 +26,17 @@ GxGDE043A2::GxGDE043A2(GxEPD_HD_IOCTRL& io, double vcom) :
 
 void GxGDE043A2::init(Stream* pDiagnosticOutput)
 {
-  IO.init(GxEPD_HD::GDE043A2, _vcom_mV, pDiagnosticOutput);
+  IO.init(panel, _vcom_mV, pDiagnosticOutput);
 }
 
 void GxGDE043A2::clearScreen(uint8_t value)
 {
   IO.clearScreen(value);
+}
+
+void GxGDE043A2::writeScreenBuffer(uint8_t value)
+{
+  IO.writeScreenBuffer(value);
 }
 
 void GxGDE043A2::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)

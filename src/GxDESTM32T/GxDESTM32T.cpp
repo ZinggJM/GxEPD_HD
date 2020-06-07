@@ -10,7 +10,7 @@
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571_10574&product_id=57650
 // or https://www.aliexpress.com/store/product/6-inch-HD-Interface-High-resolution-electronic-paper-display-e-ink-epaper-with-TCON-Demo-Kit/600281_32838449413.html
 
-#if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
+#if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) || (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE))
 
 #include "GxDESTM32T.h"
 #include "DESTM32L1_board.h"
@@ -72,6 +72,10 @@ void GxDESTM32T::init(GxEPD_HD::Panel panel, uint16_t vcom_mV, Stream* pDiagnost
     case GxEPD_HD::GDE060BA:
       _width = 800;
       _height = 600;
+      break;
+    case GxEPD_HD::GDE060F3:
+      _width = 1024;
+      _height = 758;
       break;
     case GxEPD_HD::GDEW080T5:
       _width = 1024;
@@ -138,16 +142,32 @@ void GxDESTM32T::init(GxEPD_HD::Panel panel, uint16_t vcom_mV, Stream* pDiagnost
   epd_draw_gray(0xff);
   avt.wf_mode = EPD_MODE_GC16;
   avt.avt_slp();
-  //epd_draw_gray(0xff);//ȫ��ɫ
-  //delay(2000);
   //if(pDiagnosticOutput) pDiagnosticOutput->println("GxDESTM32T::init() done");
 }
 
 void GxDESTM32T::clearScreen(uint8_t value)
 {
+  writeScreenBuffer(value);
+  refresh();
+  writeScreenBuffer(value);
+}
+
+void GxDESTM32T::writeScreenBuffer(uint8_t value)
+{
   if (_hibernating) _wake_up();
   avt.wf_mode = EPD_MODE_GC16;
-  epd_draw_gray(value);
+  avt.avt_run_sys();
+  avt.avt_ld_img_area(EPD_DATA_8BPP, 0, 0, _width, _height);
+  avt.avt_wr_reg_addr(0x0154);
+  for (uint16_t i = 0; i < _height; i++)
+  {
+    for (uint16_t j = 0; j < (_width / 2); j++)
+    {
+      avt.avt_i80_write_dat((value << 8) | value);
+    }
+  }
+  avt.avt_ld_img_end();
+  avt.avt_slp();
 }
 
 void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
@@ -271,7 +291,7 @@ void GxDESTM32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth,
 }
 
 void GxDESTM32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
-                                  int16_t x, int16_t y, int16_t w, int16_t h)
+                                int16_t x, int16_t y, int16_t w, int16_t h)
 {
   Debug_str("writeImagePart start...\r\n");
   if ((x >= _width) || (y >= _height)) return;
@@ -385,7 +405,7 @@ void GxDESTM32T::drawImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, 
 }
 
 void GxDESTM32T::drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
-                                 int16_t x, int16_t y, int16_t w, int16_t h)
+                               int16_t x, int16_t y, int16_t w, int16_t h)
 {
   Debug_str("drawImagePart start...\r\n");
   writeImagePart(bitmap, size, depth, x_part, y_part, w_bitmap, h_bitmap, x, y, w, h);
@@ -402,6 +422,7 @@ void GxDESTM32T::refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partia
 {
   if (_hibernating) _wake_up();
   uint8_t wf_mode = partial_update_mode ? EPD_MODE_DU : EPD_MODE_GC16;
+  avt.avt_run_sys();
   avt.avt_upd_full_area((wf_mode << 8), x, y, w, h);
   if (!_power_is_on) tps.tps_sleep_to_standby();
   _power_is_on = true;
