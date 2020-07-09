@@ -45,7 +45,9 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 - CPU Speed(MHz): "72MHz (Normal)"
 - Upload method: "STLink"
 
-### Version 1.0.1
+### Version 1.0.2
+- fixed controller buffer partial overwrite issue with GDE060F3 or GDEW080T5 (higher buffer base address)
+#### Version 1.0.1
 - added GxGDE060F3 for panel GDE060F3 6" 1024x758
 - uses my Adafruit_GFX clone GFX from my library GFX_Root, available by Library Manager
 - search for GFX_Root in Library Manager to install GFX_Root

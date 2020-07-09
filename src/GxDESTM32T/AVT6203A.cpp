@@ -885,6 +885,11 @@ void AVT6203A::avt_init()
   avt_info_str("\r\nCheck Register MA[31:16] updated by UPD_SET_SETADR: addr 0x0312, value ");
   avt_info_hex(avt_rd_reg(0x0312));
 
+  avt_info_str("\r\nCheck Register MA[15:0]                             addr 0x0314, value ");
+  avt_info_hex(avt_rd_reg(0x0314));
+  avt_info_str("\r\nCheck Register MA[31:16]                            addr 0x0316, value ");
+  avt_info_hex(avt_rd_reg(0x0316));
+
   avt_ld_img(EPD_DATA_8BPP);
   avt_info_str("\r\nLD_IMG is sent!");
   avt_info_str("\r\nCheck Register ARG[15:0] updated by LD_IMG: addr 0x0140, value ");

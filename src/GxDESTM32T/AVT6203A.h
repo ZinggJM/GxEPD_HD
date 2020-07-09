@@ -21,7 +21,9 @@
 //#define GDE060F3 // GDE060F3 6.0" 1024*758     
 
 #define EPD_WF_ADDR				(0x3000)		//����ֽģ�����������ļ���SPI_FLASH����ʼ��ַ
-#define EPD_IMG_ADDR			(0x200000)		//����ͼƬ������RAM����ʼ��ַ
+//#define EPD_IMG_ADDR			(0x200000)		// original, @2MB, midlle of RAM, gets partly overwritten for GxGDE060F3, GxGDEW080T5
+//#define EPD_IMG_ADDR      (0x240000)    // @2.25MB, minimum for GxGDE060F3, GxGDEW080T5
+#define EPD_IMG_ADDR      (0x280000)    // @2.5MB, ok for GxGDE060F3, GxGDEW080T5
 
 #define EPD_MODE_INIT			0
 #define EPD_MODE_DU				1
