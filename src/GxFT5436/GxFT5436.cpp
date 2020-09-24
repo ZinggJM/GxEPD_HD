@@ -16,6 +16,26 @@
 
 #define DiagOut if(_pDiagnosticOutput) (*_pDiagnosticOutput)
 
+#if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) // "STM32 Boards (STM32Duino.com)"
+
+GxFT5436::GxFT5436(int8_t rst) : I2C(1), _sda(PB7), _scl(PB6), _rst(rst)
+{
+  _prev_idx = 0;
+  _act_idx = 1;
+  _info[0].clear();
+  _info[1].clear();
+}
+
+GxFT5436::GxFT5436(int8_t sda, int8_t scl, int8_t rst) : I2C(sda == PB11 ? 2 : 1), _sda(sda), _scl(scl), _rst(rst)
+{
+  _prev_idx = 0;
+  _act_idx = 1;
+  _info[0].clear();
+  _info[1].clear();
+}
+
+#else
+
 GxFT5436::GxFT5436(int8_t rst) : _sda(SDA), _scl(SCL), _rst(rst)
 {
   _prev_idx = 0;
@@ -32,6 +52,8 @@ GxFT5436::GxFT5436(int8_t sda, int8_t scl, int8_t rst) : _sda(sda), _scl(scl), _
   _info[1].clear();
 }
 
+#endif
+
 void GxFT5436::init(Stream* pDiagnosticOutput)
 {
   _pDiagnosticOutput = pDiagnosticOutput;
@@ -46,7 +68,9 @@ void GxFT5436::init(Stream* pDiagnosticOutput)
     delay(100);
   }
 #if (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE)) // "STM32 Boards (select from submenu)"
-  //I2C.begin(uint8_t(_sda), uint8_t(_scl)); // doesn't work, reason unknown
+  //I2C.begin(uint8_t(_sda), uint8_t(_scl)); // doesn't work, reason unknown, should match void begin(uint8_t, uint8_t);
+  I2C.begin((uint8_t)_sda, (uint8_t)_scl); // this works
+#elif (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) // "STM32 Boards (STM32Duino.com)"
   I2C.begin();
 #else
   I2C.begin(_sda, _scl);
@@ -113,7 +137,9 @@ GxFT5436::TouchInfo GxFT5436::lastMultipleTouch()
 
 void GxFT5436::scan()
 {
+  uint32_t start = micros();
   I2C_Read(FT5436_I2C_ADDR, FT_REG_DEV_MODE, _registers, POINT_READ_BUF);
+  uint32_t elapsed1 = micros() - start;
   uint8_t touch_count = _registers[FT_TD_STATUS] & FT_MAX_ID;
   if (touch_count > CFG_MAX_TOUCH_POINTS)
   {
@@ -122,7 +148,8 @@ void GxFT5436::scan()
     touch_count = _registers[FT_TD_STATUS] & FT_MAX_ID;
     if (touch_count > CFG_MAX_TOUCH_POINTS) touch_count = 0;
   }
-  std::swap(_act_idx, _prev_idx);
+  //std::swap(_act_idx, _prev_idx);
+  int16_t t = _act_idx; _act_idx = _prev_idx; _prev_idx = t;
   _info[_act_idx].touch_count = touch_count;
   for (uint8_t i = 0; i < CFG_MAX_TOUCH_POINTS; i++)
   {
@@ -153,6 +180,11 @@ void GxFT5436::scan()
   {
     _info[_act_idx].x[4] = ((_registers[3 + 4 * 6] & 0x0f) << 8) | _registers[4 + 4 * 6];
     _info[_act_idx].y[4] = ((_registers[5 + 4 * 6] & 0x0f) << 8) | _registers[6 + 4 * 6];
+  }
+  uint32_t elapsed2 = micros() - start;
+  if (touch_count > 0)
+  {
+    //DiagOut.print("scan() "); DiagOut.print(elapsed1); DiagOut.print(" "); DiagOut.println(elapsed2);
   }
 }
 

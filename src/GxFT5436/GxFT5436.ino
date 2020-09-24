@@ -15,13 +15,17 @@
 #include "GxFT5436.h"
 
 #if (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE)) // "STM32 Boards (select from submenu)"
-//GxFT5436 touch(/*SDA=*/PC10, /*SCL=*/PC12, /*RST=*/PA12); // doesn't work
-//GxFT5436 touch(/*SDA=*/PB7, /*SCL=*/PB6, /*RST=*/PA12); // HW I2C
-GxFT5436 touch(/*RST=*/PA12); // HW I2C
+//GxFT5436 touch(/*SDA=*/PC10, /*SCL=*/PC12, /*RST=*/PA12); // SW I2C doesn't work
+//GxFT5436 touch(/*RST=*/PA12); // HW I2C, default on PB7, PB6 works
+//GxFT5436 touch(/*SDA=*/PB7, /*SCL=*/PB6, /*RST=*/PA12); // HW I2C works
+//GxFT5436 touch(/*SDA=*/PB9, /*SCL=*/PB8, /*RST=*/PA12); // HW I2C works
+GxFT5436 touch(/*SDA=*/PB11, /*SCL=*/PB10, /*RST=*/PA12); // HW I2C works
 HardwareSerial DiagnosticStream(PA3, PA2); // pins PA2, PA3 for USB jumpers
 #elif (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) // "STM32 Boards (STM32Duino.com)"
-// *** doesn't compile, incompatible I2C TwoWire class
-//GxFT5436 touch(/*SDA=*/PC10, /*SCL=*/PC12, /*RST=*/PA12); // doesn't work
+//GxFT5436 touch(/*SDA=*/PC10, /*SCL=*/PC12, /*RST=*/PA12); // SW I2C doesn't work
+//GxFT5436 touch(/*RST=*/PA12); // HW I2C, default on PB7, PB6 works (I2C1)
+//GxFT5436 touch(/*SDA=*/PB7, /*SCL=*/PB6, /*RST=*/PA12); // HW I2C works (I2C1)
+GxFT5436 touch(/*SDA=*/PB11, /*SCL=*/PB10, /*RST=*/PA12); // HW I2C works (I2C2)
 HardwareSerial& DiagnosticStream = Serial2; // pins PA2, PA3 for USB jumpers
 #elif defined(ESP8266)
 GxFT5436 touch(/*RST=*/D3);
