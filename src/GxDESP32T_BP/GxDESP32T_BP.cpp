@@ -73,6 +73,9 @@ void GxDESP32T_BP::init(GxEPD_HD::Panel panel, uint16_t vcom_mV, Stream* pDiagno
       _width = 1024;
       _height = 768;
       break;
+    default:
+      _width = 800;
+      _height = 600;
   }
   _pDiagnosticOutput = pDiagnosticOutput;
   IO.init();

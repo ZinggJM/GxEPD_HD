@@ -45,7 +45,12 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 - CPU Speed(MHz): "72MHz (Normal)"
 - Upload method: "STLink"
 
-### Version 1.0.2
+### Version 1.0.3
+- added grey levels graphics support GxEPD_HD_4G.h, GxEPD_HD_16G.h, GxEPD_HD_GreyGraphics.ino
+- added support for Waveshare ED060SCT on IT8951 Driver HAT
+- added touch support for GxGDE060F3-T (initial version, GxFT5436 touch driver for FT5436 controller)
+- added fix for GFX_FontExtension (added adapted getTextBounds) 
+#### Version 1.0.2
 - fixed controller buffer partial overwrite issue with GDE060F3 or GDEW080T5 (higher buffer base address)
 #### Version 1.0.1
 - added GxGDE060F3 for panel GDE060F3 6" 1024x758

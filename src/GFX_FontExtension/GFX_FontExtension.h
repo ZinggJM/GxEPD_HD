@@ -41,8 +41,12 @@ class GFX_FontExtension : public GFX
     virtual size_t write(uint8_t);
     void setFont(const GFXfont* f = NULL); // use this to set a font (to its page)
     void setFont(const GFXfont* f, uint8_t page); // use setFont(0, page); to remove a font, e.g. setFont(0, FreeMonoBold12pt7b.first / 256);
+    void getTextBounds(const char *string, int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h);
+    void getTextBounds(const __FlashStringHelper *s, int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h);
+    void getTextBounds(const String &str, int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h);
   private:
     uint16_t decodeUTF8(uint8_t c);
+    void charBounds(uint8_t uc8, int16_t *x, int16_t *y, int16_t *minx, int16_t *miny, int16_t *maxx, int16_t *maxy);
   private:
     const GFXfont* gfxFonts[256];
     uint8_t  decoderState = 0;   // UTF-8 decoder state

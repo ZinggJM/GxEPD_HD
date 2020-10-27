@@ -73,6 +73,9 @@ void GxDESP32T::init(GxEPD_HD::Panel panel, uint16_t vcom_mV, Stream* pDiagnosti
       _width = 1024;
       _height = 768;
       break;
+    default:
+      _width = 800;
+      _height = 600;
   }
   _pDiagnosticOutput = pDiagnosticOutput;
   //if(pDiagnosticOutput) pDiagnosticOutput->println("GxDESP32T::init()");
@@ -279,7 +282,7 @@ void GxDESP32T::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, 
 }
 
 void GxDESP32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
-                                  int16_t x, int16_t y, int16_t w, int16_t h)
+                               int16_t x, int16_t y, int16_t w, int16_t h)
 {
   Debug_str("writeImagePart start...\r\n");
   if ((x >= _width) || (y >= _height)) return;
@@ -401,7 +404,7 @@ void GxDESP32T::drawImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, u
 }
 
 void GxDESP32T::drawImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
-                                 int16_t x, int16_t y, int16_t w, int16_t h)
+                              int16_t x, int16_t y, int16_t w, int16_t h)
 {
   Debug_str("drawImagePart start...\r\n");
   writeImagePart(bitmap, size, depth, x_part, y_part, w_bitmap, h_bitmap, x, y, w, h);

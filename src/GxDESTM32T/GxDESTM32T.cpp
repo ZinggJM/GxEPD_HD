@@ -81,6 +81,9 @@ void GxDESTM32T::init(GxEPD_HD::Panel panel, uint16_t vcom_mV, Stream* pDiagnost
       _width = 1024;
       _height = 768;
       break;
+    default:
+      _width = 800;
+      _height = 600;
   }
   _pDiagnosticOutput = pDiagnosticOutput;
   avt.init(panel, pDiagnosticOutput);
@@ -312,7 +315,7 @@ void GxDESTM32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t de
       avt.avt_wr_reg(0x0020, 0x2);  //big endian
       avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, 8 * ww, h);
       avt.avt_wr_reg_addr(0x0154);
-      for (uint32_t y1 = y; y1 < y + h; y1++)
+      for (uint32_t y1 = y; y1 < uint32_t(y + h); y1++)
       {
         uint32_t idx = (y_part + y1 - y) * bm_wb + x_part / 8;
         for (uint16_t cw = 0; cw < ww; cw++)
@@ -330,7 +333,7 @@ void GxDESTM32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t de
       avt.avt_wr_reg(0x0020, 0x2);  //big endian
       avt.avt_ld_img_area(EPD_DATA_2BPP, x, y, 8 * ww, h);
       avt.avt_wr_reg_addr(0x0154);
-      for (uint32_t y1 = y; y1 < y + h; y1++)
+      for (uint32_t y1 = y; y1 < uint32_t(y + h); y1++)
       {
         uint32_t idx = (y_part + y1 - y) * bm_wb + x_part / 4;
         for (uint16_t cw = 0; cw < ww; cw++)
@@ -353,7 +356,7 @@ void GxDESTM32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t de
       avt.avt_wr_reg(0x0020, 0x2);  //big endian
       avt.avt_ld_img_area(EPD_DATA_4BPP, x, y, w, h);
       avt.avt_wr_reg_addr(0x0154);
-      for (uint32_t y1 = y; y1 < y + h; y1++)
+      for (uint32_t y1 = y; y1 < uint32_t(y + h); y1++)
       {
         uint32_t idx = (y_part + y1 - y) * bm_wb + x_part / 2;
         for (uint16_t cw = 0; cw < ww; cw++)
@@ -375,7 +378,7 @@ void GxDESTM32T::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t de
       avt.avt_wr_reg(0x0020, 0x2);  //big endian
       avt.avt_ld_img_area(EPD_DATA_8BPP, x, y, w, h);
       avt.avt_wr_reg_addr(0x0154);
-      for (uint32_t y1 = y; y1 < y + h; y1++)
+      for (uint32_t y1 = y; y1 < uint32_t(y + h); y1++)
       {
         uint32_t idx = (y_part + y1 - y) * w_bitmap + x_part;
         for (uint16_t cw = 0; cw < ww; cw++)

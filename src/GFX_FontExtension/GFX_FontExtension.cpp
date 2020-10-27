@@ -41,6 +41,18 @@
 #define pgm_read_pointer(addr) ((void *)pgm_read_word(addr))
 #endif
 
+inline GFXglyph *pgm_read_glyph_ptr(const GFXfont *gfxFont, uint8_t c) {
+#ifdef __AVR__
+  return &(((GFXglyph *)pgm_read_pointer(&gfxFont->glyph))[c]);
+#else
+  // expression in __AVR__ section may generate "dereferencing type-punned
+  // pointer will break strict-aliasing rules" warning In fact, on other
+  // platforms (such as STM32) there is no need to do this pointer magic as
+  // program memory may be read in a usual way So expression may be simplified
+  return gfxFont->glyph + c;
+#endif //__AVR__
+}
+
 void GFX_FontExtension::drawChar(int16_t x, int16_t y, uint16_t c, uint16_t color, uint16_t bg, uint8_t size_x, uint8_t size_y, const GFXfont* gfxFont)
 {
   if (!gfxFont) // 'Classic' built-in font
@@ -217,4 +229,124 @@ void GFX_FontExtension::setFont(const GFXfont* f, uint8_t page)
 {
   if (f && (page == f->first / 256)) gfxFonts[page] = f;
   else if (!f) gfxFonts[page] = 0;
+}
+
+void GFX_FontExtension::getTextBounds(const char *str, int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h)
+{
+  uint8_t c; // Current character
+
+  *x1 = x;
+  *y1 = y;
+  *w = *h = 0;
+
+  int16_t minx = _width, miny = _height, maxx = -1, maxy = -1;
+
+  while ((c = *str++))
+    charBounds(c, &x, &y, &minx, &miny, &maxx, &maxy);
+
+  if (maxx >= minx) {
+    *x1 = minx;
+    *w = maxx - minx + 1;
+  }
+  if (maxy >= miny) {
+    *y1 = miny;
+    *h = maxy - miny + 1;
+  }
+}
+
+void GFX_FontExtension::getTextBounds(const String & str, int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h)
+{
+  if (str.length() != 0)
+  {
+    getTextBounds(const_cast<char *>(str.c_str()), x, y, x1, y1, w, h);
+  }
+}
+
+void GFX_FontExtension::getTextBounds(const __FlashStringHelper * str, int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h)
+{
+  uint8_t *s = (uint8_t *)str, c;
+
+  *x1 = x;
+  *y1 = y;
+  *w = *h = 0;
+
+  int16_t minx = _width, miny = _height, maxx = -1, maxy = -1;
+
+  while ((c = pgm_read_byte(s++)))
+    charBounds(c, &x, &y, &minx, &miny, &maxx, &maxy);
+
+  if (maxx >= minx) {
+    *x1 = minx;
+    *w = maxx - minx + 1;
+  }
+  if (maxy >= miny) {
+    *y1 = miny;
+    *h = maxy - miny + 1;
+  }
+}
+
+void GFX_FontExtension::charBounds(unsigned char uc8, int16_t *x, int16_t *y, int16_t *minx, int16_t *miny, int16_t *maxx, int16_t *maxy)
+{
+  uint16_t c = (uint16_t)uc8;
+  c = decodeUTF8(uc8);
+  if (c == 0) return;
+  const GFXfont* gfxFont = gfxFonts[c / 256];
+  if (gfxFont) {
+
+    if (c == '\n') { // Newline?
+      *x = 0;        // Reset x to zero, advance y by one line
+      *y += textsize_y * (uint8_t)pgm_read_byte(&gfxFont->yAdvance);
+    } else if (c != '\r') { // Not a carriage return; is normal char
+      uint8_t first = pgm_read_byte(&gfxFont->first),
+              last = pgm_read_byte(&gfxFont->last);
+      if ((c >= first) && (c <= last)) { // Char present in this font?
+        GFXglyph *glyph = pgm_read_glyph_ptr(gfxFont, c - first);
+        uint8_t gw = pgm_read_byte(&glyph->width),
+                gh = pgm_read_byte(&glyph->height),
+                xa = pgm_read_byte(&glyph->xAdvance);
+        int8_t xo = pgm_read_byte(&glyph->xOffset),
+               yo = pgm_read_byte(&glyph->yOffset);
+        if (wrap && ((*x + (((int16_t)xo + gw) * textsize_x)) > _width)) {
+          *x = 0; // Reset x to zero, advance y by one line
+          *y += textsize_y * (uint8_t)pgm_read_byte(&gfxFont->yAdvance);
+        }
+        int16_t tsx = (int16_t)textsize_x, tsy = (int16_t)textsize_y,
+                x1 = *x + xo * tsx, y1 = *y + yo * tsy, x2 = x1 + gw * tsx - 1,
+                y2 = y1 + gh * tsy - 1;
+        if (x1 < *minx)
+          *minx = x1;
+        if (y1 < *miny)
+          *miny = y1;
+        if (x2 > *maxx)
+          *maxx = x2;
+        if (y2 > *maxy)
+          *maxy = y2;
+        *x += xa * tsx;
+      }
+    }
+
+  } else { // Default font
+
+    if (c == '\n') {        // Newline?
+      *x = 0;               // Reset x to zero,
+      *y += textsize_y * 8; // advance y one line
+      // min/max x/y unchaged -- that waits for next 'normal' character
+    } else if (c != '\r') { // Normal char; ignore carriage returns
+      if (wrap && ((*x + textsize_x * 6) > _width)) { // Off right?
+        *x = 0;                                       // Reset x to zero,
+        *y += textsize_y * 8;                         // advance y one line
+      }
+      int x2 = *x + textsize_x * 6 - 1, // Lower-right pixel of char
+          y2 = *y + textsize_y * 8 - 1;
+      if (x2 > *maxx)
+        *maxx = x2; // Track max x, y
+      if (y2 > *maxy)
+        *maxy = y2;
+      if (*x < *minx)
+        *minx = *x; // Track min x, y
+      if (*y < *miny)
+        *miny = *y;
+      *x += textsize_x * 6; // Advance x one char
+    }
+  }
 }

@@ -1,4 +1,4 @@
-// GxEPD_HD_TouchMe : touch example for HD e-Paper displays from Dalian Good Display Inc. (parallel interface).
+// GxEPD_HD_Scribble : touch example for HD e-Paper displays from Dalian Good Display Inc. (parallel interface).
 //
 // Display Library based on Demo Example available from Good Display
 //
@@ -87,8 +87,8 @@ GxFT5436 touch(/*RST=*/D3);
 #endif
 
 const uint16_t r = 100;
-uint16_t x = base_display.WIDTH / 2;
-uint16_t y = base_display.HEIGHT / 2;
+uint16_t x = base_display.WIDTH - r;
+uint16_t y = r;
 
 void setup()
 {
@@ -102,11 +102,19 @@ void setup()
   delay(200);
   display.init(&DiagnosticStream);
   touch.init(&DiagnosticStream); // with diagnostics, (maybe, some uncommented ones)
-  showTouchMe(x, y, r);
+  showClearMe(x, y, r);
   delay(1000);
   randomSeed(analogRead(0));
   DiagnosticStream.println("setup done");
 }
+
+uint8_t black2x2[] = {0, 0, 0, 0};
+uint8_t black3x3[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint8_t black4x4[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint8_t grey4x4[] = {0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F, 0x7F};
+
+bool refresh_pending = false;
+uint32_t refreshed;
 
 void loop()
 {
@@ -116,25 +124,45 @@ void loop()
   if (cnt > 0)
   {
     transpose(tx, ty);
-    DiagnosticStream.print(cnt); DiagnosticStream.print(" ("); DiagnosticStream.print(tx); DiagnosticStream.print(", "); DiagnosticStream.print(ty); DiagnosticStream.println(")");
+    //DiagnosticStream.print(cnt); DiagnosticStream.print(" ("); DiagnosticStream.print(tx); DiagnosticStream.print(", "); DiagnosticStream.print(ty); DiagnosticStream.println(")");
     if (near(x, y, tx, ty, r))
     {
-      x = random(r, base_display.WIDTH - r);
-      y = random(r, base_display.HEIGHT - r);
-      showTouchMe(x, y, r);
+      showClearMe(x, y, r);
+      refresh_pending = false;
+      refreshed = millis();
     }
+    else
+    {
+      //display.writeImage(black2x2, sizeof(black2x2), 8, tx, ty, 2, 2);
+      //display.writeImage(black3x3, sizeof(black3x3), 8, tx, ty, 3, 3);
+      //display.writeImage(black4x4, sizeof(black4x4), 8, tx, ty, 4, 4);
+      display.writeImage(grey4x4, sizeof(grey4x4), 8, tx, ty, 4, 4);
+      if (!refresh_pending)
+      {
+        refresh_pending = true;
+        refreshed = millis();
+      }
+      //display.refresh(true);
+    }
+  }
+  if (refresh_pending && (millis() - refreshed > 500))
+  {
+    //display.refresh(true);
+    display.refresh(false); // needed for grey
+    refresh_pending = false;
+    refreshed = millis();
   }
 }
 
-const char TouchMe[] = "Touch Me";
+const char ClearMe[] = "Clear Me";
 
-void showTouchMe(uint16_t x, uint16_t y, uint16_t r)
+void showClearMe(uint16_t x, uint16_t y, uint16_t r)
 {
-  //DiagnosticStream.println("showTouchMe");
+  //DiagnosticStream.println("showClearMe");
   display.setFont(&FreeMonoBold18pt7b);
   display.setTextColor(GxEPD_WHITE);
   int16_t tbx, tby; uint16_t tbw, tbh;
-  display.getTextBounds(TouchMe, 0, 0, &tbx, &tby, &tbw, &tbh);
+  display.getTextBounds(ClearMe, 0, 0, &tbx, &tby, &tbw, &tbh);
   // center bounding box by transposition of origin:
   uint16_t cx = x - tbw / 2 - tbx;
   uint16_t cy = y - tbh / 2 - tby;
@@ -145,10 +173,10 @@ void showTouchMe(uint16_t x, uint16_t y, uint16_t r)
     display.fillScreen(GxEPD_WHITE);
     display.fillCircle(x, y, r, GxEPD_BLACK);
     display.setCursor(cx, cy);
-    display.print(TouchMe);
+    display.print(ClearMe);
   }
   while (display.nextPage());
-  //DiagnosticStream.println("showTouchMe done");
+  //DiagnosticStream.println("showClearMe done");
 }
 
 bool near(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t d)

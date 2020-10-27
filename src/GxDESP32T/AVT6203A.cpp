@@ -84,6 +84,19 @@ void AVT6203A::init(GxEPD_HD::Panel panel, Stream* pDiagnosticOutput)
       tcon_init_gdrv_cfg = 0x00;
       tcon_init_lutidxfmt = (4 | (1 << 7));
       break;
+    default:
+      tcon_init_hsize = 800;
+      tcon_init_vsize = 600;
+      tcon_init_fslen = 4;
+      tcon_init_fblen = 4;
+      tcon_init_felen = 10;
+      tcon_init_lslen = 10;
+      tcon_init_lblen = 4;
+      tcon_init_lelen = 13;
+      tcon_init_pixclkdiv = 3;
+      tcon_init_sdrv_cfg = (100 | (1 << 8) | (1 << 9));
+      tcon_init_gdrv_cfg = 0x00;
+      tcon_init_lutidxfmt = (4 | (1 << 7));
   }
   pinio16.init(SS);
 }

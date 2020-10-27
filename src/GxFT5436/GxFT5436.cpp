@@ -14,6 +14,8 @@
 
 #include "GxFT5436.h"
 
+#if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_STM32) || defined(ARDUINO_ARCH_STM32F1)
+
 #define DiagOut if(_pDiagnosticOutput) (*_pDiagnosticOutput)
 
 #if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) // "STM32 Boards (STM32Duino.com)"
@@ -27,6 +29,24 @@ GxFT5436::GxFT5436(int8_t rst) : I2C(1), _sda(PB7), _scl(PB6), _rst(rst)
 }
 
 GxFT5436::GxFT5436(int8_t sda, int8_t scl, int8_t rst) : I2C(sda == PB11 ? 2 : 1), _sda(sda), _scl(scl), _rst(rst)
+{
+  _prev_idx = 0;
+  _act_idx = 1;
+  _info[0].clear();
+  _info[1].clear();
+}
+
+#elif defined(ESP32)
+
+GxFT5436::GxFT5436(int8_t rst) : I2C(0), _sda(SDA), _scl(SCL), _rst(rst)
+{
+  _prev_idx = 0;
+  _act_idx = 1;
+  _info[0].clear();
+  _info[1].clear();
+}
+
+GxFT5436::GxFT5436(int8_t sda, int8_t scl, int8_t rst) : I2C(0), _sda(sda), _scl(scl), _rst(rst)
 {
   _prev_idx = 0;
   _act_idx = 1;
@@ -186,6 +206,8 @@ void GxFT5436::scan()
   {
     //DiagOut.print("scan() "); DiagOut.print(elapsed1); DiagOut.print(" "); DiagOut.println(elapsed2);
   }
+  (void) elapsed1;
+  (void) elapsed2;
 }
 
 void GxFT5436::check(const char text[], TouchInfo& touchinfo)
@@ -259,3 +281,5 @@ bool GxFT5436::TouchInfo::operator==(TouchInfo to)
           (x[3] == to.x[3]) && (y[3] == to.y[3]) &&
           (x[4] == to.x[4]) && (y[4] == to.y[4]));
 }
+
+#endif

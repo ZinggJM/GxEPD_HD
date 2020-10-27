@@ -21,19 +21,29 @@
 //#include <GxDESP32T/GxDESP32T.h>
 //GxDESP32T io;
 // for my DESP32T_BP (proto board) for TCon-11 parallel interface
-#include <GxDESP32T_BP/GxDESP32T_BP.h>
-GxDESP32T_BP io;
+//#include <GxDESP32T_BP/GxDESP32T_BP.h>
+//GxDESP32T_BP io;
+// for ED060SCT on IT8951 Driver HAT e.g. with ESP32
+#include <GxIT8951/GxIT8951.h>
+GxIT8951 io(/*CS=5*/ SS, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4);
 
 // select the base display class to use, only one
 //GxGDE043A2 base_display(io); // default vcom used (-2.0V)
 //GxGDE060BA base_display(io); // default vcom used (-2.0V)
-GxGDE060BA base_display(io, -2.3); // vcom from sticker on flex connector of my panel, as double
+//GxGDE060BA base_display(io, -2.3); // vcom from sticker on flex connector of my panel, as double
 //GxGDE060BA base_display(io, 2300); // or as abs(vcom*1000) in mV, as uint16_t 
+//GxGDE060F3 base_display(io, -2.4); // vcom from sticker on flex connector of my panel, as double
 //GxGDEW080T5 base_display(io); // default vcom used (-2.2V)
+// ED060SCT on IT8951 Driver HAT e.g. with ESP32
+GxED060SCT base_display(io); // default vcom used (-2.0V)
 
 // select the graphics display template class to use, only one
 //GxEPD_HD_BW<GxGDE043A2, GxGDE043A2::HEIGHT> display(base_display); // full height, one page
-GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page
+//GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page
+//GxEPD_HD_BW<GxGDE060F3, GxGDE060F3::HEIGHT> display(base_display); // full height, one page
+//GxEPD_HD_BW<GxGDEW080T5, GxGDEW080T5::HEIGHT> display(base_display); // full height, one page
+// ED060SCT on IT8951 Driver HAT e.g. with ESP32
+GxEPD_HD_BW<GxED060SCT, GxED060SCT::HEIGHT> display(base_display); // full height, one page, on ESP32
 
 #if defined (ESP8266)
 #include <ESP8266WiFi.h>

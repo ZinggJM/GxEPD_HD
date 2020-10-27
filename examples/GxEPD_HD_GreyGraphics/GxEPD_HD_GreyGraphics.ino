@@ -1,4 +1,4 @@
-// GxEPD_HD_Example : example for HD e-Paper displays from Dalian Good Display Inc. (parallel interface).
+// GxEPD_HD_GreyGraphics : example for HD e-Paper displays from Dalian Good Display Inc. (parallel interface).
 //
 // Display Library based on Demo Example available from Good Display
 //
@@ -24,7 +24,8 @@
 
 // include library, include base class, make path known
 #include <GxEPD_HD_EPD.h>
-#include <GxEPD_HD_BW.h>
+#include <GxEPD_HD_4G.h>
+#include <GxEPD_HD_16G.h>
 
 // select the display io class to use, only one
 #if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) || (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE))
@@ -47,26 +48,43 @@ GxIT8951 io(/*CS=5*/ SS, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4);
 //GxGDE060BA base_display(io); // default vcom used (-2.0V)
 //GxGDE060BA base_display(io, -2.3); // vcom from sticker on flex connector of my panel, as double
 //GxGDE060BA base_display(io, uint16_t(2300)); // or as abs(vcom*1000) in mV, as uint16_t
-GxGDE060F3 base_display(io, -2.4); // vcom from sticker on flex connector of my panel, as double
+//GxGDE060F3 base_display(io, -2.4); // vcom from sticker on flex connector of my panel, as double
 //GxGDEW080T5 base_display(io); // default vcom used (-2.2V)
 // ED060SCT on IT8951 Driver HAT e.g. with ESP32
-//GxED060SCT base_display(io); // default vcom used (-2.0V)
+GxED060SCT base_display(io, -2.03); // vcom from sticker on flex connector of my panel, as double
 
+// for 16 grey levels:
 // select the graphics display template class to use, only one
 #if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) || (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE))
-//GxEPD_HD_BW < GxGDE043A2, GxGDE043A2::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
-//GxEPD_HD_BW < GxGDE060BA, GxGDE060BA::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
-GxEPD_HD_BW < GxGDE060F3, GxGDE060F3::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~11k RAM remaining
-//GxEPD_HD_BW < GxGDEW080T5, GxGDEW080T5::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~11k RAM remaining
+//GxEPD_HD_16G < GxGDE043A2, GxGDE043A2::HEIGHT / 8 > display(base_display); // 8 pages, ~30k RAM remaining
+//GxEPD_HD_16G < GxGDE060BA, GxGDE060BA::HEIGHT / 8 > display(base_display); // 8 pages, ~30k RAM remaining
+GxEPD_HD_16G < GxGDE060F3, GxGDE060F3::HEIGHT / 8 > display(base_display); // 8 pages, ~11k RAM remaining
+//GxEPD_HD_16G < GxGDEW080T5, GxGDEW080T5::HEIGHT / 8 > display(base_display); // 8 pages, ~11k RAM remaining
 #else
-//GxEPD_HD_BW<GxGDE043A2, GxGDE043A2::HEIGHT> display(base_display); // full height, one page
-//GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page
-//GxEPD_HD_BW<GxGDE060F3, GxGDE060F3::HEIGHT> display(base_display); // full height, one page
-//GxEPD_HD_BW<GxGDEW080T5, GxGDEW080T5::HEIGHT> display(base_display); // full height, one page
+//GxEPD_HD_16G < GxGDE043A2, GxGDE043A2::HEIGHT / 4 > display(base_display); // quarter height, 4 pages
+//GxEPD_HD_16G < GxGDE060BA, GxGDE060BA::HEIGHT / 4 > display(base_display); // quarter height, 4 pages
+//GxEPD_HD_16G < GxGDE060F3, GxGDE060F3::HEIGHT / 4 > display(base_display); // quarter height, 4 pages
+//GxEPD_HD_16G < GxGDEW080T5, GxGDEW080T5::HEIGHT / 4 > display(base_display); // quarter height, 4 pages
 // ED060SCT on IT8951 Driver HAT e.g. with ESP32
-GxEPD_HD_BW<GxED060SCT, GxED060SCT::HEIGHT> display(base_display); // full height, one page, on ESP32
-//GxEPD_HD_BW < GxED060SCT, GxED060SCT::HEIGHT / 2 > display(base_display); // half height, 2 pages, e.g. on ESP8266
-//GxEPD_HD_BW < GxED060SCT, GxED060SCT::HEIGHT / 4 > display(base_display); // quarter height, 4 pages, e.g. on MKR1000
+GxEPD_HD_16G < GxED060SCT, GxED060SCT::HEIGHT / 4 > display(base_display); // quarter height, 4 pages
+#endif
+
+// for 4 grey levels:
+// select the graphics display template class to use, only one
+#if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) || (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE))
+//GxEPD_HD_4G < GxGDE043A2, GxGDE043A2::HEIGHT / 4 > display(base_display); // half height, 2 pages, ~30k RAM remaining
+//GxEPD_HD_4G < GxGDE060BA, GxGDE060BA::HEIGHT / 4 > display(base_display); // half height, 2 pages, ~30k RAM remaining
+//GxEPD_HD_4G < GxGDE060F3, GxGDE060F3::HEIGHT / 4 > display(base_display); // half height, 2 pages, ~11k RAM remaining
+//GxEPD_HD_4G < GxGDEW080T5, GxGDEW080T5::HEIGHT / 4 > display(base_display); // half height, 2 pages, ~11k RAM remaining
+#elif defined(ESP8266)
+GxEPD_HD_4G < GxGDE060BA, GxGDE060BA::HEIGHT / 8 > display(base_display);
+#else
+//GxEPD_HD_4G < GxGDE043A2, GxGDE043A2::HEIGHT / 2 > display(base_display); // half height, 2 pages
+//GxEPD_HD_4G < GxGDE060BA, GxGDE060BA::HEIGHT / 2 > display(base_display); // half height, 2 pages
+//GxEPD_HD_4G < GxGDE060F3, GxGDE060F3::HEIGHT / 2 > display(base_display); // half height, 2 pages
+//GxEPD_HD_4G < GxGDEW080T5, GxGDEW080T5::HEIGHT / 2 > display(base_display); // half height, 2 pages
+// ED060SCT on IT8951 Driver HAT e.g. with ESP32
+//GxEPD_HD_4G < GxED060SCT, GxED060SCT::HEIGHT / 2 > display(base_display); // half height, 2 pages
 #endif
 
 // uncomment to see bitmap examples
@@ -87,19 +105,18 @@ GxEPD_HD_BW<GxED060SCT, GxED060SCT::HEIGHT> display(base_display); // full heigh
 #if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) // "STM32 Boards (STM32Duino.com)"
 // select diagnostic output stream, only one
 //HardwareSerial& DiagnosticStream = Serial1; // pins PA9, PA10
-HardwareSerial& DiagnosticStream = Serial2; // pins PA2, PA3 for USB jumpers
+//HardwareSerial& DiagnosticStream = Serial2; // pins PA2, PA3 for USB jumpers
 //HardwareSerial& DiagnosticStream = Serial3; // pins PB10, PB11
 //USBSerial& DiagnosticStream = Serial; // pins PA11, PA12 USB direct?
 #elif (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE)) // "STM32 Boards (select from submenu)"
 //HardwareSerial DiagnosticStream(PA10, PA9); // pins PA9, PA10
 HardwareSerial DiagnosticStream(PA3, PA2); // pins PA2, PA3 for USB jumpers
 //HardwareSerial DiagnosticStream(PB11, PB10); // pins PB10, PB11
-#elif defined(ARDUINO_ARCH_SAMD)
-Serial_& DiagnosticStream = Serial; // MKR1000 compile test
 #else
 HardwareSerial& DiagnosticStream = Serial; // ESP32
 #endif
 
+//HardwareSerial DiagnosticStream(PA3, PA2);
 void setup()
 {
   DiagnosticStream.begin(115200);
@@ -127,6 +144,9 @@ void setup()
   helloEpaper();
   delay(1000);
   showBitmapExample();
+  delay(1000);
+  showStripes();
+  delay(1000);
   showFont("FreeMonoBold24pt7b", &FreeMonoBold24pt7b);
   showFont("FreeMonoBold12pt7b", &FreeMonoBold12pt7b);
   showPartialUpdate();
@@ -209,7 +229,7 @@ void helloArduino()
   //DiagnosticStream.println("helloArduino");
   display.setRotation(1);
   display.setFont(&FreeMonoBold9pt7b);
-  display.setTextColor(display.epd_hd.hasColor ? GxEPD_RED : GxEPD_BLACK);
+  display.setTextColor(display.DEPTH > 1 ? GxEPD_DARKGREY : GxEPD_BLACK);
   uint16_t x = (display.width() - 160) / 2;
   uint16_t y = display.height() / 4;
   display.setPartialWindow(0, y - 14, display.width(), 20);
@@ -230,7 +250,7 @@ void helloEpaper()
   //DiagnosticStream.println("helloEpaper");
   display.setRotation(1);
   display.setFont(&FreeMonoBold9pt7b);
-  display.setTextColor(display.epd_hd.hasColor ? GxEPD_RED : GxEPD_BLACK);
+  display.setTextColor(display.DEPTH > 1 ? GxEPD_DARKGREY : GxEPD_BLACK);
   uint16_t x = (display.width() - 160) / 2;
   uint16_t y = display.height() * 3 / 4;
   display.setPartialWindow(0, y - 14, display.width(), 20);
@@ -370,6 +390,7 @@ void showFont(const char name[], const GFXfont* f)
   display.firstPage();
   do
   {
+    display.setTextColor(GxEPD_BLACK);
     display.fillScreen(GxEPD_WHITE);
     display.setCursor(0, 0);
     display.println();
@@ -378,8 +399,10 @@ void showFont(const char name[], const GFXfont* f)
     display.println("0123456789:;<=>?");
     display.println("@ABCDEFGHIJKLMNO");
     display.println("PQRSTUVWXYZ[\\]^_");
+    display.setTextColor(display.DEPTH > 1 ? GxEPD_DARKGREY : GxEPD_BLACK);
     display.println("`abcdefghijklmno");
     display.println("pqrstuvwxyz{|}~ ");
+    display.setTextColor(display.DEPTH > 1 ? GxEPD_LIGHTGREY : GxEPD_BLACK);
     display.println("The quick brown fox");
     display.println("jumps over a lazy dog");
     //    display.println("again");
@@ -590,4 +613,28 @@ void deepSleepTest()
   while (display.nextPage());
   display.hibernate();
   //Serial.println("deepSleepTest done");
+}
+
+uint16_t rgb565(uint16_t grey16)
+{
+  if (grey16 >= 15) return 0xFFFF; // pure white
+  return ((grey16 << 12) | (grey16 << 7) | (grey16 << 1));
+}
+
+void showStripes()
+{
+  display.setRotation(0);
+  uint16_t h = display.height() / 16;
+  display.setFullWindow();
+  display.firstPage();
+  do
+  {
+    display.fillScreen(GxEPD_WHITE);
+    for (uint16_t i = 0; i < 16; i++)
+    {
+      display.fillRect(0, i * h, display.width(), h, rgb565(i));
+      //display.fillRect(0, i * h, display.width(), h, GxEPD_WHITE);
+    }
+  }
+  while (display.nextPage());
 }

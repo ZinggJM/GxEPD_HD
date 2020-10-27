@@ -656,6 +656,7 @@ void DESTM32T_DEMO::SpiFlash_ReadData(uint32_t addr, uint8_t *data)
   SpiFlash_ReadWriteByte(addr2);
   SpiFlash_ReadWriteByte(addr1);
   FLASH_CS_H;
+  (void) data; // something missing here
 }
 
 void DESTM32T_DEMO::Debug_str(const char *s)

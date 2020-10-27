@@ -2,7 +2,7 @@
 //
 // based on Demo Examples from Good Display, available here: http://www.e-paper-display.com/download_list/downloadcategoryid=34&isMode=false.html
 //
-// class GxEPD_HD_BW : Template class for buffered graphics and text drawing in b/w, supporting paged drawing
+// class GxEPD_HD_BW : Template class for buffered graphics and text drawing in 4 grey levels, supporting paged drawing
 //
 // Author : J-M Zingg
 //
@@ -12,8 +12,8 @@
 //
 // Library: https://github.com/ZinggJM/GxEPD_HD
 
-#ifndef _GxEPD_HD_BW_H_
-#define _GxEPD_HD_BW_H_
+#ifndef _GxEPD_HD_4G_H_
+#define _GxEPD_HD_4G_H_
 
 #include "GxEPD_HD_EPD.h"
 #include "GxGDE043A2.h"
@@ -24,17 +24,16 @@
 #include "GxEPD_HD_GFX.h"
 
 template<typename GxEPD_HD_Type, const uint16_t page_height>
-class GxEPD_HD_BW : public GxEPD_HD_GFX
+class GxEPD_HD_4G : public GxEPD_HD_GFX
 {
   public:
-    static const uint16_t DEPTH = 1; // 1 bit per pixel, black / white
-    static const uint16_t GREYLEVELS = 2;
+    static const uint16_t DEPTH = 2; // 2 bits per pixel, 4 grey levels
+    static const uint16_t GREYLEVELS = 4;
     GxEPD_HD_Type& epd_hd;
-    GxEPD_HD_BW(GxEPD_HD_Type& epd_hd_instance) : GxEPD_HD_GFX(epd_hd_instance, GxEPD_HD_Type::WIDTH, GxEPD_HD_Type::HEIGHT), epd_hd(epd_hd_instance)
+    GxEPD_HD_4G(GxEPD_HD_Type& epd_hd_instance) : GxEPD_HD_GFX(epd_hd_instance, GxEPD_HD_Type::WIDTH, GxEPD_HD_Type::HEIGHT), epd_hd(epd_hd_instance)
     {
       _page_height = page_height;
       _pages = (HEIGHT / _page_height) + ((HEIGHT % _page_height) > 0);
-      _reverse = false;
       _using_partial_mode = false;
       _current_page = 0;
       setFullWindow();
@@ -83,14 +82,11 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
       if ((x < 0) || (x >= _pw_w) || (y < 0) || (y >= _pw_h)) return;
       // adjust for current page
       y -= _current_page * _page_height;
-      if (_reverse) y = _page_height - y - 1;
       // check if in current page
       if ((y < 0) || (y >= _page_height)) return;
-      uint32_t i = x / 8 + y * (_pw_w / 8);
-      if (color)
-        _buffer[i] = (_buffer[i] | (1 << (7 - x % 8)));
-      else
-        _buffer[i] = (_buffer[i] & (0xFF ^ (1 << (7 - x % 8))));
+      uint16_t i = x / (8 / DEPTH) + y * (_pw_w / (8 / DEPTH));
+      uint8_t grey = color == 0 ? 0 : uint8_t((((color & 0xF800) >> 8) + ((color & 0x07E0) >> 3) + ((color & 0x001F) << 3) - 1) / (3 * 16 * 4)); // 0..3
+      _buffer[i] = ((_buffer[i] & (0xFF ^ (3 << 2 * (3 - x % 4)))) | (grey << 2 * (3 - x % 4)));
     }
 
     void init(Stream* pDiagnosticOutput = 0) // (pDiagnosticOutput = 0) : disabled
@@ -101,9 +97,11 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
       setFullWindow();
     }
 
-    void fillScreen(uint16_t color) // 0x0 black, >0x0 white, to buffer
+    void fillScreen(uint16_t color)
     {
-      uint8_t data = (color == GxEPD_BLACK) ? 0x00 : 0xFF;
+      //uint8_t grey = uint8_t((((color & 0xF800) >> 8) + ((color & 0x07E0) >> 3) + ((color & 0x001F) << 3)) / (3 * 16 * 4)); // 0..3
+      uint8_t grey = color == 0 ? 0 : uint8_t((((color & 0xF800) >> 8) + ((color & 0x07E0) >> 3) + ((color & 0x001F) << 3) - 1) / (3 * 16 * 4)); // 0..3
+      uint8_t data = grey * 0b01010101;
       for (uint32_t x = 0; x < sizeof(_buffer); x++)
       {
         _buffer[x] = data;
@@ -113,13 +111,13 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
     // display buffer content to screen, useful for full screen buffer
     void display()
     {
-      epd_hd.drawImage(_buffer, sizeof(_buffer), 1, 0, 0, WIDTH, HEIGHT);
+      epd_hd.drawImage(_buffer, sizeof(_buffer), DEPTH, 0, 0, WIDTH, HEIGHT);
     }
 
     // transfer buffer content to controller buffer, useful for full screen buffer
     void transfer()
     {
-      epd_hd.writeImage(_buffer, sizeof(_buffer), 1, 0, 0, WIDTH, HEIGHT);
+      epd_hd.writeImage(_buffer, sizeof(_buffer), DEPTH, 0, 0, WIDTH, HEIGHT);
     }
 
     // display part of buffer content to screen, useful for full screen buffer
@@ -130,7 +128,7 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
       w = gx_uint16_min(w, width() - x);
       h = gx_uint16_min(h, height() - y);
       if (using_rotation) _rotate(x, y, w, h);
-      epd_hd.drawImagePart(_buffer, sizeof(_buffer), 1, x, y, WIDTH, HEIGHT, x, y, w, h);
+      epd_hd.drawImagePart(_buffer, sizeof(_buffer), DEPTH, x, y, WIDTH, HEIGHT, x, y, w, h);
     }
 
     void setFullWindow()
@@ -150,7 +148,14 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
       _pw_h = gx_uint16_min(h, height() - _pw_y);
       _rotate(_pw_x, _pw_y, _pw_w, _pw_h);
       _using_partial_mode = true;
-      // make _pw_x, _pw_w multiple of 8
+      //
+      // make _pw_x, _pw_w multiple of 4, needed because of graphics buffer (bytes)
+      //_pw_w += _pw_x % 4;
+      //if (_pw_w % 4 > 0) _pw_w += 4 - _pw_w % 4;
+      //_pw_x -= _pw_x % 4;
+      //
+      // make _pw_x, _pw_w multiple of 8, for controller best fit: 
+      // "2 bpp mode – X Start position must be multiples of 8"
       _pw_w += _pw_x % 8;
       if (_pw_w % 8 > 0) _pw_w += 8 - _pw_w % 8;
       _pw_x -= _pw_x % 8;
@@ -169,13 +174,12 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
       {
         if (_using_partial_mode)
         {
-          uint32_t offset = _reverse ? (HEIGHT - _pw_h) * _pw_w / 8 : 0;
-          epd_hd.writeImage(_buffer + offset, sizeof(_buffer), 1, _pw_x, _pw_y, _pw_w, _pw_h);
-          if (!norefresh) epd_hd.refresh(_pw_x, _pw_y, _pw_w, _pw_h, true);
+          epd_hd.writeImage(_buffer, sizeof(_buffer), DEPTH, _pw_x, _pw_y, _pw_w, _pw_h);
+          if (!norefresh) epd_hd.refresh(_pw_x, _pw_y, _pw_w, _pw_h, false);
         }
-        else // full update
+        else
         {
-          epd_hd.writeImage(_buffer, sizeof(_buffer), 1, 0, 0, WIDTH, HEIGHT);
+          epd_hd.writeImage(_buffer, sizeof(_buffer), DEPTH, 0, 0, WIDTH, HEIGHT);
           if (!norefresh) epd_hd.refresh(false);
         }
         return false;
@@ -188,14 +192,13 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
         uint16_t dest_ye = gx_uint16_min(_pw_y + _pw_h, _pw_y + page_ye);
         if (dest_ye > dest_ys)
         {
-          uint32_t offset = _reverse ? (_page_height - (dest_ye - dest_ys)) * _pw_w / 8 : 0;
-          epd_hd.writeImage(_buffer + offset, sizeof(_buffer), 1, _pw_x, dest_ys, _pw_w, dest_ye - dest_ys);
+          epd_hd.writeImage(_buffer, sizeof(_buffer), DEPTH, _pw_x, dest_ys, _pw_w, dest_ye - dest_ys);
         }
         _current_page++;
         if (_current_page == _pages)
         {
           _current_page = 0;
-          if (!norefresh) epd_hd.refresh(_pw_x, _pw_y, _pw_w, _pw_h, true);
+          if (!norefresh) epd_hd.refresh(_pw_x, _pw_y, _pw_w, _pw_h, false);
           return false;
         }
         fillScreen(GxEPD_WHITE);
@@ -203,7 +206,7 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
       }
       else
       {
-        epd_hd.writeImage(_buffer, sizeof(_buffer), 1, 0, page_ys, WIDTH, gx_uint16_min(_page_height, HEIGHT - page_ys));
+        epd_hd.writeImage(_buffer, sizeof(_buffer), DEPTH, 0, page_ys, WIDTH, gx_uint16_min(_page_height, HEIGHT - page_ys));
         _current_page++;
         if (_current_page == _pages)
         {
@@ -232,11 +235,10 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
           {
             fillScreen(GxEPD_WHITE);
             drawCallback(pv);
-            uint32_t offset = _reverse ? (_page_height - (dest_ye - dest_ys)) * _pw_w / 8 : 0;
-            epd_hd.writeImage(_buffer + offset, sizeof(_buffer), 1, _pw_x, dest_ys, _pw_w, dest_ye - dest_ys);
+            epd_hd.writeImage(_buffer, sizeof(_buffer), DEPTH, _pw_x, dest_ys, _pw_w, dest_ye - dest_ys);
           }
         }
-        epd_hd.refresh(_pw_x, _pw_y, _pw_w, _pw_h, true);
+        epd_hd.refresh(_pw_x, _pw_y, _pw_w, _pw_h, false);
       }
       else
       {
@@ -245,7 +247,7 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
           uint16_t page_ys = _current_page * _page_height;
           fillScreen(GxEPD_WHITE);
           drawCallback(pv);
-          epd_hd.writeImage(_buffer, sizeof(_buffer), 1, 0, page_ys, WIDTH, gx_uint16_min(_page_height, HEIGHT - page_ys));
+          epd_hd.writeImage(_buffer, sizeof(_buffer), DEPTH, 0, page_ys, WIDTH, gx_uint16_min(_page_height, HEIGHT - page_ys));
         }
         epd_hd.refresh(false);
       }
@@ -361,8 +363,8 @@ class GxEPD_HD_BW : public GxEPD_HD_GFX
       }
     }
   private:
-    uint8_t _buffer[(GxEPD_HD_Type::WIDTH / 8) * page_height];
-    bool _using_partial_mode, _second_phase, _mirror, _reverse;
+    uint8_t _buffer[(GxEPD_HD_Type::WIDTH / 8) * DEPTH * page_height];
+    bool _using_partial_mode, _second_phase, _mirror;
     uint16_t _width_bytes, _pixel_bytes;
     int16_t _current_page;
     uint16_t _pages, _page_height;

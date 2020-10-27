@@ -73,7 +73,8 @@
 
 #define  DEBUG_USART
 
-#define FLASH_PAGE_SIZE     2048
+//#define FLASH_PAGE_SIZE     2048
+#undef FLASH_PAGE_SIZE
 
 //#define FLASH_CS_PORT     GPIOA     //OUT - PP
 //#define FLASH_CS_PIN      GPIO_PIN_4

@@ -7,7 +7,7 @@
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571_10574&product_id=57650
 // or https://www.aliexpress.com/store/product/6-inch-HD-Interface-High-resolution-electronic-paper-display-e-ink-epaper-with-TCON-Demo-Kit/600281_32838449413.html
 
-#if !defined(ARDUINO_ARCH_STM32F1) && !defined(ARDUINO_ARCH_STM32)
+#if defined(ARDUINO_ARCH_ESP32)
 
 #include "STM32F103C8T6_IO.h"
 
