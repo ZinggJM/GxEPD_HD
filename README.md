@@ -38,18 +38,24 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 ### Arduino IDE Board (package) for build:
 - processor on demo board is STM32F103VET6
 - suitable STM32 Arduino package is:
+- official STM32 package "STM32 Boards (select from submenu)"
+- Board: "Generic STM32F1 series"
+- Board part number: "Generic F103VE"
+- also suitable Arduino package is Roger Clark version:
 - STM32 Boards (STM32Duino.com)
 - Board: "Generic STM32F103V series"
 - Optimize: "Smallest (default)"
 - Variant: "STM32F103VE"
 - CPU Speed(MHz): "72MHz (Normal)"
 - Upload method: "STLink"
+- ESP32 package for use with my proto boards, or ED060SCT on IT8951 Driver HAT
 
 ### Version 1.0.3
 - added grey levels graphics support GxEPD_HD_4G.h, GxEPD_HD_16G.h, GxEPD_HD_GreyGraphics.ino
 - added support for Waveshare ED060SCT on IT8951 Driver HAT
 - added touch support for GxGDE060F3-T (initial version, GxFT5436 touch driver for FT5436 controller)
-- added fix for GFX_FontExtension (added adapted getTextBounds) 
+- added fix for GFX_FontExtension (added adapted getTextBounds)
+- now declared supported with official STM32 package, re-tested
 #### Version 1.0.2
 - fixed controller buffer partial overwrite issue with GDE060F3 or GDEW080T5 (higher buffer base address)
 #### Version 1.0.1
