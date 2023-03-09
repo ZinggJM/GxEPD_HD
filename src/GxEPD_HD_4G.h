@@ -21,6 +21,9 @@
 #include "GxGDE060F3.h"
 #include "GxGDEW080T5.h"
 #include "GxED060SCT.h"
+#include "GxED060KC1.h"
+#include "GxED078KC2.h"
+#include "GxES103TC1.h"
 #include "GxEPD_HD_GFX.h"
 
 template<typename GxEPD_HD_Type, const uint16_t page_height>
@@ -85,7 +88,8 @@ class GxEPD_HD_4G : public GxEPD_HD_GFX
       // check if in current page
       if ((y < 0) || (y >= _page_height)) return;
       uint16_t i = x / (8 / DEPTH) + y * (_pw_w / (8 / DEPTH));
-      uint8_t grey = color == 0 ? 0 : uint8_t((((color & 0xF800) >> 8) + ((color & 0x07E0) >> 3) + ((color & 0x001F) << 3) - 1) / (3 * 16 * 4)); // 0..3
+      uint8_t grey = color == 0 ? 0 : uint8_t((((color & 0xF800) >> 8) + ((color & 0x07E0) >> 3) + ((color & 0x001F) << 3) - 1) / 3); // 0..249 (0xF9) // GxEPD_LIGHTGREY is one too high
+      grey >>= 6; // 0..3
       _buffer[i] = ((_buffer[i] & (0xFF ^ (3 << 2 * (3 - x % 4)))) | (grey << 2 * (3 - x % 4)));
     }
 
@@ -99,8 +103,8 @@ class GxEPD_HD_4G : public GxEPD_HD_GFX
 
     void fillScreen(uint16_t color)
     {
-      //uint8_t grey = uint8_t((((color & 0xF800) >> 8) + ((color & 0x07E0) >> 3) + ((color & 0x001F) << 3)) / (3 * 16 * 4)); // 0..3
-      uint8_t grey = color == 0 ? 0 : uint8_t((((color & 0xF800) >> 8) + ((color & 0x07E0) >> 3) + ((color & 0x001F) << 3) - 1) / (3 * 16 * 4)); // 0..3
+      uint8_t grey = color == 0 ? 0 : uint8_t((((color & 0xF800) >> 8) + ((color & 0x07E0) >> 3) + ((color & 0x001F) << 3) - 1) / 3); // 0..249 (0xF9) // GxEPD_LIGHTGREY is one too high
+      grey >>= 6; // 0..3
       uint8_t data = grey * 0b01010101;
       for (uint32_t x = 0; x < sizeof(_buffer); x++)
       {
@@ -154,7 +158,7 @@ class GxEPD_HD_4G : public GxEPD_HD_GFX
       //if (_pw_w % 4 > 0) _pw_w += 4 - _pw_w % 4;
       //_pw_x -= _pw_x % 4;
       //
-      // make _pw_x, _pw_w multiple of 8, for controller best fit: 
+      // make _pw_x, _pw_w multiple of 8, for controller best fit:
       // "2 bpp mode – X Start position must be multiples of 8"
       _pw_w += _pw_x % 8;
       if (_pw_w % 8 > 0) _pw_w += 8 - _pw_w % 8;

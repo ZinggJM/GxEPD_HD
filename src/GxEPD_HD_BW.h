@@ -21,6 +21,9 @@
 #include "GxGDE060F3.h"
 #include "GxGDEW080T5.h"
 #include "GxED060SCT.h"
+#include "GxED060KC1.h"
+#include "GxED078KC2.h"
+#include "GxES103TC1.h"
 #include "GxEPD_HD_GFX.h"
 
 template<typename GxEPD_HD_Type, const uint16_t page_height>

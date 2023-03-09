@@ -3,6 +3,7 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 
 ## for HD e-paper displays from Dalian Good Display on DESTM32-T evaluation kit
 - http://www.good-display.com/products_detail/productId=370.html
+## for HD e-paper displays from Waveshare with matching IT8951 Driver HAT
 
 ### The E-Paper display classes are subclasses of Adafruit_GFX, to have graphics and text rendering.
 - a graphics buffer is used to have fast rendering through Adafruit_GFX.
@@ -33,7 +34,7 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 
 ### Supporting Arduino Forum Topic:
 
-- Good Dispay ePaper for Arduino : https://forum.arduino.cc/index.php?topic=436411.0
+- Good Display ePaper for Arduino: https://forum.arduino.cc/index.php?topic=436411.0
 
 ### Arduino IDE Board (package) for build:
 - processor on demo board is STM32F103VET6
@@ -50,7 +51,16 @@ E-Paper display library for Arduino for HD parallel interface displays from Dali
 - Upload method: "STLink"
 - ESP32 package for use with my proto boards, or ED060SCT on IT8951 Driver HAT
 
-### Version 1.0.3
+### Version 1.0.4
+- added support for Waveshare ED060KC1 on matching IT8951 Driver HAT
+- added support for Waveshare ED060KC2 on matching IT8951 Driver HAT
+- added support for Waveshare ES103TC1 on matching IT8951 Driver HAT
+- added example GxEPD_HD_SD_Example
+- updated GxEPD_HD_WiFi_Example, fixes for BMP handling, updated https certificates and use
+- updated BMP handling for GxEPD_HD_SerialFlash_Annotated, GxEPD_HD_SerialFlash_Example
+- updated BMP handling for GxEPD_HD_Spiffs_Example
+- updated certificates for GxEPD_HD_SerialFlash_Loader, GxEPD_HD_Spiffs_Loader
+#### Version 1.0.3
 - added grey levels graphics support GxEPD_HD_4G.h, GxEPD_HD_16G.h, GxEPD_HD_GreyGraphics.ino
 - added support for Waveshare ED060SCT on IT8951 Driver HAT
 - added touch support for GxGDE060F3-T (initial version, GxFT5436 touch driver for FT5436 controller)

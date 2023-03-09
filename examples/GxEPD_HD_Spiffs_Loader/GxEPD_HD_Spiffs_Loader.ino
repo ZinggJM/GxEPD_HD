@@ -10,7 +10,7 @@
 
 // Supporting Arduino Forum Topics:
 // Waveshare e-paper displays with SPI: http://forum.arduino.cc/index.php?topic=487007.0
-// Good Display ePaper for Arduino : https://forum.arduino.cc/index.php?topic=436411.0
+// Good Display ePaper for Arduino: https://forum.arduino.cc/index.php?topic=436411.0
 
 #if defined(ESP32)
 #include "SPIFFS.h"
@@ -21,8 +21,8 @@ const bool formatOnFail = true;
 #include <FS.h>
 
 #if defined (ESP8266)
+#include <LittleFS.h>
 #include <ESP8266WiFi.h>
-#define USE_BearSSL true
 #endif
 
 #include <WiFiClient.h>
@@ -32,16 +32,19 @@ const char* ssid     = "........";
 const char* password = "........";
 const int httpPort  = 80;
 const int httpsPort = 443;
-const char* fp_api_github_com = "35 85 74 EF 67 35 A7 CE 40 69 50 F3 C0 F6 80 CF 80 3B 2E 19";
-const char* fp_github_com     = "ca 06 f5 6b 25 8b 7a 0d 4f 2b 05 47 09 39 47 86 51 15 19 84";
-#if USE_BearSSL
-const char fp_rawcontent[20]  = {0xcc, 0xaa, 0x48, 0x48, 0x66, 0x46, 0x0e, 0x91, 0x53, 0x2c, 0x9c, 0x7c, 0x23, 0x2a, 0xb1, 0x74, 0x4d, 0x29, 0x9d, 0x33};
-#else
-const char* fp_rawcontent     = "cc aa 48 48 66 46 0e 91 53 2c 9c 7c 23 2a b1 74 4d 29 9d 33";
-#endif
+// note: the certificates have been moved to a separate header file, as R"CERT( destroys IDE Auto Format capability
+
+#include "GxEPD_HD_github_raw_certs.h"
+
+const char* certificate_rawcontent = cert_DigiCert_TLS_RSA_SHA256_2020_CA1; // ok, should work until 2031-04-13 23:59:59
+//const char* certificate_rawcontent = github_io_chain_pem_first;  // ok, should work until Tue, 21 Mar 2023 23:59:59 GMT
+//const char* certificate_rawcontent = github_io_chain_pem_second;  // ok, should work until Tue, 21 Mar 2023 23:59:59 GMT
+//const char* certificate_rawcontent = github_io_chain_pem_third;  // ok, should work until Tue, 21 Mar 2023 23:59:59 GMT
+
 const char* host_rawcontent   = "raw.githubusercontent.com";
 const char* path_rawcontent   = "/ZinggJM/GxEPD2/master/extras/bitmaps/";
 const char* path_prenticedavid   = "/prenticedavid/MCUFRIEND_kbv/master/extras/bitmaps/";
+const char* fp_rawcontent     = "8F 0E 79 24 71 C5 A7 D2 A7 46 76 30 C1 3C B7 2A 13 B0 01 B2"; // as of 29.7.2022
 
 void setup()
 {
@@ -88,13 +91,15 @@ void setup()
   // Print the IP address
   Serial.println(WiFi.localIP());
 
+  setClock();
+
 #if defined(ESP32)
   SPIFFS.begin(formatOnFail);
-#else
-  SPIFFS.begin();
-#endif
   Serial.println("SPIFFS started");
-  SPIFFS.format();
+#else
+  LittleFS.begin();
+  Serial.println("LittleFS started");
+#endif
   //listFiles();
   //deleteFiles();
   spiffs_sizes();
@@ -113,12 +118,16 @@ void loop()
 {
 }
 
+void downloadFile_HTTPS(const char* host, const char* path, const char* filename, const char* fingerprint, const char* target, const char* certificate = certificate_rawcontent);
+
 void spiffs_sizes()
 {
+#if defined(ESP32)
   size_t total = SPIFFS.totalBytes();
   size_t used = SPIFFS.usedBytes();
   Serial.println();
   Serial.print("SPIFFS: used: "); Serial.print(used); Serial.print(" free: "); Serial.print(total - used);  Serial.print(" total: "); Serial.println(total);
+#endif
 }
 
 void downloadBitmaps_200x200()
@@ -156,7 +165,7 @@ void downloadBitmaps_test()
   downloadFile_HTTPS(host_rawcontent, path_rawcontent, "output6.bmp", fp_rawcontent, "output6.bmp");
   downloadFile_HTTPS(host_rawcontent, path_rawcontent, "tractor_1.bmp", fp_rawcontent, "tractor_1.bmp");
   downloadFile_HTTPS(host_rawcontent, path_rawcontent, "tractor_4.bmp", fp_rawcontent, "tractor_4.bmp");
-  //downloadFile_HTTPS(host_rawcontent, path_rawcontent, "tractor_8.bmp", fp_rawcontent, "tractor_8.bmp"); // depth 32 not supportet to display
+  //downloadFile_HTTPS(host_rawcontent, path_rawcontent, "tractor_8.bmp", fp_rawcontent, "tractor_8.bmp"); // format 1: BI_RLE8 is not supported
   downloadFile_HTTPS(host_rawcontent, path_rawcontent, "tractor_11.bmp", fp_rawcontent, "tractor_11.bmp");
   downloadFile_HTTPS(host_rawcontent, path_rawcontent, "tractor_44.bmp", fp_rawcontent, "tractor_44.bmp");
   downloadFile_HTTPS(host_rawcontent, path_rawcontent, "tractor_88.bmp", fp_rawcontent, "tractor_88.bmp");
@@ -191,7 +200,6 @@ void deleteFiles()
   SPIFFS.remove("/output6.bmp");
   SPIFFS.remove("/tractor_1.bmp");
   SPIFFS.remove("/tractor_4.bmp");
-  SPIFFS.remove("/tractor_8.bmp");
   SPIFFS.remove("/tractor_11.bmp");
   SPIFFS.remove("/tractor_44.bmp");
   SPIFFS.remove("/tractor_88.bmp");
@@ -199,36 +207,35 @@ void deleteFiles()
 #else
 void deleteFiles()
 {
-  SPIFFS.remove("logo200x200.bmp");
-  SPIFFS.remove("first200x200.bmp");
-  SPIFFS.remove("second200x200.bmp");
-  SPIFFS.remove("third200x200.bmp");
-  SPIFFS.remove("fourth200x200.bmp");
-  SPIFFS.remove("fifth200x200.bmp");
-  SPIFFS.remove("sixth200x200.bmp");
-  SPIFFS.remove("seventh200x200.bmp");
-  SPIFFS.remove("eighth200x200.bmp");
-  SPIFFS.remove("chanceflurries.bmp");
-  SPIFFS.remove("betty_1.bmp");
-  SPIFFS.remove("betty_4.bmp");
-  SPIFFS.remove("marilyn_240x240x8.bmp");
-  SPIFFS.remove("miniwoof.bmp");
-  SPIFFS.remove("test.bmp");
-  SPIFFS.remove("tiger.bmp");
-  SPIFFS.remove("tiger_178x160x4.bmp");
-  SPIFFS.remove("tiger_240x317x4.bmp");
-  SPIFFS.remove("tiger_320x200x24.bmp");
-  SPIFFS.remove("tiger16T.bmp");
-  SPIFFS.remove("woof.bmp");
+  LittleFS.remove("logo200x200.bmp");
+  LittleFS.remove("first200x200.bmp");
+  LittleFS.remove("second200x200.bmp");
+  LittleFS.remove("third200x200.bmp");
+  LittleFS.remove("fourth200x200.bmp");
+  LittleFS.remove("fifth200x200.bmp");
+  LittleFS.remove("sixth200x200.bmp");
+  LittleFS.remove("seventh200x200.bmp");
+  LittleFS.remove("eighth200x200.bmp");
+  LittleFS.remove("chanceflurries.bmp");
+  LittleFS.remove("betty_1.bmp");
+  LittleFS.remove("betty_4.bmp");
+  LittleFS.remove("marilyn_240x240x8.bmp");
+  LittleFS.remove("miniwoof.bmp");
+  LittleFS.remove("test.bmp");
+  LittleFS.remove("tiger.bmp");
+  LittleFS.remove("tiger_178x160x4.bmp");
+  LittleFS.remove("tiger_240x317x4.bmp");
+  LittleFS.remove("tiger_320x200x24.bmp");
+  LittleFS.remove("tiger16T.bmp");
+  LittleFS.remove("woof.bmp");
 
-  SPIFFS.remove("output5.bmp");
-  SPIFFS.remove("output6.bmp");
-  SPIFFS.remove("tractor_1.bmp");
-  SPIFFS.remove("tractor_4.bmp");
-  SPIFFS.remove("tractor_8.bmp");
-  SPIFFS.remove("tractor_11.bmp");
-  SPIFFS.remove("tractor_44.bmp");
-  SPIFFS.remove("tractor_88.bmp");
+  LittleFS.remove("output5.bmp");
+  LittleFS.remove("output6.bmp");
+  LittleFS.remove("tractor_1.bmp");
+  LittleFS.remove("tractor_4.bmp");
+  LittleFS.remove("tractor_11.bmp");
+  LittleFS.remove("tractor_44.bmp");
+  LittleFS.remove("tractor_88.bmp");
 }
 #endif
 
@@ -246,7 +253,7 @@ void downloadFile_HTTP(const char* host, const char* path, const char* filename,
   Serial.println(String("http://") + host + path + filename);
   client.print(String("GET ") + path + filename + " HTTP/1.1\r\n" +
                "Host: " + host + "\r\n" +
-               "User-Agent: GxEPD2_Spiffs_Loader\r\n" +
+               "User-Agent: GxEPD_HD_Spiffs_Loader\r\n" +
                "Connection: close\r\n\r\n");
   Serial.println("request sent");
   bool ok = false;
@@ -278,7 +285,7 @@ void downloadFile_HTTP(const char* host, const char* path, const char* filename,
 #if defined(ESP32)
   fs::File file = SPIFFS.open(String("/") + target, "w+");
 #else
-  fs::File file = SPIFFS.open(target, "w+");
+  fs::File file = LittleFS.open(target, "w+");
 #endif
   if (!file)
   {
@@ -301,38 +308,29 @@ void downloadFile_HTTP(const char* host, const char* path, const char* filename,
   Serial.print("done, "); Serial.print(total); Serial.print(" bytes transferred, written "); Serial.println(written);
 }
 
-void downloadFile_HTTPS(const char* host, const char* path, const char* filename, const char* fingerprint, const char* target)
+void downloadFile_HTTPS(const char* host, const char* path, const char* filename, const char* fingerprint, const char* target, const char* certificate)
 {
   // Use WiFiClientSecure class to create TLS connection
-#if USE_BearSSL
+#if defined (ESP8266)
   BearSSL::WiFiClientSecure client;
+  BearSSL::X509List cert(certificate ? certificate : certificate_rawcontent);
 #else
   WiFiClientSecure client;
 #endif
   Serial.println(); Serial.print("downloading file \""); Serial.print(filename);  Serial.println("\"");
   Serial.print("connecting to "); Serial.println(host);
-#if USE_BearSSL
-  if (fingerprint) client.setFingerprint((uint8_t*)fingerprint);
+#if defined (ESP8266)
+  if (certificate) client.setTrustAnchors(&cert);
+  else if (fingerprint) client.setFingerprint(fingerprint);
+  else client.setInsecure();
+#elif defined (ESP32)
+  if (certificate) client.setCACert(certificate);
 #endif
   if (!client.connect(host, httpsPort))
   {
     Serial.println("connection failed");
     return;
   }
-#if defined (ESP8266) && !USE_BearSSL
-  if (fingerprint)
-  {
-    if (client.verify(fingerprint, host))
-    {
-      Serial.println("certificate matches");
-    }
-    else
-    {
-      Serial.println("certificate doesn't match");
-      return;
-    }
-  }
-#endif
   Serial.print("requesting URL: ");
   Serial.println(String("https://") + host + path + filename);
   client.print(String("GET ") + path + filename + " HTTP/1.1\r\n" +
@@ -369,7 +367,7 @@ void downloadFile_HTTPS(const char* host, const char* path, const char* filename
 #if defined(ESP32)
   fs::File file = SPIFFS.open(String("/") + target, "w+");
 #else
-  fs::File file = SPIFFS.open(target, "w+");
+  fs::File file = LittleFS.open(target, "w+");
 #endif
   if (!file)
   {
@@ -410,4 +408,24 @@ void downloadFile_HTTPS(const char* host, const char* path, const char* filename
   }
   file.close();
   Serial.print("done, "); Serial.print(total); Serial.print(" bytes transferred, written "); Serial.println(written);
+}
+
+// Set time via NTP, as required for x.509 validation
+void setClock()
+{
+  configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+
+  Serial.print("Waiting for NTP time sync: ");
+  time_t now = time(nullptr);
+  while (now < 8 * 3600 * 2)
+  {
+    delay(500);
+    Serial.print(".");
+    now = time(nullptr);
+  }
+  Serial.println("");
+  struct tm timeinfo;
+  gmtime_r(&now, &timeinfo);
+  Serial.print("Current time: ");
+  Serial.print(asctime(&timeinfo));
 }

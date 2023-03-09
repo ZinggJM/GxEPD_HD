@@ -59,7 +59,7 @@
 #define yield() {}
 #endif
 
-GxIT8951::GxIT8951(int8_t cs, int8_t dc, int8_t rst, int8_t busy) : _cs(cs), _dc(dc), _rst(rst), _busy(busy),
+GxIT8951::GxIT8951(int16_t cs, int16_t dc, int16_t rst, int16_t busy) : _cs(cs), _dc(dc), _rst(rst), _busy(busy),
   _spi_settings(24000000, MSBFIRST, SPI_MODE0),
   _spi_settings_for_read(1000000, MSBFIRST, SPI_MODE0)
 {
@@ -83,6 +83,16 @@ void GxIT8951::init(GxEPD_HD::Panel panel, uint16_t vcom_mV, Stream* pDiagnostic
   {
     _width = 800;
     _height = 600;
+  }
+  else if (panel == GxEPD_HD::ED060KC1)
+  {
+    _width = 1448;
+    _height = 1072;
+  }
+  else if ((panel == GxEPD_HD::ED078KC2) || (panel == GxEPD_HD::ES103TC1))
+  {
+    _width = 1872;
+    _height = 1404;
   }
   _initial_write = true;
   _initial_refresh = true;
@@ -120,8 +130,8 @@ void GxIT8951::init(GxEPD_HD::Panel panel, uint16_t vcom_mV, Stream* pDiagnostic
   _waitWhileBusy("GetIT8951SystemInfo", power_on_time);
   _readData16((uint16_t*)&IT8951DevInfo, sizeof(IT8951DevInfo) / 2);
   //Show Device information of IT8951
-  SerialDiag.print("Panel(W,H) = ("); SerialDiag.print(IT8951DevInfo.usPanelW); SerialDiag.print("(, "); SerialDiag.println(IT8951DevInfo.usPanelH );
-  SerialDiag.print("Image Buffer Address = 0x"); SerialDiag.println(uint32_t(IT8951DevInfo.usImgBufAddrL) | (uint32_t(IT8951DevInfo.usImgBufAddrH) << 16));
+  SerialDiag.print("Panel(W,H) = ("); SerialDiag.print(IT8951DevInfo.usPanelW); SerialDiag.print(", "); SerialDiag.print(IT8951DevInfo.usPanelH); SerialDiag.println(")");
+  SerialDiag.print("Image Buffer Address = 0x"); SerialDiag.println(uint32_t(IT8951DevInfo.usImgBufAddrL) | (uint32_t(IT8951DevInfo.usImgBufAddrH) << 16), HEX);
   //  //Show Firmware and LUT Version
   SerialDiag.print("FW Version = "); SerialDiag.println((char*)IT8951DevInfo.usFWVersion);
   SerialDiag.print("LUT Version = "); SerialDiag.println((char*)IT8951DevInfo.usLUTVersion);
@@ -211,7 +221,7 @@ void GxIT8951::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, u
         {
           uint32_t idx = uint32_t(j) + uint32_t(i) * uint32_t(bm_wb);
           uint8_t data = idx < size ? bitmap[idx] : 0xFF;
-          _send8pixel(~data);
+          _send8pixel(data);
         }
         yield();
       }
@@ -223,7 +233,8 @@ void GxIT8951::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, u
       wb = (w + 3) / 4;
       xd = x - x % 8; // 2 bpp mode – X Start position must be multiples of 8
       wbd = 2 * ((w + 7) / 8); // "must be multiples of 8"
-      _setPartialRamArea(xd, y, 4 * wbd, h, IT8951_2BPP);
+      //_setPartialRamArea(xd, y, 4 * wbd, h, IT8951_2BPP);
+      _setPartialRamArea(xd, y, 4 * wbd, h, IT8951_8BPP);
       SPI.beginTransaction(_spi_settings);
       if (_cs >= 0) digitalWrite(_cs, LOW);
       _transfer16(0x0000); // preamble for write data
@@ -233,7 +244,7 @@ void GxIT8951::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, u
         {
           uint32_t idx = uint32_t(j) + uint32_t(i) * uint32_t(bm_wb);
           uint8_t data = idx < size ? bitmap[idx] : 0xFF;
-          SPI.transfer(data);
+          _send4pixel(data);
         }
         if (wbd > wb) SPI.transfer(0xFF);
       }
@@ -284,7 +295,7 @@ void GxIT8951::writeImage(const uint8_t* bitmap, uint32_t size, uint8_t depth, u
       break;
   }
   _writeCommand16(IT8951_TCON_LD_IMG_END);
-  yield(); // to avoid WDT on ESP8266 and ESP32
+  delay(2); // yield() to avoid WDT on ESP8266 and ESP32, 2ms for ED078KC2
 }
 
 void GxIT8951::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t depth, int16_t x_part, int16_t y_part, int16_t w_bitmap, int16_t h_bitmap,
@@ -312,7 +323,7 @@ void GxIT8951::writeImagePart(const uint8_t* bitmap, uint32_t size, uint8_t dept
         {
           uint32_t idx = uint32_t(j + x_part / 8) + uint32_t(i + y_part) * uint32_t(bm_wb);
           uint8_t data = idx < size ? bitmap[idx] : 0xFF;
-          _send8pixel(~data);
+          _send8pixel(data);
         }
         yield();
       }
@@ -460,8 +471,22 @@ void GxIT8951::_send8pixel(uint8_t data)
 {
   for (uint8_t j = 0; j < 8; j++)
   {
-    SPI.transfer(data & 0x80 ? 0x00 : 0xFF);
+    SPI.transfer(data & 0x80 ? 0xFF : 0x00);
     data <<= 1;
+  }
+}
+
+void GxIT8951::_send4pixel(uint8_t data)
+{
+  for (uint8_t j = 0; j < 4; j++)
+  {
+    //    if (0x00 == (data & 0xC0)) SPI.transfer(0x00);
+    //    else if (0x40 == (data & 0xC0)) SPI.transfer(0x40);
+    //    else if (0x80 == (data & 0xC0)) SPI.transfer(0x80);
+    //    else SPI.transfer(0xFF);
+    if (0xC0 == (data & 0xC0)) SPI.transfer(0xFF); // full white
+    else SPI.transfer(data & 0xC0);
+    data <<= 2;
   }
 }
 
@@ -542,7 +567,7 @@ void GxIT8951::_waitWhileBusy(const char* comment, uint16_t busy_time)
       if (_pDiagnosticOutput)
       {
         unsigned long elapsed = micros() - start;
-        //if (elapsed > diag_min_time * 1000)
+        if (elapsed > diag_min_time * 1000)
         {
           SerialDiag.print(comment);
           SerialDiag.print(" : ");

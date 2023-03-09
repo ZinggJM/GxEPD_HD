@@ -2,19 +2,29 @@
 //
 // Display Library based on Demo Example available from Good Display
 //
+// BMP handling code extracts taken from: https://github.com/prenticedavid/MCUFRIEND_kbv/tree/master/examples/showBMP_kbv_Uno
+//
 // Author: Jean-Marc Zingg
 //
 // Version: see library.properties
 //
 // Library: https://github.com/ZinggJM/GxEPD_HD
 //
-// To be used with "STM32F103VE" of "Generic STM32F103V series" of package "STM32 Boards (STM32Duino.com)" for Arduino.
+// To be used with Board: "Generic STM32F1 series" Board part number: "Generic F103VE" of package "STM32 Boards (select from submenu)" for Arduino
+// Add this package by adding "https://raw.githubusercontent.com/stm32duino/BoardManagerFiles/master/STM32/package_stm_index.json"
+// to Preferences "Additional Boards Manager URLs" and installing with Boards Manager.
+//
+// Can also be used with "STM32F103VE" of "Generic STM32F103V series" of package "STM32 Boards (STM32Duino.com)" for Arduino.
 // download this package as .zip file from https://github.com/rogerclarkmelbourne/Arduino_STM32
 // and install it as described in https://github.com/rogerclarkmelbourne/Arduino_STM32/wiki/Installation
+//
+// Can also be used with ESP32 boards, e.g. "DOIT ESP32 DEVKIT V1", with my proto board for DESTM32-Tcon-11.
 //
 // The e-paper display and demo board is available from:
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571_10574&product_id=57650
 // or https://www.aliexpress.com/store/product/6-inch-HD-Interface-High-resolution-electronic-paper-display-e-ink-epaper-with-TCON-Demo-Kit/600281_32838449413.html
+//
+// Can also be used with ESP32 or other large RAM board with Waveshare IT8951 board and matched e-paper panel
 //
 // this example uses the SerialFlash library from: https://github.com/PaulStoffregen/SerialFlash
 // with a modification for use with the STM32 package available here: https://github.com/ZinggJM/SerialFlash
@@ -40,7 +50,8 @@
 const int FlashChipSelect = SS; // for onboard W25Q16BVSIG
 //const int FlashChipSelect = PC4; // e.g. for breakout flash board added
 #else
-const int FlashChipSelect = 32; // for W25Q16BVSIG on my DESP32T_BP proto board
+//const int FlashChipSelect = 32; // for W25Q16BVSIG on my DESP32T_BP proto board
+const int FlashChipSelect = 2; // as used with my Wemos LOLIN32 Lite proto board SD connector
 #endif
 
 // select the display io class to use, only one
@@ -52,18 +63,25 @@ GxDESTM32T io;
 //#include <GxDESP32T/GxDESP32T.h>
 //GxDESP32T io;
 // next is for my DESP32T_BP (proto board) for TCon-11 parallel interface
-#include <GxDESP32T_BP/GxDESP32T_BP.h>
-GxDESP32T_BP io;
+//#include <GxDESP32T_BP/GxDESP32T_BP.h>
+//GxDESP32T_BP io;
+// next is for ED060SCT, ED060KC1, ED078KC2, ES103TC1 on matching IT8951 Driver HAT e.g. with ESP32
+#include <GxIT8951/GxIT8951.h>
+GxIT8951 io(/*CS=5*/ SS, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4);
 #endif
 
 // select the base display class to use, only one
 //GxGDE043A2 base_display(io); // default vcom used (-2.0V)
 //GxGDE060BA base_display(io); // default vcom used (-2.0V)
-GxGDE060BA base_display(io, -2.3); // vcom from sticker on flex connector of my panel, as double
-//GxGDE060BA base_display(io, -2.05); // vcom from sticker on flex connector of my other panel, as double
+//GxGDE060BA base_display(io, -2.3); // vcom from sticker on flex connector of my panel, as double
 //GxGDE060BA base_display(io, uint16_t(2300)); // or as abs(vcom*1000) in mV, as uint16_t
 //GxGDE060F3 base_display(io, -2.4); // vcom from sticker on flex connector of my panel, as double
 //GxGDEW080T5 base_display(io); // default vcom used (-2.2V)
+// ED060SCT, ED060KC1, ED078KC2, ES103TC1 on matching IT8951 Driver HAT e.g. with ESP32
+//GxED060SCT base_display(io); // default vcom used (-2.0V)
+//GxED060KC1 base_display(io); // default vcom used (-2.0V)
+GxED078KC2 base_display(io); // default vcom used (-2.0V)
+//GxES103TC1 base_display(io); // default vcom used (-2.0V)
 
 // select the graphics display template class to use, only one
 #if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) || (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE))
@@ -73,9 +91,19 @@ GxEPD_HD_BW < GxGDE060BA, GxGDE060BA::HEIGHT / 2 > display(base_display); // hal
 //GxEPD_HD_BW < GxGDEW080T5, GxGDEW080T5::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~11k RAM remaining
 #else
 //GxEPD_HD_BW<GxGDE043A2, GxGDE043A2::HEIGHT> display(base_display); // full height, one page
-GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page
+//GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page
 //GxEPD_HD_BW<GxGDE060F3, GxGDE060F3::HEIGHT> display(base_display); // full height, one page
 //GxEPD_HD_BW<GxGDEW080T5, GxGDEW080T5::HEIGHT> display(base_display); // full height, one page
+// ED060SCT on matching IT8951 Driver HAT e.g. with ESP32
+//GxEPD_HD_BW<GxED060SCT, GxED060SCT::HEIGHT> display(base_display); // full height, one page, on ESP32
+//GxEPD_HD_BW < GxED060SCT, GxED060SCT::HEIGHT / 2 > display(base_display); // half height, 2 pages, e.g. on ESP8266
+//GxEPD_HD_BW < GxED060SCT, GxED060SCT::HEIGHT / 4 > display(base_display); // quarter height, 4 pages, e.g. on MKR1000
+// ED060KC1 on matching IT8951 Driver HAT e.g. with ESP32
+//GxEPD_HD_BW < GxED060KC1, GxED060KC1::HEIGHT / 2 > display(base_display); // half height, 2 pages, on ESP32
+//GxEPD_HD_BW < GxED060KC1, GxED060KC1::HEIGHT / 8 > display(base_display); // 1/8 height, 8 pages, e.g. on ESP8266
+// ED060KC2, ES103TC1 on matching IT8951 Driver HAT e.g. with ESP32
+GxEPD_HD_BW < GxED078KC2, GxED078KC2::HEIGHT / 8 > display(base_display); // 1/8, 8 pages, on ESP32
+//GxEPD_HD_BW < GxES103TC1, GxES103TC1::HEIGHT / 8 > display(base_display); // 1/8, 8 pages, on ESP32
 #endif
 
 #if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) || (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE))
@@ -247,9 +275,9 @@ void spaces(int num)
   }
 }
 
-static const uint16_t input_buffer_pixels = 1024; // may affect performance
+static const uint16_t input_buffer_pixels = 1872; // may affect performance
 
-static const uint16_t max_row_width = 1024; // for up to 8" display 1024x768
+static const uint16_t max_row_width = 1872; // for up to 7.8" or 10.3" display 1872x1404
 static const uint16_t max_palette_pixels = 256; // for depth <= 8
 
 uint8_t input_buffer[3 * input_buffer_pixels]; // up to depth 24
@@ -275,18 +303,18 @@ void drawBitmapFromSerialFlash(const char *filename, int16_t x, int16_t y, bool 
     if (file)
     {
       // Parse BMP header
-      if (read16(file) == 0x4D42) // BMP signature
+      uint16_t signature = read16(file);
+      if (signature == 0x4D42) // BMP signature
       {
         uint32_t fileSize = read32(file);
-        uint32_t creatorBytes = read32(file);
+        uint32_t creatorBytes = read32(file); (void)creatorBytes; //unused
         uint32_t imageOffset = read32(file); // Start of image data
         uint32_t headerSize = read32(file);
         uint32_t width  = read32(file);
-        uint32_t height = read32(file);
+        int32_t height = (int32_t) read32(file);
         uint16_t planes = read16(file);
         uint16_t depth = read16(file); // bits per pixel
         uint32_t format = read32(file);
-        (void) creatorBytes; // not used
         if ((planes == 1) && ((format == 0) || (format == 3))) // uncompressed is handled, 565 also
         {
           DiagnosticStream.print("File size: "); DiagnosticStream.println(fileSize);
@@ -315,7 +343,7 @@ void drawBitmapFromSerialFlash(const char *filename, int16_t x, int16_t y, bool 
             uint8_t bitmask = 0xFF;
             uint8_t bitshift = 8 - depth;
             uint16_t red, green, blue;
-            bool whitish;
+            bool whitish = false;
             if (depth <= 8)
             {
               if (depth < 8) bitmask >>= depth;
@@ -355,6 +383,13 @@ void drawBitmapFromSerialFlash(const char *filename, int16_t x, int16_t y, bool 
                 }
                 switch (depth)
                 {
+                  case 32:
+                    blue = input_buffer[in_idx++];
+                    green = input_buffer[in_idx++];
+                    red = input_buffer[in_idx++];
+                    in_idx++; // skip alpha
+                    whitish = ((red + green + blue) > 3 * 0x80); // whitish
+                    break;
                   case 24:
                     blue = input_buffer[in_idx++];
                     green = input_buffer[in_idx++];
@@ -381,6 +416,7 @@ void drawBitmapFromSerialFlash(const char *filename, int16_t x, int16_t y, bool 
                     }
                     break;
                   case 1:
+                  case 2:
                   case 4:
                   case 8:
                     {
@@ -421,14 +457,23 @@ void drawBitmapFromSerialFlash(const char *filename, int16_t x, int16_t y, bool 
             if (!no_refresh) display.refresh();
           } // max_row_width
         } // format
+        else
+        {
+          DiagnosticStream.print("bad format: "); DiagnosticStream.println(format);
+          DiagnosticStream.print("planes:     "); DiagnosticStream.println(planes);
+        }
       } // BMP
+      else
+      {
+        DiagnosticStream.println("bad signature: 0x"); DiagnosticStream.println(signature, HEX);
+      }
       file.close();
       if (!valid)
       {
         DiagnosticStream.println("bitmap format not handled.");
       }
     } // if (file)
-    else DiagnosticStream.print("File not found");
+    else DiagnosticStream.println("File not found");
   }
   else DiagnosticStream.println("Unable to access SPI Flash chip");
 #if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)
@@ -454,18 +499,18 @@ void drawBitmapFromSerialFlash_16G(const char *filename, int16_t x, int16_t y, b
     if (file)
     {
       // Parse BMP header
-      if (read16(file) == 0x4D42) // BMP signature
+      uint16_t signature = read16(file);
+      if (signature == 0x4D42) // BMP signature
       {
         uint32_t fileSize = read32(file);
-        uint32_t creatorBytes = read32(file);
+        uint32_t creatorBytes = read32(file); (void)creatorBytes; //unused
         uint32_t imageOffset = read32(file); // Start of image data
         uint32_t headerSize = read32(file);
         uint32_t width  = read32(file);
-        uint32_t height = read32(file);
+        int32_t height = (int32_t) read32(file);
         uint16_t planes = read16(file);
         uint16_t depth = read16(file); // bits per pixel
         uint32_t format = read32(file);
-        (void) creatorBytes; // not used
         if ((planes == 1) && ((format == 0) || (format == 3))) // uncompressed is handled, 565 also
         {
           DiagnosticStream.print("File size: "); DiagnosticStream.println(fileSize);
@@ -533,6 +578,13 @@ void drawBitmapFromSerialFlash_16G(const char *filename, int16_t x, int16_t y, b
                 }
                 switch (depth)
                 {
+                  case 32:
+                    blue = input_buffer[in_idx++];
+                    green = input_buffer[in_idx++];
+                    red = input_buffer[in_idx++];
+                    in_idx++; // skip alpha
+                    grey = uint8_t((red + green + blue) / 3);
+                    break;
                   case 24:
                     blue = input_buffer[in_idx++];
                     green = input_buffer[in_idx++];
@@ -559,6 +611,7 @@ void drawBitmapFromSerialFlash_16G(const char *filename, int16_t x, int16_t y, b
                     }
                     break;
                   case 1:
+                  case 2:
                   case 4:
                   case 8:
                     {
@@ -598,14 +651,23 @@ void drawBitmapFromSerialFlash_16G(const char *filename, int16_t x, int16_t y, b
             if (!no_refresh) display.refresh();
           } // max_row_width
         } // format
+        else
+        {
+          DiagnosticStream.print("bad format: "); DiagnosticStream.println(format);
+          DiagnosticStream.print("planes:     "); DiagnosticStream.println(planes);
+        }
       } // BMP
+      else
+      {
+        DiagnosticStream.println("bad signature: 0x"); DiagnosticStream.println(signature, HEX);
+      }
       file.close();
       if (!valid)
       {
         DiagnosticStream.println("bitmap format not handled.");
       }
     } // if (file)
-    else DiagnosticStream.print("File not found");
+    else DiagnosticStream.println("File not found");
   }
   else DiagnosticStream.println("Unable to access SPI Flash chip");
 #if defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)

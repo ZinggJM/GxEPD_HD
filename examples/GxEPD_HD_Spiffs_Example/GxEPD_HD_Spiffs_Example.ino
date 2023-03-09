@@ -14,6 +14,8 @@
 
 #if defined(ESP32)
 #include "SPIFFS.h"
+#else
+#include <LittleFS.h>
 #endif
 
 #include <FS.h>
@@ -31,7 +33,7 @@
 // for my DESP32T_BP (proto board) for TCon-11 parallel interface
 //#include <GxDESP32T_BP/GxDESP32T_BP.h>
 //GxDESP32T_BP io;
-// for ED060SCT on IT8951 Driver HAT e.g. with ESP32
+// next is for ED060SCT, ED060KC1, ED078KC2, ES103TC1 on matching IT8951 Driver HAT e.g. with ESP32
 #include <GxIT8951/GxIT8951.h>
 GxIT8951 io(/*CS=5*/ SS, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4);
 
@@ -39,19 +41,30 @@ GxIT8951 io(/*CS=5*/ SS, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4);
 //GxGDE043A2 base_display(io); // default vcom used (-2.0V)
 //GxGDE060BA base_display(io); // default vcom used (-2.0V)
 //GxGDE060BA base_display(io, -2.3); // vcom from sticker on flex connector of my panel, as double
-//GxGDE060BA base_display(io, 2300); // or as abs(vcom*1000) in mV, as uint16_t 
+//GxGDE060BA base_display(io, uint16_t(2300)); // or as abs(vcom*1000) in mV, as uint16_t
 //GxGDE060F3 base_display(io, -2.4); // vcom from sticker on flex connector of my panel, as double
 //GxGDEW080T5 base_display(io); // default vcom used (-2.2V)
-// ED060SCT on IT8951 Driver HAT e.g. with ESP32
-GxED060SCT base_display(io); // default vcom used (-2.0V)
+// ED060SCT, ED060KC1, ED078KC2, ES103TC1 on matching IT8951 Driver HAT e.g. with ESP32
+//GxED060SCT base_display(io); // default vcom used (-2.0V)
+//GxED060KC1 base_display(io); // default vcom used (-2.0V)
+GxED078KC2 base_display(io); // default vcom used (-2.0V)
+//GxES103TC1 base_display(io); // default vcom used (-2.0V)
 
 // select the graphics display template class to use, only one
 //GxEPD_HD_BW<GxGDE043A2, GxGDE043A2::HEIGHT> display(base_display); // full height, one page
 //GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page
 //GxEPD_HD_BW<GxGDE060F3, GxGDE060F3::HEIGHT> display(base_display); // full height, one page
 //GxEPD_HD_BW<GxGDEW080T5, GxGDEW080T5::HEIGHT> display(base_display); // full height, one page
-// ED060SCT on IT8951 Driver HAT e.g. with ESP32
-GxEPD_HD_BW<GxED060SCT, GxED060SCT::HEIGHT> display(base_display); // full height, one page, on ESP32
+// ED060SCT on matching IT8951 Driver HAT e.g. with ESP32
+//GxEPD_HD_BW<GxED060SCT, GxED060SCT::HEIGHT> display(base_display); // full height, one page, on ESP32
+//GxEPD_HD_BW < GxED060SCT, GxED060SCT::HEIGHT / 2 > display(base_display); // half height, 2 pages, e.g. on ESP8266
+//GxEPD_HD_BW < GxED060SCT, GxED060SCT::HEIGHT / 4 > display(base_display); // quarter height, 4 pages, e.g. on MKR1000
+// ED060KC1 on matching IT8951 Driver HAT e.g. with ESP32
+//GxEPD_HD_BW < GxED060KC1, GxED060KC1::HEIGHT / 2 > display(base_display); // half height, 2 pages, on ESP32
+//GxEPD_HD_BW < GxED060KC1, GxED060KC1::HEIGHT / 8 > display(base_display); // 1/8 height, 8 pages, e.g. on ESP8266
+// ED060KC2, ES103TC1 on matching IT8951 Driver HAT e.g. with ESP32
+GxEPD_HD_BW < GxED078KC2, GxED078KC2::HEIGHT / 8 > display(base_display); // 1/8, 8 pages, on ESP32
+//GxEPD_HD_BW < GxES103TC1, GxES103TC1::HEIGHT / 8 > display(base_display); // 1/8, 8 pages, on ESP32
 
 // function declaration with default parameter
 // note that BMP bitmaps are drawn at physical position in physical orientation of the screen
@@ -67,8 +80,14 @@ void setup()
   //display.init(&Serial);
   display.init();
 
+#if defined(ESP32)
   SPIFFS.begin();
   Serial.println("SPIFFS started");
+#else
+  LittleFS.begin();
+  Serial.println("LittleFS started");
+#endif
+
   listFiles();
   spiffs_sizes();
 
@@ -92,10 +111,12 @@ void loop(void)
 
 void spiffs_sizes()
 {
+#if defined(ESP32)
   size_t total = SPIFFS.totalBytes();
   size_t used = SPIFFS.usedBytes();
   Serial.println();
   Serial.print("SPIFFS: used: "); Serial.print(used); Serial.print(" free: "); Serial.print(total - used);  Serial.print(" total: "); Serial.println(total);
+#endif
 }
 
 void drawBitmaps_200x200()
@@ -158,7 +179,7 @@ void drawBitmaps_test()
   delay(2000);
   drawBitmapFromSpiffs("tractor_4.bmp", 0, 0);
   delay(2000);
-  //drawBitmapFromSpiffs("tractor_8.bmp", 0, 0); // depth 32 not supportet
+  //drawBitmapFromSpiffs("tractor_8.bmp", 0, 0); // format 1: BI_RLE8 is not supported
   //delay(2000);
   drawBitmapFromSpiffs("tractor_11.bmp", 0, 0);
   delay(2000);
@@ -228,7 +249,7 @@ void drawBitmaps_test_16G()
   delay(2000);
   drawBitmapFromSpiffs_16G("tractor_4.bmp", 0, 0);
   delay(2000);
-  //drawBitmapFromSpiffs_16G("tractor_8.bmp", 0, 0); // depth 32 not supportet
+  //drawBitmapFromSpiffs_16G("tractor_8.bmp", 0, 0); // format 1: BI_RLE8 is not supported
   //delay(2000);
   drawBitmapFromSpiffs_16G("tractor_11.bmp", 0, 0);
   delay(2000);
@@ -238,9 +259,9 @@ void drawBitmaps_test_16G()
   delay(2000);
 }
 
-static const uint16_t input_buffer_pixels = 1024; // may affect performance
+static const uint16_t input_buffer_pixels = 1872; // may affect performance
 
-static const uint16_t max_row_width = 1024; // for up to 8" display 1024x768
+static const uint16_t max_row_width = 1872; // for up to 7.8" or 10.3" display 1872x1404
 static const uint16_t max_palette_pixels = 256; // for depth <= 8
 
 uint8_t input_buffer[3 * input_buffer_pixels]; // up to depth 24
@@ -264,23 +285,23 @@ void drawBitmapFromSpiffs(const char *filename, int16_t x, int16_t y, bool clear
 #if defined(ESP32)
   file = SPIFFS.open(String("/") + filename, "r");
 #else
-  file = SPIFFS.open(filename, "r");
+  file = LittleFS.open(filename, "r");
 #endif
   if (file && file.size())
   {
     // Parse BMP header
-    if (read16(file) == 0x4D42) // BMP signature
+    uint16_t signature = read16(file);
+    if (signature == 0x4D42) // BMP signature
     {
       uint32_t fileSize = read32(file);
-      uint32_t creatorBytes = read32(file);
+      uint32_t creatorBytes = read32(file); (void)creatorBytes; //unused
       uint32_t imageOffset = read32(file); // Start of image data
       uint32_t headerSize = read32(file);
       uint32_t width  = read32(file);
-      uint32_t height = read32(file);
+      int32_t height = (int32_t) read32(file);
       uint16_t planes = read16(file);
       uint16_t depth = read16(file); // bits per pixel
       uint32_t format = read32(file);
-      (void) creatorBytes; // not used
       if ((planes == 1) && ((format == 0) || (format == 3))) // uncompressed is handled, 565 also
       {
         Serial.print("File size: "); Serial.println(fileSize);
@@ -309,7 +330,7 @@ void drawBitmapFromSpiffs(const char *filename, int16_t x, int16_t y, bool clear
           uint8_t bitmask = 0xFF;
           uint8_t bitshift = 8 - depth;
           uint16_t red, green, blue;
-          bool whitish;
+          bool whitish = false;
           if (depth <= 8)
           {
             if (depth < 8) bitmask >>= depth;
@@ -349,6 +370,13 @@ void drawBitmapFromSpiffs(const char *filename, int16_t x, int16_t y, bool clear
               }
               switch (depth)
               {
+                case 32:
+                  blue = input_buffer[in_idx++];
+                  green = input_buffer[in_idx++];
+                  red = input_buffer[in_idx++];
+                  in_idx++; // skip alpha
+                  whitish = ((red + green + blue) > 3 * 0x80); // whitish
+                  break;
                 case 24:
                   blue = input_buffer[in_idx++];
                   green = input_buffer[in_idx++];
@@ -375,6 +403,7 @@ void drawBitmapFromSpiffs(const char *filename, int16_t x, int16_t y, bool clear
                   }
                   break;
                 case 1:
+                case 2:
                 case 4:
                 case 8:
                   {
@@ -415,7 +444,16 @@ void drawBitmapFromSpiffs(const char *filename, int16_t x, int16_t y, bool clear
           if (!no_refresh) display.refresh();
         } // max_row_width
       } // format
+      else
+      {
+        Serial.print("bad format: "); Serial.println(format);
+        Serial.print("planes:     "); Serial.println(planes);
+      }
     } // BMP
+    else
+    {
+      Serial.println("bad signature: 0x"); Serial.println(signature, HEX);
+    }
     file.close();
     if (!valid)
     {
@@ -440,23 +478,23 @@ void drawBitmapFromSpiffs_16G(const char *filename, int16_t x, int16_t y, bool c
 #if defined(ESP32)
   file = SPIFFS.open(String("/") + filename, "r");
 #else
-  file = SPIFFS.open(filename, "r");
+  file = LittleFS.open(filename, "r");
 #endif
   if (file && file.size())
   {
     // Parse BMP header
-    if (read16(file) == 0x4D42) // BMP signature
+    uint16_t signature = read16(file);
+    if (signature == 0x4D42) // BMP signature
     {
       uint32_t fileSize = read32(file);
-      uint32_t creatorBytes = read32(file);
+      uint32_t creatorBytes = read32(file); (void)creatorBytes; //unused
       uint32_t imageOffset = read32(file); // Start of image data
       uint32_t headerSize = read32(file);
       uint32_t width  = read32(file);
-      uint32_t height = read32(file);
+      int32_t height = (int32_t) read32(file);
       uint16_t planes = read16(file);
       uint16_t depth = read16(file); // bits per pixel
       uint32_t format = read32(file);
-      (void) creatorBytes; // not used
       if ((planes == 1) && ((format == 0) || (format == 3))) // uncompressed is handled, 565 also
       {
         Serial.print("File size: "); Serial.println(fileSize);
@@ -524,6 +562,13 @@ void drawBitmapFromSpiffs_16G(const char *filename, int16_t x, int16_t y, bool c
               }
               switch (depth)
               {
+                case 32:
+                  blue = input_buffer[in_idx++];
+                  green = input_buffer[in_idx++];
+                  red = input_buffer[in_idx++];
+                  in_idx++; // skip alpha
+                  grey = uint8_t((red + green + blue) / 3);
+                  break;
                 case 24:
                   blue = input_buffer[in_idx++];
                   green = input_buffer[in_idx++];
@@ -550,6 +595,7 @@ void drawBitmapFromSpiffs_16G(const char *filename, int16_t x, int16_t y, bool c
                   }
                   break;
                 case 1:
+                case 2:
                 case 4:
                 case 8:
                   {
@@ -589,7 +635,16 @@ void drawBitmapFromSpiffs_16G(const char *filename, int16_t x, int16_t y, bool c
           if (!no_refresh) display.refresh();
         } // max_row_width
       } // format
+      else
+      {
+        Serial.print("bad format: "); Serial.println(format);
+        Serial.print("planes:     "); Serial.println(planes);
+      }
     } // BMP
+    else
+    {
+      Serial.println("bad signature: 0x"); Serial.println(signature, HEX);
+    }
     file.close();
     if (!valid)
     {

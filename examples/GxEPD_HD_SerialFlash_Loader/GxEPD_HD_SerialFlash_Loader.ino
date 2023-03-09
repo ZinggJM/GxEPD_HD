@@ -10,7 +10,7 @@
 
 // Supporting Arduino Forum Topics:
 // Waveshare e-paper displays with SPI: http://forum.arduino.cc/index.php?topic=487007.0
-// Good Display ePaper for Arduino : https://forum.arduino.cc/index.php?topic=436411.0
+// Good Display ePaper for Arduino: https://forum.arduino.cc/index.php?topic=436411.0
 //
 // this example uses the SerialFlash library from: https://github.com/PaulStoffregen/SerialFlash
 // with a modification for use with ESP32 or the STM32 package available here: https://github.com/ZinggJM/SerialFlash
@@ -22,13 +22,14 @@
 #include <SPI.h>
 
 // digital pin for flash chip CS pin:
-const int FlashChipSelect = SS; // for standard slave select pin
+//const int FlashChipSelect = SS; // for standard slave select pin
 //const int FlashChipSelect = 5; // use D1 on my Wemos D1 mini wired for e-papers
 //const int FlashChipSelect = 17; // as used with my ESP32 breadboard
+//const int FlashChipSelect = 32; // for W25Q16BVSIG on my DESP32T_BP proto board
+const int FlashChipSelect = 2; // as used with my Wemos LOLIN32 Lite proto board SD connector
 
 #if defined (ESP8266)
 #include <ESP8266WiFi.h>
-#define USE_BearSSL true
 #endif
 
 #include <WiFiClient.h>
@@ -38,16 +39,19 @@ const char* ssid     = "........";
 const char* password = "........";
 const int httpPort  = 80;
 const int httpsPort = 443;
-const char* fp_api_github_com = "35 85 74 EF 67 35 A7 CE 40 69 50 F3 C0 F6 80 CF 80 3B 2E 19";
-const char* fp_github_com     = "ca 06 f5 6b 25 8b 7a 0d 4f 2b 05 47 09 39 47 86 51 15 19 84";
-#if USE_BearSSL
-const char fp_rawcontent[20]  = {0xcc, 0xaa, 0x48, 0x48, 0x66, 0x46, 0x0e, 0x91, 0x53, 0x2c, 0x9c, 0x7c, 0x23, 0x2a, 0xb1, 0x74, 0x4d, 0x29, 0x9d, 0x33};
-#else
-const char* fp_rawcontent     = "cc aa 48 48 66 46 0e 91 53 2c 9c 7c 23 2a b1 74 4d 29 9d 33";
-#endif
+// note: the certificates have been moved to a separate header file, as R"CERT( destroys IDE Auto Format capability
+
+#include "GxEPD_HD_github_raw_certs.h"
+
+const char* certificate_rawcontent = cert_DigiCert_TLS_RSA_SHA256_2020_CA1; // ok, should work until 2031-04-13 23:59:59
+//const char* certificate_rawcontent = github_io_chain_pem_first;  // ok, should work until Tue, 21 Mar 2023 23:59:59 GMT
+//const char* certificate_rawcontent = github_io_chain_pem_second;  // ok, should work until Tue, 21 Mar 2023 23:59:59 GMT
+//const char* certificate_rawcontent = github_io_chain_pem_third;  // ok, should work until Tue, 21 Mar 2023 23:59:59 GMT
+
 const char* host_rawcontent   = "raw.githubusercontent.com";
 const char* path_rawcontent   = "/ZinggJM/GxEPD2/master/extras/bitmaps/";
 const char* path_prenticedavid   = "/prenticedavid/MCUFRIEND_kbv/master/extras/bitmaps/";
+const char* fp_rawcontent     = "8F 0E 79 24 71 C5 A7 D2 A7 46 76 30 C1 3C B7 2A 13 B0 01 B2"; // as of 29.7.2022
 
 void setup()
 {
@@ -95,8 +99,10 @@ void setup()
   Serial.println(WiFi.localIP());
   Serial.println();
 
+  setClock();
+
   // comment out for standalone use
-  waitForStartConfirmation();
+  //waitForStartConfirmation();
 
   if (!SerialFlash.begin(FlashChipSelect))
   {
@@ -120,6 +126,8 @@ void setup()
 void loop()
 {
 }
+
+void downloadFile_HTTPS(const char* host, const char* path, const char* filename, const char* fingerprint, const char* target, const char* certificate = certificate_rawcontent);
 
 void waitForStartConfirmation()
 {
@@ -204,7 +212,7 @@ void downloadBitmaps_test()
   downloadFile_HTTPS(host_rawcontent, path_rawcontent, "output6.bmp", fp_rawcontent, "output6.bmp");
   downloadFile_HTTPS(host_rawcontent, path_rawcontent, "tractor_1.bmp", fp_rawcontent, "tractor_1.bmp");
   downloadFile_HTTPS(host_rawcontent, path_rawcontent, "tractor_4.bmp", fp_rawcontent, "tractor_4.bmp");
-  downloadFile_HTTPS(host_rawcontent, path_rawcontent, "tractor_8.bmp", fp_rawcontent, "tractor_8.bmp");
+  //downloadFile_HTTPS(host_rawcontent, path_rawcontent, "tractor_8.bmp", fp_rawcontent, "tractor_8.bmp"); // format 1: BI_RLE8 is not supported
   downloadFile_HTTPS(host_rawcontent, path_rawcontent, "tractor_11.bmp", fp_rawcontent, "tractor_11.bmp");
   downloadFile_HTTPS(host_rawcontent, path_rawcontent, "tractor_44.bmp", fp_rawcontent, "tractor_44.bmp");
   downloadFile_HTTPS(host_rawcontent, path_rawcontent, "tractor_88.bmp", fp_rawcontent, "tractor_88.bmp");
@@ -286,38 +294,29 @@ void downloadFile_HTTP(const char* host, const char* path, const char* filename,
   Serial.print("done, "); Serial.print(total); Serial.println(" bytes transferred");
 }
 
-void downloadFile_HTTPS(const char* host, const char* path, const char* filename, const char* fingerprint, const char* target)
+void downloadFile_HTTPS(const char* host, const char* path, const char* filename, const char* fingerprint, const char* target, const char* certificate)
 {
   // Use WiFiClientSecure class to create TLS connection
-#if USE_BearSSL
+#if defined (ESP8266)
   BearSSL::WiFiClientSecure client;
+  BearSSL::X509List cert(certificate ? certificate : certificate_rawcontent);
 #else
   WiFiClientSecure client;
 #endif
   Serial.println(); Serial.print("downloading file \""); Serial.print(filename);  Serial.println("\"");
   Serial.print("connecting to "); Serial.println(host);
-#if USE_BearSSL
-  if (fingerprint) client.setFingerprint((uint8_t*)fingerprint);
+#if defined (ESP8266)
+  if (certificate) client.setTrustAnchors(&cert);
+  else if (fingerprint) client.setFingerprint(fingerprint);
+  else client.setInsecure();
+#elif defined (ESP32)
+  if (certificate) client.setCACert(certificate);
 #endif
   if (!client.connect(host, httpsPort))
   {
     Serial.println("connection failed");
     return;
   }
-#if defined (ESP8266) && !USE_BearSSL
-  if (fingerprint)
-  {
-    if (client.verify(fingerprint, host))
-    {
-      Serial.println("certificate matches");
-    }
-    else
-    {
-      Serial.println("certificate doesn't match");
-      return;
-    }
-  }
-#endif
   Serial.print("requesting URL: ");
   Serial.println(String("https://") + host + path + filename);
   client.print(String("GET ") + path + filename + " HTTP/1.1\r\n" +
@@ -425,6 +424,7 @@ void eraseSerialFlash()
     Serial.println(" seconds.");
     Serial.println("  Yes, full chip erase is SLOW!");
     SerialFlash.eraseAll();
+    delay(10);
     unsigned long dotMillis = millis();
     unsigned char dotcount = 0;
     while (SerialFlash.ready() == false)
@@ -458,4 +458,24 @@ float eraseBytesPerSecond(const unsigned char *id)
   if (id[0] == 0xEF) return 419430.0; // Winbond
   if (id[0] == 0xC2) return 279620.0; // Macronix
   return 320000.0; // guess?
+}
+
+// Set time via NTP, as required for x.509 validation
+void setClock()
+{
+  configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+
+  Serial.print("Waiting for NTP time sync: ");
+  time_t now = time(nullptr);
+  while (now < 8 * 3600 * 2)
+  {
+    delay(500);
+    Serial.print(".");
+    now = time(nullptr);
+  }
+  Serial.println("");
+  struct tm timeinfo;
+  gmtime_r(&now, &timeinfo);
+  Serial.print("Current time: ");
+  Serial.print(asctime(&timeinfo));
 }

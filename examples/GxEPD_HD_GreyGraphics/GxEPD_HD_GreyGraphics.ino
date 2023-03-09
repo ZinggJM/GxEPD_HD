@@ -21,6 +21,8 @@
 // The e-paper display and demo board is available from:
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571_10574&product_id=57650
 // or https://www.aliexpress.com/store/product/6-inch-HD-Interface-High-resolution-electronic-paper-display-e-ink-epaper-with-TCON-Demo-Kit/600281_32838449413.html
+//
+// Can also be used with ESP32 or other large RAM board with Waveshare IT8951 board and matched e-paper panel
 
 // include library, include base class, make path known
 #include <GxEPD_HD_EPD.h>
@@ -38,7 +40,7 @@ GxDESTM32T io;
 // next is for my DESP32T_BP (proto board) for TCon-11 parallel interface
 //#include <GxDESP32T_BP/GxDESP32T_BP.h>
 //GxDESP32T_BP io;
-// next is for ED060SCT on IT8951 Driver HAT e.g. with ESP32
+// next is for ED060SCT, ED060KC1, ED078KC2, ES103TC1 on matching IT8951 Driver HAT e.g. with ESP32
 #include <GxIT8951/GxIT8951.h>
 GxIT8951 io(/*CS=5*/ SS, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4);
 #endif
@@ -50,8 +52,11 @@ GxIT8951 io(/*CS=5*/ SS, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4);
 //GxGDE060BA base_display(io, uint16_t(2300)); // or as abs(vcom*1000) in mV, as uint16_t
 //GxGDE060F3 base_display(io, -2.4); // vcom from sticker on flex connector of my panel, as double
 //GxGDEW080T5 base_display(io); // default vcom used (-2.2V)
-// ED060SCT on IT8951 Driver HAT e.g. with ESP32
-GxED060SCT base_display(io, -2.03); // vcom from sticker on flex connector of my panel, as double
+// ED060SCT, ED060KC1, ED078KC2, ES103TC1 on matching IT8951 Driver HAT e.g. with ESP32
+//GxED060SCT base_display(io); // default vcom used (-2.0V)
+//GxED060KC1 base_display(io); // default vcom used (-2.0V)
+GxED078KC2 base_display(io); // default vcom used (-2.0V)
+//GxES103TC1 base_display(io); // default vcom used (-2.0V)
 
 // for 16 grey levels:
 // select the graphics display template class to use, only one
@@ -61,12 +66,19 @@ GxED060SCT base_display(io, -2.03); // vcom from sticker on flex connector of my
 GxEPD_HD_16G < GxGDE060F3, GxGDE060F3::HEIGHT / 8 > display(base_display); // 8 pages, ~11k RAM remaining
 //GxEPD_HD_16G < GxGDEW080T5, GxGDEW080T5::HEIGHT / 8 > display(base_display); // 8 pages, ~11k RAM remaining
 #else
-//GxEPD_HD_16G < GxGDE043A2, GxGDE043A2::HEIGHT / 4 > display(base_display); // quarter height, 4 pages
-//GxEPD_HD_16G < GxGDE060BA, GxGDE060BA::HEIGHT / 4 > display(base_display); // quarter height, 4 pages
-//GxEPD_HD_16G < GxGDE060F3, GxGDE060F3::HEIGHT / 4 > display(base_display); // quarter height, 4 pages
-//GxEPD_HD_16G < GxGDEW080T5, GxGDEW080T5::HEIGHT / 4 > display(base_display); // quarter height, 4 pages
-// ED060SCT on IT8951 Driver HAT e.g. with ESP32
-GxEPD_HD_16G < GxED060SCT, GxED060SCT::HEIGHT / 4 > display(base_display); // quarter height, 4 pages
+#define MAX_DISPLAY_BUFFER_SIZE 65536ul // e.g.
+#define MAX_HEIGHT(EPD) (EPD::HEIGHT <= MAX_DISPLAY_BUFFER_SIZE / (EPD::WIDTH / 2) ? EPD::HEIGHT : MAX_DISPLAY_BUFFER_SIZE / (EPD::WIDTH / 2))
+//GxEPD_HD_16G < GxGDE043A2, MAX_HEIGHT(GxGDE043A2) > display(base_display);
+//GxEPD_HD_16G < GxGDE060BA, MAX_HEIGHT(GxGDE060BA) > display(base_display);
+//GxEPD_HD_16G < GxGDE060F3, MAX_HEIGHT(GxGDE060F3) > display(base_display);
+//GxEPD_HD_16G < GxGDEW080T5, MAX_HEIGHT(GxGDEW080T5) > display(base_display);
+// ED060SCT, ED060KC1, ED078KC2, ES103TC1 on matching IT8951 Driver HAT e.g. with ESP32
+//GxEPD_HD_16G < GxED060SCT, MAX_HEIGHT(GxED060SCT) > display(base_display);
+//GxEPD_HD_16G < GxED060KC1, MAX_HEIGHT(GxED060KC1::HEIGHT / 8 > display(base_display);
+//GxEPD_HD_16G < GxED078KC2, MAX_HEIGHT(GxED078KC2) > display(base_display);
+//GxEPD_HD_16G < GxES103TC1, MAX_HEIGHT(GxES103TC1::HEIGHT / 16 > display(base_display);
+#undef MAX_DISPLAY_BUFFER_SIZE
+#undef MAX_HEIGHT
 #endif
 
 // for 4 grey levels:
@@ -77,14 +89,21 @@ GxEPD_HD_16G < GxED060SCT, GxED060SCT::HEIGHT / 4 > display(base_display); // qu
 //GxEPD_HD_4G < GxGDE060F3, GxGDE060F3::HEIGHT / 4 > display(base_display); // half height, 2 pages, ~11k RAM remaining
 //GxEPD_HD_4G < GxGDEW080T5, GxGDEW080T5::HEIGHT / 4 > display(base_display); // half height, 2 pages, ~11k RAM remaining
 #elif defined(ESP8266)
-GxEPD_HD_4G < GxGDE060BA, GxGDE060BA::HEIGHT / 8 > display(base_display);
+GxEPD_HD_4G < GxED060SCT, GxED060SCT::HEIGHT / 8 > display(base_display); // 1/8 height, 8 pages, e.g. on ESP8266
 #else
-//GxEPD_HD_4G < GxGDE043A2, GxGDE043A2::HEIGHT / 2 > display(base_display); // half height, 2 pages
-//GxEPD_HD_4G < GxGDE060BA, GxGDE060BA::HEIGHT / 2 > display(base_display); // half height, 2 pages
-//GxEPD_HD_4G < GxGDE060F3, GxGDE060F3::HEIGHT / 2 > display(base_display); // half height, 2 pages
-//GxEPD_HD_4G < GxGDEW080T5, GxGDEW080T5::HEIGHT / 2 > display(base_display); // half height, 2 pages
-// ED060SCT on IT8951 Driver HAT e.g. with ESP32
-//GxEPD_HD_4G < GxED060SCT, GxED060SCT::HEIGHT / 2 > display(base_display); // half height, 2 pages
+#define MAX_DISPLAY_BUFFER_SIZE 65536ul // e.g.
+#define MAX_HEIGHT(EPD) (EPD::HEIGHT <= MAX_DISPLAY_BUFFER_SIZE / (EPD::WIDTH / 4) ? EPD::HEIGHT : MAX_DISPLAY_BUFFER_SIZE / (EPD::WIDTH / 4))
+//GxEPD_HD_4G < GxGDE043A2, MAX_HEIGHT(GxGDE043A2) > display(base_display);
+//GxEPD_HD_4G < GxGDE060BA, MAX_HEIGHT(GxGDE060BA) > display(base_display);
+//GxEPD_HD_4G < GxGDE060F3, MAX_HEIGHT(GxGDE060F3) > display(base_display);
+//GxEPD_HD_4G < GxGDEW080T5, MAX_HEIGHT(GxGDEW080T5) > display(base_display);
+// ED060SCT, ED060KC1, ED078KC2, ES103TC1 on matching IT8951 Driver HAT e.g. with ESP32
+//GxEPD_HD_4G < GxED060SCT, MAX_HEIGHT(GxED060SCT) > display(base_display);
+//GxEPD_HD_4G < GxED060KC1, MAX_HEIGHT(GxED060KC1) > display(base_display);
+GxEPD_HD_4G < GxED078KC2, MAX_HEIGHT(GxED078KC2) > display(base_display);
+//GxEPD_HD_4G < GxES103TC1, MAX_HEIGHT(GxES103TC1) > display(base_display);
+#undef MAX_DISPLAY_BUFFER_SIZE
+#undef MAX_HEIGHT
 #endif
 
 // uncomment to see bitmap examples

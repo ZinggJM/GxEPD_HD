@@ -23,7 +23,7 @@
 // for my DESP32T_BP (proto board) for TCon-11 parallel interface
 //#include <GxDESP32T_BP/GxDESP32T_BP.h>
 //GxDESP32T_BP io;
-// for ED060SCT on IT8951 Driver HAT e.g. with ESP32
+// for ED060SCT, ED060KC1, ED078KC2, ES103TC1 on matching IT8951 Driver HAT e.g. with ESP32
 #include <GxIT8951/GxIT8951.h>
 GxIT8951 io(/*CS=5*/ SS, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4);
 
@@ -31,11 +31,14 @@ GxIT8951 io(/*CS=5*/ SS, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4);
 //GxGDE043A2 base_display(io); // default vcom used (-2.0V)
 //GxGDE060BA base_display(io); // default vcom used (-2.0V)
 //GxGDE060BA base_display(io, -2.3); // vcom from sticker on flex connector of my panel, as double
-//GxGDE060BA base_display(io, 2300); // or as abs(vcom*1000) in mV, as uint16_t 
+//GxGDE060BA base_display(io, uint16_t(2300)); // or as abs(vcom*1000) in mV, as uint16_t
 //GxGDE060F3 base_display(io, -2.4); // vcom from sticker on flex connector of my panel, as double
 //GxGDEW080T5 base_display(io); // default vcom used (-2.2V)
-// ED060SCT on IT8951 Driver HAT e.g. with ESP32
-GxED060SCT base_display(io); // default vcom used (-2.0V)
+// ED060SCT, ED060KC1, ED078KC2, ES103TC1 on matching IT8951 Driver HAT e.g. with ESP32
+//GxED060SCT base_display(io); // default vcom used (-2.0V)
+//GxED060KC1 base_display(io); // default vcom used (-2.0V)
+GxED078KC2 base_display(io); // default vcom used (-2.0V)
+//GxES103TC1 base_display(io); // default vcom used (-2.0V)
 
 // select the graphics display template class to use, only one
 //GxEPD_HD_BW<GxGDE043A2, GxGDE043A2::HEIGHT> display(base_display); // full height, one page
@@ -43,11 +46,15 @@ GxED060SCT base_display(io); // default vcom used (-2.0V)
 //GxEPD_HD_BW<GxGDE060F3, GxGDE060F3::HEIGHT> display(base_display); // full height, one page
 //GxEPD_HD_BW<GxGDEW080T5, GxGDEW080T5::HEIGHT> display(base_display); // full height, one page
 // ED060SCT on IT8951 Driver HAT e.g. with ESP32
-GxEPD_HD_BW<GxED060SCT, GxED060SCT::HEIGHT> display(base_display); // full height, one page, on ESP32
+//GxEPD_HD_BW<GxED060SCT, GxED060SCT::HEIGHT> display(base_display); // full height, one page, on ESP32
+// ED060KC1 on matching IT8951 Driver HAT e.g. with ESP32
+//GxEPD_HD_BW < GxED060KC1, GxED060KC1::HEIGHT / 2 > display(base_display); // half height, 2 pages, on ESP32
+// ED060KC2, ES103TC1 on matching IT8951 Driver HAT e.g. with ESP32
+GxEPD_HD_BW < GxED078KC2, GxED078KC2::HEIGHT / 8 > display(base_display); // 1/8, 8 pages, on ESP32
+//GxEPD_HD_BW < GxES103TC1, GxES103TC1::HEIGHT / 8 > display(base_display); // 1/8, 8 pages, on ESP32
 
 #if defined (ESP8266)
 #include <ESP8266WiFi.h>
-#define USE_BearSSL true
 #endif
 
 #include <WiFiClient.h>
@@ -57,16 +64,22 @@ const char* ssid     = "........";
 const char* password = "........";
 const int httpPort  = 80;
 const int httpsPort = 443;
-const char* fp_api_github_com = "35 85 74 EF 67 35 A7 CE 40 69 50 F3 C0 F6 80 CF 80 3B 2E 19";
-const char* fp_github_com     = "ca 06 f5 6b 25 8b 7a 0d 4f 2b 05 47 09 39 47 86 51 15 19 84";
-#if USE_BearSSL
-const char fp_rawcontent[20]  = {0xcc, 0xaa, 0x48, 0x48, 0x66, 0x46, 0x0e, 0x91, 0x53, 0x2c, 0x9c, 0x7c, 0x23, 0x2a, 0xb1, 0x74, 0x4d, 0x29, 0x9d, 0x33};
-#else
-const char* fp_rawcontent     = "cc aa 48 48 66 46 0e 91 53 2c 9c 7c 23 2a b1 74 4d 29 9d 33";
-#endif
+// note: the certificates have been moved to a separate header file, as R"CERT( destroys IDE Auto Format capability
+
+#include "GxEPD_HD_github_raw_certs.h"
+
+const char* certificate_rawcontent = cert_DigiCert_TLS_RSA_SHA256_2020_CA1; // ok, should work until 2031-04-13 23:59:59
+//const char* certificate_rawcontent = github_io_chain_pem_first;  // ok, should work until Tue, 21 Mar 2023 23:59:59 GMT
+//const char* certificate_rawcontent = github_io_chain_pem_second;  // ok, should work until Tue, 21 Mar 2023 23:59:59 GMT
+//const char* certificate_rawcontent = github_io_chain_pem_third;  // ok, should work until Tue, 21 Mar 2023 23:59:59 GMT
+
 const char* host_rawcontent   = "raw.githubusercontent.com";
 const char* path_rawcontent   = "/ZinggJM/GxEPD2/master/extras/bitmaps/";
 const char* path_prenticedavid   = "/prenticedavid/MCUFRIEND_kbv/master/extras/bitmaps/";
+const char* fp_rawcontent     = "8F 0E 79 24 71 C5 A7 D2 A7 46 76 30 C1 3C B7 2A 13 B0 01 B2"; // as of 29.7.2022
+
+void showBitmapFrom_HTTPS(const char* host, const char* path, const char* filename, const char* fingerprint, int16_t x, int16_t y, const char* certificate = certificate_rawcontent);
+void showBitmapFrom_HTTPS_16G(const char* host, const char* path, const char* filename, const char* fingerprint, int16_t x, int16_t y, const char* certificate = certificate_rawcontent);
 
 void setup()
 {
@@ -115,6 +128,8 @@ void setup()
 
   // Print the IP address
   Serial.println(WiFi.localIP());
+
+  setClock();
 
   drawBitmaps_200x200();
   drawBitmaps_other();
@@ -174,7 +189,7 @@ void drawBitmaps_other()
   delay(2000);
   showBitmapFrom_HTTPS(host_rawcontent, path_prenticedavid, "miniwoof.bmp", fp_rawcontent, w2 - 60, h2 - 80);
   delay(2000);
-  showBitmapFrom_HTTPS(host_rawcontent, path_prenticedavid, "test.bmp", fp_rawcontent, w2 - 100, h2 - 100);
+  showBitmapFrom_HTTPS(host_rawcontent, path_prenticedavid, "test.bmp", fp_rawcontent, w2 - 120, h2 - 160);
   delay(2000);
   showBitmapFrom_HTTPS(host_rawcontent, path_prenticedavid, "tiger.bmp", fp_rawcontent, w2 - 160, h2 - 120);
   delay(2000);
@@ -204,7 +219,7 @@ void drawBitmaps_test()
   delay(2000);
   showBitmapFrom_HTTPS(host_rawcontent, path_rawcontent, "tractor_4.bmp", fp_rawcontent, 0, 0);
   delay(2000);
-  //showBitmapFrom_HTTPS(host_rawcontent, path_rawcontent, "tractor_8.bmp", fp_rawcontent, 0, 0); // depth 32 not supportet
+  //showBitmapFrom_HTTPS(host_rawcontent, path_rawcontent, "tractor_8.bmp", fp_rawcontent, 0, 0); // format 1: BI_RLE8 is not supported
   //delay(2000);
   showBitmapFrom_HTTPS(host_rawcontent, path_rawcontent, "tractor_11.bmp", fp_rawcontent, 0, 0);
   delay(2000);
@@ -296,9 +311,9 @@ void drawBitmaps_test_16G()
   //delay(2000);
 }
 
-static const uint16_t input_buffer_pixels = 1024; // may affect performance
+static const uint16_t input_buffer_pixels = 1872; // may affect performance
 
-static const uint16_t max_row_width = 1024; // for up to 8" display 1024x768
+static const uint16_t max_row_width = 1872; // for up to 7.8" display 1872x1404
 static const uint16_t max_palette_pixels = 256; // for depth <= 8
 
 uint8_t input_buffer[3 * input_buffer_pixels]; // up to depth 24
@@ -348,18 +363,18 @@ void showBitmapFrom_HTTP(const char* host, const char* path, const char* filenam
   }
   if (!connection_ok) return;
   // Parse BMP header
-  if (read16(client) == 0x4D42) // BMP signature
+  uint16_t signature = read16(client);
+  if (signature == 0x4D42) // BMP signature
   {
     uint32_t fileSize = read32(client);
-    uint32_t creatorBytes = read32(client);
+    uint32_t creatorBytes = read32(client); (void)creatorBytes; //unused
     uint32_t imageOffset = read32(client); // Start of image data
     uint32_t headerSize = read32(client);
     uint32_t width  = read32(client);
-    uint32_t height = read32(client);
+    int32_t height = (int32_t) read32(client);
     uint16_t planes = read16(client);
     uint16_t depth = read16(client); // bits per pixel
     uint32_t format = read32(client);
-    (void) creatorBytes; // not used
     uint32_t bytes_read = 7 * 4 + 3 * 2; // read so far
     if ((planes == 1) && ((format == 0) || (format == 3))) // uncompressed is handled, 565 also
     {
@@ -449,6 +464,13 @@ void showBitmapFrom_HTTP(const char* host, const char* path, const char* filenam
             }
             switch (depth)
             {
+              case 32:
+                blue = input_buffer[in_idx++];
+                green = input_buffer[in_idx++];
+                red = input_buffer[in_idx++];
+                in_idx++; // skip alpha
+                whitish = ((red + green + blue) > 3 * 0x80); // whitish
+                break;
               case 24:
                 blue = input_buffer[in_idx++];
                 green = input_buffer[in_idx++];
@@ -475,6 +497,7 @@ void showBitmapFrom_HTTP(const char* host, const char* path, const char* filenam
                 }
                 break;
               case 1:
+              case 2:
               case 4:
               case 8:
                 {
@@ -514,7 +537,17 @@ void showBitmapFrom_HTTP(const char* host, const char* path, const char* filenam
       }
       Serial.print("bytes read "); Serial.println(bytes_read);
     }
+    else
+    {
+      Serial.print("bad format: "); Serial.println(format);
+      Serial.print("planes:     "); Serial.println(planes);
+    }
   }
+  else
+  {
+    Serial.println("bad signature: 0x"); Serial.println(signature, HEX);
+  }
+  client.stop();
   if (!valid)
   {
     Serial.println("bitmap format not handled.");
@@ -562,18 +595,18 @@ void showBitmapFrom_HTTP_16G(const char* host, const char* path, const char* fil
   }
   if (!connection_ok) return;
   // Parse BMP header
-  if (read16(client) == 0x4D42) // BMP signature
+  uint16_t signature = read16(client);
+  if (signature == 0x4D42) // BMP signature
   {
     uint32_t fileSize = read32(client);
-    uint32_t creatorBytes = read32(client);
+    uint32_t creatorBytes = read32(client); (void)creatorBytes; //unused
     uint32_t imageOffset = read32(client); // Start of image data
     uint32_t headerSize = read32(client);
     uint32_t width  = read32(client);
-    uint32_t height = read32(client);
+    int32_t height = (int32_t) read32(client);
     uint16_t planes = read16(client);
     uint16_t depth = read16(client); // bits per pixel
     uint32_t format = read32(client);
-    (void) creatorBytes; // not used
     uint32_t bytes_read = 7 * 4 + 3 * 2; // read so far
     if ((planes == 1) && ((format == 0) || (format == 3))) // uncompressed is handled, 565 also
     {
@@ -662,6 +695,13 @@ void showBitmapFrom_HTTP_16G(const char* host, const char* path, const char* fil
             }
             switch (depth)
             {
+              case 32:
+                blue = input_buffer[in_idx++];
+                green = input_buffer[in_idx++];
+                red = input_buffer[in_idx++];
+                in_idx++; // skip alpha
+                grey = uint8_t((red + green + blue) / 3);
+                break;
               case 24:
                 blue = input_buffer[in_idx++];
                 green = input_buffer[in_idx++];
@@ -688,6 +728,7 @@ void showBitmapFrom_HTTP_16G(const char* host, const char* path, const char* fil
                 }
                 break;
               case 1:
+              case 2:
               case 4:
               case 8:
                 {
@@ -726,18 +767,29 @@ void showBitmapFrom_HTTP_16G(const char* host, const char* path, const char* fil
       }
       Serial.print("bytes read "); Serial.println(bytes_read);
     }
+    else
+    {
+      Serial.print("bad format: "); Serial.println(format);
+      Serial.print("planes:     "); Serial.println(planes);
+    }
   }
+  else
+  {
+    Serial.println("bad signature: 0x"); Serial.println(signature, HEX);
+  }
+  client.stop();
   if (!valid)
   {
     Serial.println("bitmap format not handled.");
   }
 }
 
-void showBitmapFrom_HTTPS(const char* host, const char* path, const char* filename, const char* fingerprint, int16_t x, int16_t y)
+void showBitmapFrom_HTTPS(const char* host, const char* path, const char* filename, const char* fingerprint, int16_t x, int16_t y, const char* certificate)
 {
   // Use WiFiClientSecure class to create TLS connection
-#if USE_BearSSL
+#if defined (ESP8266)
   BearSSL::WiFiClientSecure client;
+  BearSSL::X509List cert(certificate ? certificate : certificate_rawcontent);
 #else
   WiFiClientSecure client;
 #endif
@@ -748,28 +800,20 @@ void showBitmapFrom_HTTPS(const char* host, const char* path, const char* filena
   if ((x >= display.epd_hd.WIDTH) || (y >= display.epd_hd.HEIGHT)) return;
   Serial.println(); Serial.print("downloading file \""); Serial.print(filename);  Serial.println("\"");
   Serial.print("connecting to "); Serial.println(host);
-#if USE_BearSSL
-  if (fingerprint) client.setFingerprint((uint8_t*)fingerprint);
+#if defined (ESP8266)
+  client.setBufferSizes(4096, 4096); // required
+  //client.setBufferSizes(8192, 4096); // may help for some sites
+  if (certificate) client.setTrustAnchors(&cert);
+  else if (fingerprint) client.setFingerprint(fingerprint);
+  else client.setInsecure();
+#elif defined (ESP32)
+  if (certificate) client.setCACert(certificate);
 #endif
   if (!client.connect(host, httpsPort))
   {
     Serial.println("connection failed");
     return;
   }
-#if defined (ESP8266) && !USE_BearSSL
-  if (fingerprint)
-  {
-    if (client.verify(fingerprint, host))
-    {
-      Serial.println("certificate matches");
-    }
-    else
-    {
-      Serial.println("certificate doesn't match");
-      return;
-    }
-  }
-#endif
   Serial.print("requesting URL: ");
   Serial.println(String("https://") + host + path + filename);
   client.print(String("GET ") + path + filename + " HTTP/1.1\r\n" +
@@ -796,18 +840,25 @@ void showBitmapFrom_HTTPS(const char* host, const char* path, const char* filena
   }
   if (!connection_ok) return;
   // Parse BMP header
-  if (read16(client) == 0x4D42) // BMP signature
+  uint16_t signature = 0;
+  for (int16_t i = 0; i < 50; i++)
+  {
+    if (!client.available()) delay(100);
+    else signature = read16(client);
+    //Serial.print("signature: 0x"); Serial.println(signature, HEX);
+    if (signature == 0x4D42) break;
+  }
+  if (signature == 0x4D42) // BMP signature
   {
     uint32_t fileSize = read32(client);
-    uint32_t creatorBytes = read32(client);
+    uint32_t creatorBytes = read32(client); (void)creatorBytes; //unused
     uint32_t imageOffset = read32(client); // Start of image data
     uint32_t headerSize = read32(client);
     uint32_t width  = read32(client);
-    uint32_t height = read32(client);
+    int32_t height = (int32_t) read32(client);
     uint16_t planes = read16(client);
     uint16_t depth = read16(client); // bits per pixel
     uint32_t format = read32(client);
-    (void) creatorBytes; // not used
     uint32_t bytes_read = 7 * 4 + 3 * 2; // read so far
     if ((planes == 1) && ((format == 0) || (format == 3))) // uncompressed is handled, 565 also
     {
@@ -898,6 +949,13 @@ void showBitmapFrom_HTTPS(const char* host, const char* path, const char* filena
             }
             switch (depth)
             {
+              case 32:
+                blue = input_buffer[in_idx++];
+                green = input_buffer[in_idx++];
+                red = input_buffer[in_idx++];
+                in_idx++; // skip alpha
+                whitish = ((red + green + blue) > 3 * 0x80); // whitish
+                break;
               case 24:
                 blue = input_buffer[in_idx++];
                 green = input_buffer[in_idx++];
@@ -924,6 +982,7 @@ void showBitmapFrom_HTTPS(const char* host, const char* path, const char* filena
                 }
                 break;
               case 1:
+              case 2:
               case 4:
               case 8:
                 {
@@ -961,18 +1020,29 @@ void showBitmapFrom_HTTPS(const char* host, const char* path, const char* filena
         display.refresh();
       }
     }
+    else
+    {
+      Serial.print("bad format: "); Serial.println(format);
+      Serial.print("planes:     "); Serial.println(planes);
+    }
   }
+  else
+  {
+    Serial.println("bad signature: 0x"); Serial.println(signature, HEX);
+  }
+  client.stop();
   if (!valid)
   {
     Serial.println("bitmap format not handled.");
   }
 }
 
-void showBitmapFrom_HTTPS_16G(const char* host, const char* path, const char* filename, const char* fingerprint, int16_t x, int16_t y)
+void showBitmapFrom_HTTPS_16G(const char* host, const char* path, const char* filename, const char* fingerprint, int16_t x, int16_t y, const char* certificate)
 {
   // Use WiFiClientSecure class to create TLS connection
-#if USE_BearSSL
+#if defined (ESP8266)
   BearSSL::WiFiClientSecure client;
+  BearSSL::X509List cert(certificate ? certificate : certificate_rawcontent);
 #else
   WiFiClientSecure client;
 #endif
@@ -983,28 +1053,20 @@ void showBitmapFrom_HTTPS_16G(const char* host, const char* path, const char* fi
   if ((x >= display.epd_hd.WIDTH) || (y >= display.epd_hd.HEIGHT)) return;
   Serial.println(); Serial.print("downloading file \""); Serial.print(filename);  Serial.println("\"");
   Serial.print("connecting to "); Serial.println(host);
-#if USE_BearSSL
-  if (fingerprint) client.setFingerprint((uint8_t*)fingerprint);
+#if defined (ESP8266)
+  client.setBufferSizes(4096, 4096); // required
+  //client.setBufferSizes(8192, 4096); // may help for some sites
+  if (certificate) client.setTrustAnchors(&cert);
+  else if (fingerprint) client.setFingerprint(fingerprint);
+  else client.setInsecure();
+#elif defined (ESP32)
+  if (certificate) client.setCACert(certificate);
 #endif
   if (!client.connect(host, httpsPort))
   {
     Serial.println("connection failed");
     return;
   }
-#if defined (ESP8266) && !USE_BearSSL
-  if (fingerprint)
-  {
-    if (client.verify(fingerprint, host))
-    {
-      Serial.println("certificate matches");
-    }
-    else
-    {
-      Serial.println("certificate doesn't match");
-      return;
-    }
-  }
-#endif
   Serial.print("requesting URL: ");
   Serial.println(String("https://") + host + path + filename);
   client.print(String("GET ") + path + filename + " HTTP/1.1\r\n" +
@@ -1031,18 +1093,25 @@ void showBitmapFrom_HTTPS_16G(const char* host, const char* path, const char* fi
   }
   if (!connection_ok) return;
   // Parse BMP header
-  if (read16(client) == 0x4D42) // BMP signature
+  uint16_t signature = 0;
+  for (int16_t i = 0; i < 50; i++)
+  {
+    if (!client.available()) delay(100);
+    else signature = read16(client);
+    //Serial.print("signature: 0x"); Serial.println(signature, HEX);
+    if (signature == 0x4D42) break;
+  }
+  if (signature == 0x4D42) // BMP signature
   {
     uint32_t fileSize = read32(client);
-    uint32_t creatorBytes = read32(client);
+    uint32_t creatorBytes = read32(client); (void)creatorBytes; //unused
     uint32_t imageOffset = read32(client); // Start of image data
     uint32_t headerSize = read32(client);
     uint32_t width  = read32(client);
-    uint32_t height = read32(client);
+    int32_t height = (int32_t) read32(client);
     uint16_t planes = read16(client);
     uint16_t depth = read16(client); // bits per pixel
     uint32_t format = read32(client);
-    (void) creatorBytes; // not used
     uint32_t bytes_read = 7 * 4 + 3 * 2; // read so far
     if ((planes == 1) && ((format == 0) || (format == 3))) // uncompressed is handled, 565 also
     {
@@ -1132,6 +1201,13 @@ void showBitmapFrom_HTTPS_16G(const char* host, const char* path, const char* fi
             }
             switch (depth)
             {
+              case 32:
+                blue = input_buffer[in_idx++];
+                green = input_buffer[in_idx++];
+                red = input_buffer[in_idx++];
+                in_idx++; // skip alpha
+                grey = uint8_t((red + green + blue) / 3);
+                break;
               case 24:
                 blue = input_buffer[in_idx++];
                 green = input_buffer[in_idx++];
@@ -1158,6 +1234,7 @@ void showBitmapFrom_HTTPS_16G(const char* host, const char* path, const char* fi
                 }
                 break;
               case 1:
+              case 2:
               case 4:
               case 8:
                 {
@@ -1194,7 +1271,17 @@ void showBitmapFrom_HTTPS_16G(const char* host, const char* path, const char* fi
         display.refresh();
       }
     }
+    else
+    {
+      Serial.print("bad format: "); Serial.println(format);
+      Serial.print("planes:     "); Serial.println(planes);
+    }
   }
+  else
+  {
+    Serial.println("bad signature: 0x"); Serial.println(signature, HEX);
+  }
+  client.stop();
   if (!valid)
   {
     Serial.println("bitmap format not handled.");
@@ -1221,7 +1308,7 @@ uint32_t read32(WiFiClient& client)
   return result;
 }
 
-#if USE_BearSSL
+#if defined (ESP8266)
 
 uint32_t skip(BearSSL::WiFiClientSecure& client, int32_t bytes)
 {
@@ -1293,4 +1380,24 @@ uint32_t readBytes(WiFiClient& client, uint8_t* buffer, int32_t bytes)
     if (millis() - start > 2000) break; // don't hang forever
   }
   return bytes - remain;
+}
+
+// Set time via NTP, as required for x.509 validation
+void setClock()
+{
+  configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+
+  Serial.print("Waiting for NTP time sync: ");
+  time_t now = time(nullptr);
+  while (now < 8 * 3600 * 2)
+  {
+    delay(500);
+    Serial.print(".");
+    now = time(nullptr);
+  }
+  Serial.println("");
+  struct tm timeinfo;
+  gmtime_r(&now, &timeinfo);
+  Serial.print("Current time: ");
+  Serial.print(asctime(&timeinfo));
 }

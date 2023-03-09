@@ -36,7 +36,7 @@ class GxIT8951 : public GxEPD_HD_IOCTRL
     static const uint16_t diag_min_time = 3; // ms, e.g. > refresh_par_time
     static const uint16_t set_vcom_time = 40; // ms, e.g. 37833us
     // constructor
-    GxIT8951(int8_t cs, int8_t dc, int8_t rst, int8_t busy);
+    GxIT8951(int16_t cs, int16_t dc, int16_t rst, int16_t busy);
     void init(GxEPD_HD::Panel panel, uint16_t vcom_mV, Stream* pDiagnosticOutput); // (pDiagnosticOutput = 0) : disabled
     //  Support for Bitmaps (Sprites) to Controller Buffer and to Screen
     void clearScreen(uint8_t value = 0xFF); // init controller memory and screen (default white)
@@ -59,6 +59,7 @@ class GxIT8951 : public GxEPD_HD_IOCTRL
     void _writeScreenBuffer(uint8_t value);
     void _refresh(int16_t x, int16_t y, int16_t w, int16_t h, bool partial_update_mode);
     void _send8pixel(uint8_t data);
+    void _send4pixel(uint8_t data);
     void _setPartialRamArea(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t bpp);
     void _PowerOn();
     void _PowerOff();
@@ -90,7 +91,7 @@ class GxIT8951 : public GxEPD_HD_IOCTRL
       uint16_t usFWVersion[8];   //16 Bytes String
       uint16_t usLUTVersion[8];   //16 Bytes String
     };
-    int8_t _cs, _dc, _rst, _busy;
+    int16_t _cs, _dc, _rst, _busy;
     bool _initial_write, _initial_refresh;
     bool _power_is_on, _using_partial_mode, _hibernating;
     IT8951DevInfoStruct IT8951DevInfo;

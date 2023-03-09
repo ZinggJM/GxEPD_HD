@@ -12,13 +12,21 @@
 //
 // Library: https://github.com/ZinggJM/GxEPD_HD
 //
-// To be used with "STM32F103VE" of "Generic STM32F103V series" of package "STM32 Boards (STM32Duino.com)" for Arduino.
+// To be used with Board: "Generic STM32F1 series" Board part number: "Generic F103VE" of package "STM32 Boards (select from submenu)" for Arduino
+// Add this package by adding "https://raw.githubusercontent.com/stm32duino/BoardManagerFiles/master/STM32/package_stm_index.json"
+// to Preferences "Additional Boards Manager URLs" and installing with Boards Manager.
+//
+// Can also be used with "STM32F103VE" of "Generic STM32F103V series" of package "STM32 Boards (STM32Duino.com)" for Arduino.
 // download this package as .zip file from https://github.com/rogerclarkmelbourne/Arduino_STM32
 // and install it as described in https://github.com/rogerclarkmelbourne/Arduino_STM32/wiki/Installation
+//
+// Can also be used with ESP32 boards, e.g. "DOIT ESP32 DEVKIT V1", with my proto board for DESTM32-Tcon-11.
 //
 // The e-paper display and demo board is available from:
 // http://www.buy-lcd.com/index.php?route=product/product&path=2897_10571_10574&product_id=57650
 // or https://www.aliexpress.com/store/product/6-inch-HD-Interface-High-resolution-electronic-paper-display-e-ink-epaper-with-TCON-Demo-Kit/600281_32838449413.html
+//
+// Can also be used with ESP32 or other large RAM board with Waveshare IT8951 board and matched e-paper panel
 //
 // Note: GFX_FontExtension no longer uses a workaround for UTF-8 fonts, the new gfxfont.h of Adafruit_GFX is released
 
@@ -35,29 +43,47 @@ GxDESTM32T io;
 //#include <GxDESP32T/GxDESP32T.h>
 //GxDESP32T io;
 // next is for my DESP32T_BP (proto board) for TCon-11 parallel interface
-#include <GxDESP32T_BP/GxDESP32T_BP.h>
-GxDESP32T_BP io;
+//#include <GxDESP32T_BP/GxDESP32T_BP.h>
+//GxDESP32T_BP io;
+// next is for ED060SCT, ED060KC1, ED078KC2, ES103TC1 on matching IT8951 Driver HAT e.g. with ESP32
+#include <GxIT8951/GxIT8951.h>
+GxIT8951 io(/*CS=5*/ SS, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4);
 #endif
 
 // select the base display class to use, only one
 //GxGDE043A2 base_display(io); // default vcom used (-2.0V)
 //GxGDE060BA base_display(io); // default vcom used (-2.0V)
-GxGDE060BA base_display(io, -2.3); // vcom from sticker on flex connector of my panel, as double
+//GxGDE060BA base_display(io, -2.3); // vcom from sticker on flex connector of my panel, as double
 //GxGDE060BA base_display(io, uint16_t(2300)); // or as abs(vcom*1000) in mV, as uint16_t
 //GxGDE060F3 base_display(io, -2.4); // vcom from sticker on flex connector of my panel, as double
 //GxGDEW080T5 base_display(io); // default vcom used (-2.2V)
+// ED060SCT, ED060KC1, ED078KC2, ES103TC1 on matching IT8951 Driver HAT e.g. with ESP32
+//GxED060SCT base_display(io); // default vcom used (-2.0V)
+//GxED060KC1 base_display(io); // default vcom used (-2.0V)
+GxED078KC2 base_display(io); // default vcom used (-2.0V)
+//GxES103TC1 base_display(io); // default vcom used (-2.0V)
 
 // select the graphics display template class to use, only one
 #if (defined(ARDUINO_ARCH_STM32F1) && defined(ARDUINO_GENERIC_STM32F103V)) || (defined(ARDUINO_ARCH_STM32) && defined(ARDUINO_GENERIC_F103VE))
 //GxEPD_HD_BW < GxGDE043A2, GxGDE043A2::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
-GxEPD_HD_BW < GxGDE060BA, GxGDE060BA::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
-//GxEPD_HD_BW < GxGDE060F3, GxGDE060F3::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~11k RAM remaining
+//GxEPD_HD_BW < GxGDE060BA, GxGDE060BA::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~30k RAM remaining
+GxEPD_HD_BW < GxGDE060F3, GxGDE060F3::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~11k RAM remaining
 //GxEPD_HD_BW < GxGDEW080T5, GxGDEW080T5::HEIGHT / 2 > display(base_display); // half height, 2 pages, ~11k RAM remaining
 #else
 //GxEPD_HD_BW<GxGDE043A2, GxGDE043A2::HEIGHT> display(base_display); // full height, one page
-GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page
+//GxEPD_HD_BW<GxGDE060BA, GxGDE060BA::HEIGHT> display(base_display); // full height, one page
 //GxEPD_HD_BW<GxGDE060F3, GxGDE060F3::HEIGHT> display(base_display); // full height, one page
 //GxEPD_HD_BW<GxGDEW080T5, GxGDEW080T5::HEIGHT> display(base_display); // full height, one page
+// ED060SCT on matching IT8951 Driver HAT e.g. with ESP32
+//GxEPD_HD_BW<GxED060SCT, GxED060SCT::HEIGHT> display(base_display); // full height, one page, on ESP32
+//GxEPD_HD_BW < GxED060SCT, GxED060SCT::HEIGHT / 2 > display(base_display); // half height, 2 pages, e.g. on ESP8266
+//GxEPD_HD_BW < GxED060SCT, GxED060SCT::HEIGHT / 4 > display(base_display); // quarter height, 4 pages, e.g. on MKR1000
+// ED060KC1 on matching IT8951 Driver HAT e.g. with ESP32
+//GxEPD_HD_BW < GxED060KC1, GxED060KC1::HEIGHT / 2 > display(base_display); // half height, 2 pages, on ESP32
+//GxEPD_HD_BW < GxED060KC1, GxED060KC1::HEIGHT / 8 > display(base_display); // 1/8 height, 8 pages, e.g. on ESP8266
+// ED060KC2, ES103TC1 on matching IT8951 Driver HAT e.g. with ESP32
+GxEPD_HD_BW < GxED078KC2, GxED078KC2::HEIGHT / 8 > display(base_display); // 1/8, 8 pages, on ESP32
+//GxEPD_HD_BW < GxES103TC1, GxES103TC1::HEIGHT / 8 > display(base_display); // 1/8, 8 pages, on ESP32
 #endif
 
 // uncomment to see bitmap examples

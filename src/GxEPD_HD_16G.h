@@ -21,6 +21,9 @@
 #include "GxGDE060F3.h"
 #include "GxGDEW080T5.h"
 #include "GxED060SCT.h"
+#include "GxED060KC1.h"
+#include "GxED078KC2.h"
+#include "GxES103TC1.h"
 #include "GxEPD_HD_GFX.h"
 
 template<typename GxEPD_HD_Type, const uint16_t page_height>
@@ -85,7 +88,7 @@ class GxEPD_HD_16G : public GxEPD_HD_GFX
       // check if in current page
       if ((y < 0) || (y >= _page_height)) return;
       uint16_t i = x / (8 / DEPTH) + y * (_pw_w / (8 / DEPTH));
-      uint8_t grey = color == 0 ? 0 : uint8_t((((color & 0xF800) >> 8) + ((color & 0x07E0) >> 3) + ((color & 0x001F) << 3) - 1) / 3); // 0..255
+      uint8_t grey = color == 0 ? 0 : uint8_t((((color & 0xF800) >> 8) + ((color & 0x07E0) >> 3) + ((color & 0x001F) << 3) - 1) / 3); // 0..249 (0xF9) // GxEPD_LIGHTGREY is one too high
       if (x % 2) _buffer[i] = ((_buffer[i] & 0xF0) | (grey >> 4));
       else _buffer[i] = ((_buffer[i] & 0x0F) | (grey & 0xF0));
     }

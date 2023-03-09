@@ -43,7 +43,10 @@ class GxEPD_HD
       GDE060BA,
       GDE060F3,
       GDEW080T5,
-      ED060SCT // on IT8951 Driver HAT
+      ED060SCT, // on IT8951 Driver HAT
+      ED060KC1, // on IT8951 Driver HAT
+      ED078KC2, // on IT8951 Driver HAT
+      ES103TC1 // on IT8951 Driver HAT
     };
 };
 
